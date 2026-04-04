@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smartcodai | Tableau de Bord</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #05060A; 
+            --bg-panel: #0D101C;
+            --primary: #10b981; 
+            --primary-hover: #059669;
+            --secondary: #7c6df8; 
+            --text-main: #FFFFFF;
+            --text-muted: #94a3b8;
+            --border-light: rgba(255, 255, 255, 0.08);
+            
+            --php: #7c6df8;
+            --python: #3b82f6;
+            --n8n: #f43f5e;
+            --openclaw: #10b981;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3, h4 { font-family: 'Syne', sans-serif; }
+        a { text-decoration: none; color: inherit; }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--bg-panel);
+            border-right: 1px solid var(--border-light);
+            display: flex;
+            flex-direction: column;
+            padding: 2rem 1.5rem;
+            position: fixed;
+            height: 100vh;
+        }
+
+        .logo {
+            display: flex; align-items: center; gap: 0.8rem; 
+            font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; 
+            margin-bottom: 3rem;
+        }
+        .logo img { height: 32px; width: 32px; }
+
+        .nav-menu {
+            display: flex; flex-direction: column; gap: 0.5rem; flex: 1;
+        }
+        .nav-item {
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            color: var(--text-muted);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: 0.2s;
+        }
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: var(--text-main); }
+        .nav-item.active { background: rgba(16, 185, 129, 0.1); color: var(--primary); font-weight: 600; }
+        
+        .user-profile {
+            margin-top: auto;
+            display: flex; align-items: center; gap: 12px;
+            padding: 1rem; border-top: 1px solid var(--border-light);
+        }
+        .avatar {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-family: 'Syne', sans-serif;
+        }
+        .user-info { display: flex; flex-direction: column; }
+        .user-name { font-weight: 600; font-size: 0.95rem; }
+        .user-status { font-size: 0.8rem; color: var(--primary); }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 3rem 4rem;
+        }
+
+        .header-section { margin-bottom: 3rem; }
+        .header-section h1 { font-size: 2.2rem; margin-bottom: 0.5rem; }
+        .header-section p { color: var(--text-muted); font-size: 1.1rem; }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 3rem;
+        }
+        .stat-card {
+            background: var(--bg-panel); border: 1px solid var(--border-light); border-radius: 16px;
+            padding: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem;
+        }
+        .stat-value { font-size: 2.5rem; font-family: 'Syne', sans-serif; font-weight: 800; color: var(--text-main); }
+        .stat-label { color: var(--text-muted); font-size: 0.9rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
+        
+        /* Courses Grid */
+        .section-title { font-size: 1.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-light); padding-bottom: 1rem; }
+        
+        .courses-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem;
+        }
+        
+        .course-card {
+            background: var(--bg-panel); border: 1px solid var(--border-light); border-radius: 16px;
+            padding: 2rem; display: flex; flex-direction: column; transition: 0.3s;
+            position: relative; overflow: hidden;
+        }
+        .course-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        .card-glow {
+            position: absolute; top: 0; right: 0; width: 150px; height: 150px; filter: blur(60px); opacity: 0.1; z-index: 0;
+            border-radius: 50%;
+        }
+        .course-card > * { z-index: 1; position: relative; }
+
+        .course-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
+        .course-icon {
+            width: 54px; height: 54px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.8rem;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+        }
+        .course-status { font-size: 0.75rem; padding: 0.3rem 0.8rem; border-radius: 99px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        /* Status Colors */
+        .status-new { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .status-progress { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); }
+        
+        .course-title { font-size: 1.3rem; margin-bottom: 0.5rem; }
+        .course-desc { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem; flex: 1; }
+        
+        .course-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-light); padding-top: 1.5rem; }
+        .course-meta { display: flex; gap: 1rem; color: var(--text-muted); font-size: 0.85rem; font-weight: 500; }
+        
+        .btn-start {
+            background: #ffffff; color: #000; padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 600; font-size: 0.9rem; transition: 0.2s;
+        }
+        .btn-start:hover { background: #e2e8f0; }
+
+        /* Responsive */
+        @media (max-width: 1000px) {
+            .courses-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; position: static; border-right: none; border-bottom: 1px solid var(--border-light); padding: 1rem; flex-direction: row; align-items: center; justify-content: space-between; }
+            .nav-menu, .user-profile { display: none; }
+            .logo { margin-bottom: 0; }
+            .main-content { margin-left: 0; padding: 2rem 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">
+            <img src="assets/logo.png" alt="Logo">
+            Smartcodai
+        </div>
+        
+        <nav class="nav-menu">
+            <a href="#" class="nav-item active">
+                <span>📚</span> Mon Espace
+            </a>
+            <a href="#" class="nav-item">
+                <span>🏆</span> Mes Certificats
+            </a>
+            <a href="#" class="nav-item">
+                <span>⚙️</span> Paramètres
+            </a>
+            <a href="landing-page.html" class="nav-item" style="margin-top: auto;">
+                <span>⬅️</span> Retour à l'accueil
+            </a>
+        </nav>
+
+        <div class="user-profile">
+            <div class="avatar">👨‍💻</div>
+            <div class="user-info">
+                <span class="user-name">Nouvel Étudiant</span>
+                <span class="user-status">Compte Gratuit</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        
+        <div class="header-section">
+            <h1>Bienvenue dans votre espace d'apprentissage</h1>
+            <p>Choisissez un parcours et commencez à coder directement dans votre navigateur.</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Leçons complétées</div>
+                <div class="stat-value">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Certificats obtenus</div>
+                <div class="stat-value">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Temps de pratique</div>
+                <div class="stat-value">0h</div>
+            </div>
+        </div>
+
+        <h2 class="section-title">Vos Cursus Disponibles</h2>
+
+        <div class="courses-grid">
+            <!-- Course 1: PHP -->
+            <div class="course-card">
+                <div class="card-glow" style="background: var(--php);"></div>
+                <div class="course-header">
+                    <div class="course-icon">🐘</div>
+                    <div class="course-status status-new">À commencer</div>
+                </div>
+                <h3 class="course-title">Développement Web Backend avec PHP</h3>
+                <p class="course-desc">Maîtrisez les bases du web dynamique, les variables, la POO et la sécurité (injections SQL, hashage).</p>
+                <div class="course-footer">
+                    <div class="course-meta">
+                        <span>⏱ 12 modules</span>
+                    </div>
+                    <a href="apprendre-php-app.html" class="btn-start">Ouvrir le cours</a>
+                </div>
+            </div>
+
+            <!-- Course 2: Python -->
+            <div class="course-card">
+                <div class="card-glow" style="background: var(--python);"></div>
+                <div class="course-header">
+                    <div class="course-icon">🐍</div>
+                    <div class="course-status status-new">À commencer</div>
+                </div>
+                <h3 class="course-title">Programmation en Python</h3>
+                <p class="course-desc">Des bases algorithmiques jusqu'à l'analyse de données (Listes, Dictionnaires, Fichiers, Modèles).</p>
+                <div class="course-footer">
+                    <div class="course-meta">
+                        <span>⏱ 10 modules</span>
+                    </div>
+                    <a href="apprendre-python-app.html" class="btn-start">Ouvrir le cours</a>
+                </div>
+            </div>
+
+            <!-- Course 3: n8n -->
+            <div class="course-card">
+                <div class="card-glow" style="background: var(--n8n);"></div>
+                <div class="course-header">
+                    <div class="course-icon">⚙️</div>
+                    <div class="course-status status-new">À commencer</div>
+                </div>
+                <h3 class="course-title">Automatisation avec n8n</h3>
+                <p class="course-desc">Le parcours "Zero to Hero" pour connecter vos applications via Webhooks, API et Javascript Node.</p>
+                <div class="course-footer">
+                    <div class="course-meta">
+                        <span>⏱ 10 modules</span>
+                    </div>
+                    <a href="apprendre-n8n-app.html" class="btn-start">Ouvrir le cours</a>
+                </div>
+            </div>
+
+            <!-- Course 4: OpenClaw -->
+            <div class="course-card">
+                <div class="card-glow" style="background: var(--openclaw);"></div>
+                <div class="course-header">
+                    <div class="course-icon">🤖</div>
+                    <div class="course-status status-new">À commencer</div>
+                </div>
+                <h3 class="course-title">Maîtrise de l'IA OpenClaw</h3>
+                <p class="course-desc">Apprenez à contrôler et scripter des Agents IA personnels avec un accès système complet (Local-first).</p>
+                <div class="course-footer">
+                    <div class="course-meta">
+                        <span>⏱ 10 modules</span>
+                    </div>
+                    <a href="apprendre-openclaw-app.html" class="btn-start">Ouvrir le cours</a>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+</body>
+</html>

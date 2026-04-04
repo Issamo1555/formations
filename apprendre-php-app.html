@@ -1,0 +1,3068 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apprendre PHP — Interactif</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #151820;
+    --card: #1c2030;
+    --border: #272d3f;
+    --php: #7c6df8;
+    --php2: #a78bfa;
+    --accent: #f59e0b;
+    --green: #22d3a0;
+    --red: #f87171;
+    --text: #e4e8f7;
+    --muted: #6b7694;
+    --code-bg: #0a0c10;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 2.5rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(13,15,20,0.85);
+    backdrop-filter: blur(12px);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo {
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--php); }
+  .logo em { color: var(--accent); font-style: normal; }
+
+  nav { display: flex; gap: 0.4rem; }
+  nav button {
+    background: none; border: 1px solid transparent;
+    color: var(--muted); padding: 0.4rem 1rem;
+    border-radius: 6px; cursor: pointer;
+    font-family: 'Syne', sans-serif; font-size: 0.85rem;
+    transition: all 0.2s;
+  }
+  nav button:hover { color: var(--text); border-color: var(--border); }
+  nav button.active { color: var(--php); border-color: var(--php); background: rgba(124,109,248,0.1); }
+
+  /* HERO */
+  .hero {
+    text-align: center;
+    padding: 4rem 2rem 2.5rem;
+    background: radial-gradient(ellipse 70% 40% at 50% 0%, rgba(124,109,248,0.18) 0%, transparent 70%);
+  }
+  .hero h1 {
+    font-size: clamp(2.2rem, 6vw, 4rem);
+    font-weight: 800;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #fff 30%, var(--php2) 70%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p { color: var(--muted); margin-top: 0.8rem; font-size: 1rem; }
+
+  .progress-bar-wrap {
+    max-width: 600px; margin: 1.5rem auto 0;
+    background: var(--surface); border-radius: 99px; height: 8px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%; background: linear-gradient(90deg, var(--php), var(--php2));
+    border-radius: 99px; transition: width 0.5s ease;
+    width: 0%;
+  }
+  .progress-label { color: var(--muted); font-size: 0.78rem; margin-top: 0.4rem; text-align: center; }
+
+  /* LAYOUT */
+  .app-body {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: calc(100vh - 200px);
+    max-width: 1200px; margin: 0 auto; padding: 1.5rem;
+    gap: 1.5rem;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1rem 0;
+    height: fit-content;
+    position: sticky; top: 80px;
+  }
+  .sidebar-title {
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 2px;
+    color: var(--muted); text-transform: uppercase;
+    padding: 0 1.2rem; margin-bottom: 0.8rem;
+  }
+  .sidebar-section { margin-bottom: 0.6rem; }
+  .sidebar-category {
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 1px;
+    color: var(--php); text-transform: uppercase;
+    padding: 0.4rem 1.2rem; margin-top: 0.4rem;
+  }
+  .sidebar-item {
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.45rem 1.2rem; cursor: pointer;
+    font-size: 0.83rem; color: var(--muted); border-left: 3px solid transparent;
+    transition: all 0.15s; border-radius: 0 6px 6px 0;
+  }
+  .sidebar-item:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+  .sidebar-item.active { color: var(--text); border-left-color: var(--php); background: rgba(124,109,248,0.1); }
+  .sidebar-item .check { width: 14px; height: 14px; border: 1.5px solid var(--border); border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .sidebar-item.done .check { background: var(--green); border-color: var(--green); }
+  .sidebar-item.done .check::after { content: '✓'; font-size: 9px; color: #000; font-weight: bold; }
+
+  /* MAIN */
+  main { min-width: 0; }
+
+  .lesson-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    display: none;
+  }
+  .lesson-card.visible { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .lesson-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-start; gap: 1rem;
+  }
+  .lesson-icon {
+    width: 44px; height: 44px; border-radius: 10px;
+    background: rgba(124,109,248,0.2); display: flex; align-items: center;
+    justify-content: center; font-size: 1.3rem; flex-shrink: 0;
+  }
+  .lesson-header h2 { font-size: 1.4rem; font-weight: 800; line-height: 1.2; }
+  .lesson-header .tag {
+    display: inline-block; margin-top: 0.3rem;
+    font-size: 0.7rem; font-weight: 600; letter-spacing: 1px;
+    background: rgba(124,109,248,0.15); color: var(--php);
+    padding: 2px 10px; border-radius: 99px; text-transform: uppercase;
+  }
+
+  .lesson-body { padding: 2rem; }
+  .lesson-body p { color: #bcc4de; line-height: 1.75; margin-bottom: 1rem; font-size: 0.93rem; }
+  .lesson-body h3 { font-size: 1rem; font-weight: 700; margin: 1.5rem 0 0.6rem; color: var(--php2); }
+  .lesson-body ul { list-style: none; padding: 0; margin-bottom: 1rem; }
+  .lesson-body ul li { color: #bcc4de; padding: 0.25rem 0; font-size: 0.9rem; display: flex; align-items: flex-start; gap: 0.5rem; }
+  .lesson-body ul li::before { content: '→'; color: var(--php); flex-shrink: 0; margin-top: 1px; }
+
+  /* CODE BLOCK */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin: 1rem 0;
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.03);
+  }
+  .code-lang { font-size: 0.72rem; color: var(--php); font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+  .copy-btn {
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    padding: 2px 10px; border-radius: 5px; cursor: pointer; font-size: 0.72rem;
+    font-family: 'Syne', sans-serif; transition: all 0.2s;
+  }
+  .copy-btn:hover { border-color: var(--php); color: var(--php); }
+  pre {
+    padding: 1.2rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    overflow-x: auto;
+    white-space: pre;
+    color: #c9d1f0;
+  }
+  .kw { color: #7c6df8; font-weight: 700; }
+  .fn { color: #f59e0b; }
+  .str { color: #22d3a0; }
+  .cmt { color: #4a5270; font-style: italic; }
+  .var { color: #f87171; }
+  .num { color: #fb923c; }
+
+  /* QUIZ */
+  .quiz-section {
+    margin-top: 2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+  .quiz-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; margin-bottom: 1rem; }
+  .quiz-question { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: var(--text); }
+  .quiz-options { display: grid; gap: 0.6rem; }
+  .quiz-option {
+    background: var(--card); border: 1.5px solid var(--border);
+    color: var(--text); padding: 0.7rem 1rem; border-radius: 8px;
+    cursor: pointer; font-family: 'Syne', sans-serif; font-size: 0.88rem;
+    text-align: left; transition: all 0.2s;
+  }
+  .quiz-option:hover:not(:disabled) { border-color: var(--php); background: rgba(124,109,248,0.08); }
+  .quiz-option.correct { border-color: var(--green); background: rgba(34,211,160,0.1); color: var(--green); }
+  .quiz-option.wrong { border-color: var(--red); background: rgba(248,113,113,0.1); color: var(--red); }
+  .quiz-feedback {
+    margin-top: 0.8rem; padding: 0.7rem 1rem;
+    border-radius: 8px; font-size: 0.88rem; display: none;
+  }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.ok { background: rgba(34,211,160,0.1); color: var(--green); border: 1px solid var(--green); }
+  .quiz-feedback.ko { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid var(--red); }
+
+  /* SANDBOX */
+  .sandbox-section {
+    margin-top: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .sandbox-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.8rem 1.2rem; border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+  }
+  .sandbox-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; }
+  .run-btn {
+    background: var(--php); color: #fff; border: none;
+    padding: 0.4rem 1.2rem; border-radius: 6px; cursor: pointer;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.82rem;
+    transition: opacity 0.2s;
+  }
+  .run-btn:hover { opacity: 0.85; }
+  textarea.code-editor {
+    width: 100%; background: var(--code-bg); color: #c9d1f0;
+    border: none; resize: vertical; padding: 1rem 1.2rem;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
+    line-height: 1.7; outline: none; min-height: 120px;
+  }
+  .sandbox-output {
+    padding: 0.8rem 1.2rem; border-top: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
+    color: var(--green); min-height: 40px; background: rgba(0,0,0,0.3);
+    white-space: pre-wrap;
+  }
+
+  /* NEXT / PREV */
+  .lesson-nav {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 2rem; padding: 1rem 0; border-top: 1px solid var(--border);
+  }
+  .nav-btn {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); padding: 0.6rem 1.4rem; border-radius: 8px;
+    cursor: pointer; font-family: 'Syne', sans-serif; font-weight: 600;
+    font-size: 0.85rem; transition: all 0.2s; display: flex; align-items: center; gap: 0.5rem;
+  }
+  .nav-btn:hover { border-color: var(--php); color: var(--php); }
+  .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .complete-btn {
+    background: var(--php); border: none; color: #fff; padding: 0.6rem 1.6rem;
+    border-radius: 8px; cursor: pointer; font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 0.85rem; transition: opacity 0.2s;
+  }
+  .complete-btn:hover { opacity: 0.85; }
+  .complete-btn.done-state { background: var(--green); }
+
+  /* TABS */
+  .tabs { display: flex; gap: 0.3rem; padding: 0 1.2rem; border-bottom: 1px solid var(--border); margin-bottom: 0; }
+  .tab-btn {
+    background: none; border: none; color: var(--muted);
+    padding: 0.6rem 1rem; cursor: pointer; font-family: 'Syne', sans-serif;
+    font-size: 0.83rem; border-bottom: 2px solid transparent; transition: all 0.2s;
+  }
+  .tab-btn.active { color: var(--php); border-bottom-color: var(--php); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; animation: slideUp 0.4s cubic-bezier(0.22, 0.9, 0.36, 1); }
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* CHEATSHEET */
+  .cheat-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem; padding: 1.5rem;
+  }
+  .cheat-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    overflow: hidden;
+  }
+  .cheat-card-head {
+    padding: 0.6rem 1rem; background: rgba(124,109,248,0.1);
+    font-size: 0.78rem; font-weight: 700; color: var(--php); letter-spacing: 1px;
+  }
+  .cheat-card pre { padding: 0.8rem 1rem; font-size: 0.78rem; }
+
+  /* SEARCH */
+  .search-wrap { padding: 1.2rem; }
+  .search-input {
+    width: 100%; background: var(--card); border: 1px solid var(--border);
+    color: var(--text); padding: 0.7rem 1rem; border-radius: 8px;
+    font-family: 'Syne', sans-serif; font-size: 0.9rem; outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--php); }
+  .search-input::placeholder { color: var(--muted); }
+
+  @media (max-width: 720px) {
+    .app-body { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+    header { padding: 1rem; }
+    nav { display: none; }
+  }
+
+  /* ===== MODAL INSCRIPTION ===== */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 999;
+    background: rgba(0,0,0,0.82);
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(8px);
+    animation: fadeIn 0.3s ease;
+  }
+  .modal-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.5rem 2.5rem 2rem;
+    max-width: 460px; width: 90%;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(124,109,248,0.15);
+    text-align: center;
+    animation: slideUp 0.4s cubic-bezier(.22,.9,.36,1);
+  }
+  @keyframes slideUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:none; } }
+  .modal-icon { font-size: 3rem; margin-bottom: 1rem; }
+  .modal-box h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.4rem; }
+  .modal-box p { color: var(--muted); font-size: 0.88rem; margin-bottom: 1.8rem; line-height: 1.6; }
+  .modal-field { margin-bottom: 1rem; text-align: left; }
+  .modal-field label { display: block; font-size: 0.78rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.4rem; }
+  .modal-field input {
+    width: 100%; background: var(--surface); border: 1.5px solid var(--border);
+    color: var(--text); padding: 0.75rem 1rem; border-radius: 10px;
+    font-family: 'Syne', sans-serif; font-size: 0.95rem; outline: none;
+    transition: border-color 0.2s;
+  }
+  .modal-field input:focus { border-color: var(--php); }
+  .modal-field input::placeholder { color: var(--muted); }
+  .modal-submit {
+    width: 100%; background: linear-gradient(135deg, var(--php), var(--php2));
+    border: none; color: #fff; padding: 0.85rem;
+    border-radius: 10px; cursor: pointer; font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 1rem; margin-top: 0.5rem;
+    transition: opacity 0.2s, transform 0.15s;
+    box-shadow: 0 4px 20px rgba(124,109,248,0.4);
+  }
+  .modal-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  /* ===== PROGRESS DETAIL ===== */
+  .progress-detail {
+    max-width: 800px; margin: 0 auto; padding: 0 2rem 2rem;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0.8rem;
+  }
+  .cat-progress-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 0.8rem 1rem;
+  }
+  .cat-progress-name { font-size: 0.72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
+  .cat-bar-wrap { background: var(--card); border-radius: 99px; height: 6px; overflow: hidden; }
+  .cat-bar-fill { height: 100%; border-radius: 99px; transition: width 0.5s ease; }
+  .cat-label { display: flex; justify-content: space-between; margin-top: 0.4rem; font-size: 0.72rem; color: var(--muted); }
+  .cat-label strong { color: var(--text); }
+
+  /* ===== HEADER STUDENT BADGE ===== */
+  .student-badge {
+    display: flex; align-items: center; gap: 0.5rem;
+    background: rgba(124,109,248,0.1); border: 1px solid rgba(124,109,248,0.25);
+    border-radius: 99px; padding: 0.3rem 0.8rem 0.3rem 0.4rem;
+    font-size: 0.82rem; cursor: pointer; transition: all 0.2s;
+  }
+  .student-badge:hover { background: rgba(124,109,248,0.18); }
+  .student-avatar {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--php), var(--php2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; font-weight: 800; color: #fff;
+  }
+  .header-right { display: flex; align-items: center; gap: 0.6rem; }
+  .header-progress-mini {
+    font-size: 0.75rem; color: var(--muted); display: flex; align-items: center; gap: 0.4rem;
+  }
+  .mini-ring {
+    width: 28px; height: 28px; position: relative;
+  }
+  .mini-ring svg { transform: rotate(-90deg); }
+  .mini-ring circle { fill: none; stroke-width: 3; }
+  .mini-ring .bg { stroke: var(--border); }
+  .mini-ring .fill { stroke: var(--php); stroke-linecap: round; transition: stroke-dashoffset 0.5s ease; }
+
+  /* ===== CERTIFICATE VIEW ===== */
+  #view-cert {
+    min-height: calc(100vh - 70px);
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(124,109,248,0.12) 0%, transparent 60%);
+    padding: 2rem 1rem 4rem;
+  }
+  .cert-intro {
+    text-align: center; max-width: 600px; margin: 0 auto 3rem;
+  }
+  .cert-intro h2 { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
+  .cert-intro p { color: var(--muted); }
+  .cert-locked {
+    text-align: center; max-width: 500px; margin: 4rem auto;
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 3rem 2rem;
+  }
+  .cert-locked .lock-icon { font-size: 3rem; margin-bottom: 1rem; }
+  .cert-locked h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.6rem; }
+  .cert-locked p { color: var(--muted); font-size: 0.88rem; line-height: 1.6; }
+  .cert-locked .progress-num { font-size: 2.5rem; font-weight: 800; color: var(--php); margin: 1rem 0; }
+
+  /* Certificate card */
+  .cert-wrapper {
+    max-width: 860px; margin: 0 auto;
+  }
+  .cert-actions {
+    display: flex; gap: 0.8rem; justify-content: center; margin-bottom: 2rem; flex-wrap: wrap;
+  }
+  .cert-action-btn {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    padding: 0.6rem 1.4rem; border-radius: 8px; cursor: pointer;
+    font-family: 'Syne', sans-serif; font-weight: 600; font-size: 0.85rem;
+    display: flex; align-items: center; gap: 0.5rem; transition: all 0.2s;
+  }
+  .cert-action-btn:hover { border-color: var(--php); color: var(--php); }
+  .cert-action-btn.primary {
+    background: linear-gradient(135deg, var(--php), var(--php2));
+    border: none; color: #fff;
+    box-shadow: 0 4px 16px rgba(124,109,248,0.35);
+  }
+  .cert-action-btn.primary:hover { opacity: 0.9; color: #fff; }
+
+  /* The actual certificate */
+  #certificateCanvas {
+    width: 100%; border-radius: 16px;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+    display: block;
+  }
+
+  /* Confetti */
+  .confetti-piece {
+    position: fixed; width: 8px; height: 8px; border-radius: 2px;
+    top: -10px; animation: confettiFall linear forwards;
+    pointer-events: none; z-index: 9999;
+  }
+  @keyframes confettiFall {
+    0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.5); }
+    50% { box-shadow: 0 0 0 6px rgba(245,158,11,0); }
+  }
+
+  @media print {
+    header, nav, .cert-actions, .cert-locked, .cert-intro p { display: none !important; }
+    body { background: white; }
+    #view-cert { padding: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== MODAL INSCRIPTION ===== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <div class="modal-icon">🎓</div>
+    <h2>Bienvenue dans la formation</h2>
+    <p>Entrez vos informations pour commencer votre parcours d'apprentissage PHP. Votre certificat sera personnalisé avec votre nom.</p>
+    <div class="modal-field">
+      <label>Prénom</label>
+      <input type="text" id="inputPrenom" placeholder="ex: Alice" autocomplete="given-name">
+    </div>
+    <div class="modal-field">
+      <label>Nom de famille</label>
+      <input type="text" id="inputNom" placeholder="ex: Dupont" autocomplete="family-name">
+    </div>
+    <button class="modal-submit" onclick="startFormation()">🚀 Commencer la formation</button>
+  </div>
+</div>
+
+<header>
+  <div class="logo"><span>&lt;</span>PHP<span>/&gt;</span> <em>Apprendre</em></div>
+  <nav>
+    <button class="active" onclick="switchView('learn', this)">📚 Leçons</button>
+    <button onclick="switchView('cheat', this)">📋 Aide-mémoire</button>
+    <button onclick="switchView('quiz-all', this)">🎯 Quiz Rapide</button>
+    <button onclick="switchView('cert', this)" id="certNavBtn">🏆 Certificat</button>
+  </nav>
+  <div class="header-right">
+    <div class="mini-ring" id="miniRing" title="Progression globale">
+      <svg width="28" height="28" viewBox="0 0 28 28">
+        <circle class="bg" cx="14" cy="14" r="11" />
+        <circle class="fill" id="miniRingFill" cx="14" cy="14" r="11"
+          stroke-dasharray="69.1" stroke-dashoffset="69.1"/>
+      </svg>
+    </div>
+    <div class="student-badge" id="studentBadge" onclick="switchView('cert', document.querySelector('nav button:nth-child(4)'))">
+      <div class="student-avatar" id="studentAvatar">?</div>
+      <span id="studentName">Étudiant</span>
+    </div>
+  </div>
+</header>
+
+<!-- LEARN VIEW -->
+<div id="view-learn">
+  <div class="hero">
+    <h1>Maîtriser PHP<br>pas à pas</h1>
+    <p>Cours interactifs · Exercices pratiques · Quiz intégrés</p>
+    <div class="progress-bar-wrap" style="max-width:700px;">
+      <div class="progress-bar-fill" id="mainProgress"></div>
+    </div>
+    <div class="progress-label" id="progressLabel">0 leçon complétée</div>
+  </div>
+  <div class="progress-detail" id="catProgressGrid"></div>
+
+  <div class="app-body">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main id="lessonContent"></main>
+  </div>
+</div>
+
+<!-- CHEAT VIEW -->
+<div id="view-cheat" style="display:none; max-width:1200px; margin:0 auto; padding:1.5rem;">
+  <h2 style="font-size:1.6rem;font-weight:800;margin-bottom:0.3rem;">Aide-mémoire PHP</h2>
+  <p style="color:var(--muted);margin-bottom:1.5rem;">Les syntaxes essentielles en un coup d'œil</p>
+  <div class="search-wrap" style="padding:0 0 1rem;">
+    <input class="search-input" id="cheatSearch" placeholder="Rechercher une syntaxe..." oninput="filterCheat(this.value)">
+  </div>
+  <div class="cheat-grid" id="cheatGrid"></div>
+</div>
+
+<!-- QUIZ ALL VIEW -->
+<div id="view-quiz-all" style="display:none; max-width:700px; margin:0 auto; padding:2rem 1.5rem;">
+  <h2 style="font-size:1.6rem;font-weight:800;margin-bottom:0.3rem;">Quiz Rapide</h2>
+  <p style="color:var(--muted);margin-bottom:2rem;">Testez vos connaissances PHP</p>
+  <div id="quickQuizContainer"></div>
+</div>
+
+<!-- CERTIFICATE VIEW -->
+<div id="view-cert" style="display:none;">
+  <div class="cert-intro">
+    <h2>🏆 Votre Certificat</h2>
+    <p>Complétez toutes les leçons pour débloquer et télécharger votre certificat officiel.</p>
+  </div>
+  <div id="certContent"></div>
+</div>
+
+<script>
+// ===== DATA =====
+const lessons = [
+  {
+    id: 'intro', icon: '🐘', category: 'Introduction', title: 'C\'est quoi PHP ?',
+    tag: 'Débutant',
+    content: `
+      <p>PHP (Hypertext Preprocessor) est un langage de script côté serveur. Créé par Rasmus Lerdorf en 1993, il est aujourd'hui l'un des langages les plus utilisés pour le développement web dynamique.</p>
+      <h3>Pourquoi PHP ?</h3>
+      <ul>
+        <li>Gratuit et open source</li>
+        <li>Facile à apprendre pour les débutants</li>
+        <li>Compatible avec tous les hébergeurs web</li>
+        <li>Immense communauté et documentation</li>
+        <li>Utilisé par WordPress, Facebook (à ses débuts), Wikipedia</li>
+      </ul>
+      <h3>Comment ça marche ?</h3>
+      <p>Le navigateur envoie une requête au serveur → PHP traite le fichier .php → Le serveur renvoie du HTML au navigateur. L'utilisateur ne voit jamais le code PHP.</p>
+    `,
+    code: `<?php\n  <span class="cmt">// Mon premier programme PHP</span>\n  <span class="kw">echo</span> <span class="str">"Bonjour le monde !"</span>;\n\n  <span class="cmt">// PHP peut s'imbriquer dans HTML</span>\n  <span class="kw">$prenom</span> = <span class="str">"Alice"</span>;\n  <span class="kw">echo</span> <span class="str">"Bienvenue, "</span> . <span class="kw">$prenom</span>;\n?>`,
+    sandbox: `<?php\n// Modifiez et testez votre code\necho "Bonjour le monde !";\n?>`,
+    quiz: {
+      question: 'Que signifie PHP ?',
+      options: ['Personal Home Page', 'Hypertext Preprocessor', 'Professional HTML Processor', 'PHP Has Power'],
+      correct: 1,
+      explain: 'PHP signifie "Hypertext Preprocessor" (acronyme récursif).'
+    }
+  },
+  // ---- COMMENTAIRES ----
+  {
+    id: 'commentaires', icon: '💬', category: 'Bases du langage', title: 'Les Commentaires',
+    tag: 'Débutant',
+    content: `
+      <p>Les commentaires permettent d'annoter votre code sans affecter son exécution. Ils sont essentiels pour documenter, expliquer et désactiver temporairement du code.</p>
+      <h3>3 styles de commentaires</h3>
+      <ul>
+        <li><code>//</code> — commentaire sur une seule ligne (style C++)</li>
+        <li><code>#</code> — commentaire sur une seule ligne (style shell)</li>
+        <li><code>/* ... */</code> — commentaire sur plusieurs lignes</li>
+      </ul>
+      <h3>Bonnes pratiques</h3>
+      <ul>
+        <li>Commentez le <em>pourquoi</em>, pas le <em>quoi</em> (le code parle déjà)</li>
+        <li>Utilisez les blocs <code>/* */</code> pour documenter les fonctions</li>
+        <li>Évitez les commentaires évidents : <code>// incrémente i</code> avant <code>$i++</code></li>
+        <li>PHPDoc (<code>/** */</code>) génère de la documentation automatique</li>
+      </ul>
+    `,
+    code: `<?php\n  <span class="cmt">// Commentaire sur une ligne (style C++)</span>\n  <span class="cmt"># Commentaire sur une ligne (style shell)</span>\n\n  <span class="cmt">/* Commentaire\n     sur plusieurs\n     lignes */</span>\n\n  <span class="cmt">/**\n   * PHPDoc : documente une fonction\n   * @param string $nom Le prénom\n   * @return string La salutation\n   */</span>\n  <span class="kw">function</span> <span class="fn">saluer</span>(<span class="var">$nom</span>) {\n    <span class="kw">return</span> <span class="str">"Bonjour "</span> . <span class="var">$nom</span>;\n  }\n\n  <span class="kw">echo</span> <span class="fn">saluer</span>(<span class="str">"Alice"</span>); <span class="cmt">// Bonjour Alice</span>\n?>`,
+    sandbox: `<?php\n// Ceci est un commentaire\n# Ceci aussi\n\n/* Commentaire\n   multi-lignes */\n\n$x = 42; // valeur de test\necho "x = " . $x;\n?>`,
+    quiz: {
+      question: 'Lequel de ces styles N\'est PAS un commentaire PHP valide ?',
+      options: ['// commentaire', '/* commentaire */', '<!-- commentaire -->', '# commentaire'],
+      correct: 2,
+      explain: '<!-- --> est un commentaire HTML, pas PHP. PHP utilise //, #, et /* */.'
+    }
+  },
+  // ---- CONSTANTES ----
+  {
+    id: 'constantes', icon: '🔐', category: 'Bases du langage', title: 'Les Constantes',
+    tag: 'Débutant',
+    content: `
+      <p>Une constante est un identifiant dont la valeur ne change pas pendant l'exécution du script. Contrairement aux variables, elle ne commence pas par <code>$</code>.</p>
+      <h3>Définir une constante</h3>
+      <ul>
+        <li><code>define("NOM", valeur)</code> — méthode traditionnelle</li>
+        <li><code>const NOM = valeur</code> — syntaxe moderne (au niveau classe)</li>
+      </ul>
+      <h3>Conventions</h3>
+      <ul>
+        <li>Par convention, les constantes sont en <strong>MAJUSCULES</strong></li>
+        <li>Accessibles partout (portée globale) sans <code>global</code></li>
+        <li>Ne peuvent pas être modifiées ni supprimées</li>
+      </ul>
+      <h3>Constantes prédéfinies utiles</h3>
+      <ul>
+        <li><code>PHP_VERSION</code> — version de PHP</li>
+        <li><code>PHP_INT_MAX</code> — valeur entière maximale</li>
+        <li><code>PHP_EOL</code> — fin de ligne selon l'OS</li>
+        <li><code>M_PI</code> — valeur de π (3.14159...)</li>
+        <li><code>__FILE__</code>, <code>__LINE__</code>, <code>__DIR__</code> — constantes magiques</li>
+      </ul>
+    `,
+    code: `<?php\n  <span class="cmt">// Définir une constante</span>\n  <span class="fn">define</span>(<span class="str">"SITE_NOM"</span>, <span class="str">"MonSite.fr"</span>);\n  <span class="fn">define</span>(<span class="str">"TVA"</span>, <span class="num">0.20</span>);\n  <span class="fn">define</span>(<span class="str">"MAX_USERS"</span>, <span class="num">100</span>);\n\n  <span class="kw">echo</span> SITE_NOM;   <span class="cmt">// MonSite.fr</span>\n  <span class="kw">echo</span> TVA;        <span class="cmt">// 0.2</span>\n\n  <span class="cmt">// Constantes prédéfinies</span>\n  <span class="kw">echo</span> PHP_VERSION; <span class="cmt">// ex: 8.2.0</span>\n  <span class="kw">echo</span> M_PI;        <span class="cmt">// 3.14159...</span>\n  <span class="kw">echo</span> PHP_EOL;     <span class="cmt">// \\n ou \\r\\n</span>\n\n  <span class="cmt">// Constantes magiques</span>\n  <span class="kw">echo</span> __LINE__;    <span class="cmt">// numéro de ligne</span>\n?>`,
+    sandbox: `<?php\ndefine("TAUX_TVA", 0.20);\ndefine("APP_NOM", "MonAppPHP");\n\n$prix_ht = 100;\n$prix_ttc = $prix_ht * (1 + TAUX_TVA);\n\necho APP_NOM . "\\n";\necho "Prix HT : " . $prix_ht . " euros\\n";\necho "Prix TTC : " . $prix_ttc . " euros\\n";\necho "PI = " . M_PI . "\\n";\n?>`,
+    quiz: {
+      question: 'Comment définir une constante en PHP ?',
+      options: ['const $MAX = 10;', 'define("MAX", 10);', '$MAX = constant(10);', 'final MAX = 10;'],
+      correct: 1,
+      explain: 'define("NOM", valeur) est la façon standard de définir une constante. Notez qu\'on n\'utilise pas $ avec les constantes.'
+    }
+  },
+  // ---- VARIABLES (complète) ----
+  {
+    id: 'variables', icon: '📦', category: 'Bases du langage', title: 'Les Variables',
+    tag: 'Débutant',
+    content: `
+      <p>En PHP, une variable commence toujours par le signe <strong>$</strong>. Elle peut stocker différents types de données : texte, nombre, booléen, tableau, etc.</p>
+      <h3>Règles de nommage</h3>
+      <ul>
+        <li>Commence toujours par <code>$</code></li>
+        <li>Sensible à la casse : <code>$age</code> ≠ <code>$Age</code></li>
+        <li>Commence par une lettre ou underscore (pas un chiffre)</li>
+        <li>Contient lettres, chiffres, underscores</li>
+      </ul>
+      <h3>Types de données</h3>
+      <ul>
+        <li><strong>string</strong> — chaîne de caractères</li>
+        <li><strong>int</strong> — nombre entier</li>
+        <li><strong>float</strong> — nombre décimal</li>
+        <li><strong>bool</strong> — true ou false</li>
+        <li><strong>null</strong> — aucune valeur</li>
+      </ul>
+      <h3>Portée des variables</h3>
+      <ul>
+        <li><strong>Locale</strong> — existe uniquement dans la fonction</li>
+        <li><strong>Globale</strong> — déclarée hors fonction, accessible avec <code>global $var</code></li>
+        <li><strong>Statique</strong> — conserve sa valeur entre les appels (<code>static $x</code>)</li>
+      </ul>
+    `,
+    code: `<?php\n  <span class="var">$nom</span>    = <span class="str">"Alice"</span>;   <span class="cmt">// string</span>\n  <span class="var">$age</span>    = <span class="num">25</span>;       <span class="cmt">// int</span>\n  <span class="var">$taille</span> = <span class="num">1.68</span>;    <span class="cmt">// float</span>\n  <span class="var">$actif</span>  = <span class="kw">true</span>;    <span class="cmt">// bool</span>\n  <span class="var">$rien</span>   = <span class="kw">null</span>;    <span class="cmt">// null</span>\n\n  <span class="kw">echo</span> <span class="fn">gettype</span>(<span class="var">$taille</span>); <span class="cmt">// "double"</span>\n\n  <span class="cmt">// Variable variable</span>\n  <span class="var">$cle</span> = <span class="str">"couleur"</span>;\n  <span class="var">$$cle</span> = <span class="str">"rouge"</span>;   <span class="cmt">// $couleur = "rouge"</span>\n  <span class="kw">echo</span> <span class="var">$couleur</span>;      <span class="cmt">// rouge</span>\n\n  <span class="cmt">// Portée : variable globale</span>\n  <span class="var">$compteur</span> = <span class="num">0</span>;\n  <span class="kw">function</span> <span class="fn">incrementer</span>() {\n    <span class="kw">global</span> <span class="var">$compteur</span>;\n    <span class="var">$compteur</span>++;\n  }\n  <span class="fn">incrementer</span>();\n  <span class="kw">echo</span> <span class="var">$compteur</span>; <span class="cmt">// 1</span>\n?>`,
+    sandbox: `<?php\n$prenom = "Alice";\n$age = 25;\necho "Bonjour " . $prenom . ", tu as " . $age . " ans.\\n";\necho "Type age : " . gettype($age) . "\\n";\necho "Type prenom : " . gettype($prenom) . "\\n";\n\n$x = null;\necho "x est null : " . (is_null($x) ? "oui" : "non") . "\\n";\n?>`,
+    quiz: {
+      question: 'Quel est le bon nom de variable PHP ?',
+      options: ['$1age', '#age', '$mon_age', 'mon$age'],
+      correct: 2,
+      explain: '$mon_age est correct. Une variable PHP commence par $ suivi d\'une lettre ou underscore.'
+    }
+  },
+  // ---- TABLEAUX ----
+  {
+    id: 'arrays', icon: '🗂️', category: 'Bases du langage', title: 'Les Tableaux (Arrays)',
+    tag: 'Intermédiaire',
+    content: `
+      <p>Un tableau (array) est une structure de données permettant de stocker plusieurs valeurs sous un seul identifiant. PHP supporte trois types de tableaux.</p>
+      <h3>Types de tableaux</h3>
+      <ul>
+        <li><strong>Indexé</strong> — clés numériques automatiques (0, 1, 2...)</li>
+        <li><strong>Associatif</strong> — clés textuelles personnalisées</li>
+        <li><strong>Multidimensionnel</strong> — tableaux imbriqués dans d'autres tableaux</li>
+      </ul>
+      <h3>Fonctions indispensables</h3>
+      <ul>
+        <li><code>count()</code> — nombre d'éléments</li>
+        <li><code>array_push()</code> — ajouter à la fin</li>
+        <li><code>array_pop()</code> — supprimer le dernier</li>
+        <li><code>array_merge()</code> — fusionner deux tableaux</li>
+        <li><code>in_array()</code> — vérifier si une valeur existe</li>
+        <li><code>array_key_exists()</code> — vérifier si une clé existe</li>
+        <li><code>sort()</code> / <code>rsort()</code> — trier (croissant/décroissant)</li>
+        <li><code>array_map()</code> — appliquer une fonction à chaque élément</li>
+        <li><code>array_filter()</code> — filtrer les éléments</li>
+      </ul>
+    `,
+    code: `<?php\n  <span class="cmt">// Tableau indexé</span>\n  <span class="var">$fruits</span> = [<span class="str">"pomme"</span>, <span class="str">"banane"</span>, <span class="str">"cerise"</span>];\n  <span class="kw">echo</span> <span class="var">$fruits</span>[<span class="num">0</span>]; <span class="cmt">// "pomme"</span>\n\n  <span class="cmt">// Tableau associatif</span>\n  <span class="var">$personne</span> = [\n    <span class="str">"nom"</span>   => <span class="str">"Alice"</span>,\n    <span class="str">"age"</span>   => <span class="num">25</span>,\n    <span class="str">"ville"</span> => <span class="str">"Paris"</span>\n  ];\n  <span class="kw">echo</span> <span class="var">$personne</span>[<span class="str">"nom"</span>]; <span class="cmt">// "Alice"</span>\n\n  <span class="cmt">// Tableau multidimensionnel</span>\n  <span class="var">$equipe</span> = [\n    [<span class="str">"Alice"</span>, <span class="num">30</span>],\n    [<span class="str">"Bob"</span>,   <span class="num">25</span>]\n  ];\n  <span class="kw">echo</span> <span class="var">$equipe</span>[<span class="num">0</span>][<span class="num">0</span>]; <span class="cmt">// "Alice"</span>\n\n  <span class="cmt">// Fonctions utiles</span>\n  <span class="fn">array_push</span>(<span class="var">$fruits</span>, <span class="str">"mangue"</span>);\n  <span class="kw">echo</span> <span class="fn">count</span>(<span class="var">$fruits</span>); <span class="cmt">// 4</span>\n?>`,
+    sandbox: `<?php\n$eleves = ["Alice", "Bob", "Charlie", "Diana"];\nforeach ($eleves as $i => $eleve) {\n    echo ($i+1) . ". " . $eleve . "\\n";\n}\necho "Total : " . count($eleves) . " élèves\\n";\n\n// Tableau associatif\n$notes = ["Alice" => 18, "Bob" => 14, "Charlie" => 16];\nforeach ($notes as $nom => $note) {\n    echo $nom . " : " . $note . "/20\\n";\n}\n?>`,
+    quiz: {
+      question: 'Comment accéder à "Paris" dans $p = ["ville" => "Paris"] ?',
+      options: ['$p[0]', '$p->ville', '$p["ville"]', 'personne.ville'],
+      correct: 2,
+      explain: 'Pour un tableau associatif, on accède aux valeurs avec la syntaxe $tableau["cle"].'
+    }
+  },
+  // ---- OPERATEURS ----
+  {
+    id: 'operateurs', icon: '🧮', category: 'Bases du langage', title: 'Les Opérateurs',
+    tag: 'Débutant',
+    content: `
+      <p>Les opérateurs permettent d'effectuer des opérations sur des valeurs. PHP dispose de nombreuses catégories d'opérateurs.</p>
+      <h3>Opérateurs arithmétiques</h3>
+      <ul>
+        <li><code>+</code> addition, <code>-</code> soustraction, <code>*</code> multiplication</li>
+        <li><code>/</code> division, <code>%</code> modulo, <code>**</code> puissance</li>
+      </ul>
+      <h3>Opérateurs d'affectation</h3>
+      <ul>
+        <li><code>=</code> affectation simple</li>
+        <li><code>+=</code>, <code>-=</code>, <code>*=</code>, <code>/=</code>, <code>.=</code> — affectation combinée</li>
+        <li><code>++</code> incrémentation, <code>--</code> décrémentation</li>
+      </ul>
+      <h3>Opérateurs de comparaison</h3>
+      <ul>
+        <li><code>==</code> égal (valeur), <code>===</code> identique (valeur + type)</li>
+        <li><code>!=</code> différent, <code>!==</code> non identique</li>
+        <li><code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code></li>
+        <li><code>&lt;=&gt;</code> spaceship (retourne -1, 0 ou 1)</li>
+      </ul>
+      <h3>Opérateurs logiques</h3>
+      <ul>
+        <li><code>&amp;&amp;</code> / <code>and</code> — ET logique</li>
+        <li><code>||</code> / <code>or</code> — OU logique</li>
+        <li><code>!</code> — NON logique</li>
+      </ul>
+    `,
+    code: `<?php\n  <span class="cmt">// Arithmétiques</span>\n  <span class="kw">echo</span> <span class="num">10</span> + <span class="num">3</span>;   <span class="cmt">// 13</span>\n  <span class="kw">echo</span> <span class="num">10</span> % <span class="num">3</span>;   <span class="cmt">// 1 (modulo)</span>\n  <span class="kw">echo</span> <span class="num">2</span> ** <span class="num">8</span>;  <span class="cmt">// 256 (puissance)</span>\n\n  <span class="cmt">// Affectation combinée</span>\n  <span class="var">$x</span> = <span class="num">10</span>;\n  <span class="var">$x</span> += <span class="num">5</span>;   <span class="cmt">// $x = 15</span>\n  <span class="var">$x</span> *= <span class="num">2</span>;   <span class="cmt">// $x = 30</span>\n\n  <span class="cmt">// Spaceship operator (PHP 7+)</span>\n  <span class="kw">echo</span> (<span class="num">1</span> <=> <span class="num">2</span>); <span class="cmt">// -1</span>\n  <span class="kw">echo</span> (<span class="num">2</span> <=> <span class="num">2</span>); <span class="cmt">// 0</span>\n  <span class="kw">echo</span> (<span class="num">3</span> <=> <span class="num">2</span>); <span class="cmt">// 1</span>\n\n  <span class="cmt">// Null coalescing (PHP 7+)</span>\n  <span class="var">$nom</span> = <span class="var">$_GET</span>[<span class="str">"nom"</span>] ?? <span class="str">"Inconnu"</span>;\n?>`,
+    sandbox: `<?php\n$a = 15;\n$b = 4;\n\necho "Addition : " . ($a + $b) . "\\n";\necho "Soustraction : " . ($a - $b) . "\\n";\necho "Multiplication : " . ($a * $b) . "\\n";\necho "Division : " . ($a / $b) . "\\n";\necho "Modulo : " . ($a % $b) . "\\n";\necho "Puissance : " . ($a ** $b) . "\\n";\n\n// Comparaison stricte\necho ("5" == 5 ? "égaux" : "différents") . "\\n";  // égaux (==)\necho ("5" === 5 ? "identiques" : "différents") . "\\n"; // différents (===)\n?>`,
+    quiz: {
+      question: 'Que retourne "5" === 5 en PHP ?',
+      options: ['true', 'false', '1', 'null'],
+      correct: 1,
+      explain: '=== compare la valeur ET le type. "5" est une string, 5 est un int. Types différents → false.'
+    }
+  },
+  // ---- CONDITIONS ----
+  {
+    id: 'conditions', icon: '🔀', category: 'Bases du langage', title: 'Conditions & Switch',
+    tag: 'Débutant',
+    content: `
+      <p>Les structures conditionnelles permettent d'exécuter du code différent selon une condition. PHP utilise <code>if</code>, <code>elseif</code>, <code>else</code> et <code>switch</code>.</p>
+      <h3>Opérateurs de comparaison</h3>
+      <ul>
+        <li><code>==</code> — égal (valeur seulement)</li>
+        <li><code>===</code> — identique (valeur ET type)</li>
+        <li><code>!=</code> — différent</li>
+        <li><code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code> — comparaisons</li>
+      </ul>
+      <h3>Opérateurs logiques</h3>
+      <ul>
+        <li><code>&amp;&amp;</code> ou <code>and</code> — ET</li>
+        <li><code>||</code> ou <code>or</code> — OU</li>
+        <li><code>!</code> — NON</li>
+      </ul>
+    `,
+    code: `<?php\n  <span class="var">$age</span> = <span class="num">17</span>;\n\n  <span class="kw">if</span> (<span class="var">$age</span> >= <span class="num">18</span>) {\n    <span class="kw">echo</span> <span class="str">"Vous êtes majeur."</span>;\n  } <span class="kw">elseif</span> (<span class="var">$age</span> >= <span class="num">16</span>) {\n    <span class="kw">echo</span> <span class="str">"Bientôt majeur !"</span>;\n  } <span class="kw">else</span> {\n    <span class="kw">echo</span> <span class="str">"Vous êtes mineur."</span>;\n  }\n\n  <span class="cmt">// Opérateur ternaire</span>\n  <span class="var">$statut</span> = (<span class="var">$age</span> >= <span class="num">18</span>) ? <span class="str">"majeur"</span> : <span class="str">"mineur"</span>;\n  <span class="kw">echo</span> <span class="var">$statut</span>;\n?>`,
+    sandbox: `<?php\n$age = 17;\nif ($age >= 18) {\n    echo "Majeur";\n} else {\n    echo "Mineur (age: " . $age . ")";\n}\n?>`,
+    quiz: {
+      question: 'Quelle est la différence entre == et === en PHP ?',
+      options: [
+        'Aucune différence',
+        '=== compare valeur ET type, == compare seulement la valeur',
+        '== est plus rapide que ===',
+        '=== ne fonctionne qu\'avec les strings'
+      ],
+      correct: 1,
+      explain: '=== est une comparaison stricte : elle vérifie à la fois la valeur et le type. Exemple : "5" == 5 est true, mais "5" === 5 est false.'
+    }
+  },
+  {
+    id: 'boucles', icon: '🔄', category: 'Bases du langage', title: 'Les Boucles',
+    tag: 'Débutant',
+    content: `
+      <p>Les boucles permettent de répéter des instructions. PHP propose <code>for</code>, <code>while</code>, <code>do...while</code> et <code>foreach</code>.</p>
+      <h3>Choisir sa boucle</h3>
+      <ul>
+        <li><code>for</code> — quand on connaît le nombre d'itérations</li>
+        <li><code>while</code> — tant qu'une condition est vraie</li>
+        <li><code>do...while</code> — exécute au moins une fois</li>
+        <li><code>foreach</code> — pour parcourir un tableau</li>
+      </ul>
+    `,
+    code: `<?php\n  <span class="cmt">// Boucle for classique</span>\n  <span class="kw">for</span> (<span class="var">$i</span> = <span class="num">1</span>; <span class="var">$i</span> <= <span class="num">5</span>; <span class="var">$i</span>++) {\n    <span class="kw">echo</span> <span class="str">"Itération "</span> . <span class="var">$i</span> . <span class="str">"\\n"</span>;\n  }\n\n  <span class="cmt">// Boucle while</span>\n  <span class="var">$x</span> = <span class="num">0</span>;\n  <span class="kw">while</span> (<span class="var">$x</span> < <span class="num">3</span>) {\n    <span class="kw">echo</span> <span class="str">"x = "</span> . <span class="var">$x</span> . <span class="str">"\\n"</span>;\n    <span class="var">$x</span>++;\n  }\n\n  <span class="cmt">// Foreach sur tableau</span>\n  <span class="var">$fruits</span> = [<span class="str">"pomme"</span>, <span class="str">"banane"</span>, <span class="str">"cerise"</span>];\n  <span class="kw">foreach</span> (<span class="var">$fruits</span> <span class="kw">as</span> <span class="var">$fruit</span>) {\n    <span class="kw">echo</span> <span class="var">$fruit</span> . <span class="str">"\\n"</span>;\n  }\n?>`,
+    sandbox: `<?php\n// Afficher les 5 premiers multiples de 3\nfor ($i = 1; $i <= 5; $i++) {\n    echo $i . " x 3 = " . ($i * 3) . "\\n";\n}\n?>`,
+    quiz: {
+      question: 'Quelle boucle utiliser pour parcourir les éléments d\'un tableau ?',
+      options: ['for', 'while', 'foreach', 'do...while'],
+      correct: 2,
+      explain: 'foreach est spécialement conçu pour parcourir des tableaux et des collections en PHP.'
+    }
+  },
+  // ---- FORMULAIRES ----
+  {
+    id: 'formulaires', icon: '📝', category: 'Web avec PHP', title: 'Formulaires $_GET/$_POST',
+    tag: 'Intermédiaire',
+    content: `
+      <p>PHP peut récupérer les données envoyées par les formulaires HTML grâce aux superglobales <code>$_GET</code> et <code>$_POST</code>.</p>
+      <h3>$_GET vs $_POST</h3>
+      <ul>
+        <li><strong>$_GET</strong> — données passées dans l'URL (<code>?nom=Alice&age=25</code>). Visibles, max ~2000 chars. Pour la recherche, navigation.</li>
+        <li><strong>$_POST</strong> — données dans le corps de la requête. Invisibles dans l'URL. Pour login, formulaires, données sensibles.</li>
+      </ul>
+      <h3>Sécurité obligatoire</h3>
+      <ul>
+        <li><code>htmlspecialchars()</code> — échappe les caractères HTML (contre XSS)</li>
+        <li><code>strip_tags()</code> — supprime toutes les balises HTML</li>
+        <li><code>trim()</code> — supprime les espaces en début/fin</li>
+        <li><code>isset()</code> — vérifie si la variable existe</li>
+        <li>Ne jamais faire confiance aux données utilisateur !</li>
+      </ul>
+      <h3>Superglobales PHP</h3>
+      <ul>
+        <li><code>$_GET</code>, <code>$_POST</code>, <code>$_REQUEST</code> (les deux)</li>
+        <li><code>$_FILES</code> — upload de fichiers</li>
+        <li><code>$_SERVER</code> — infos du serveur</li>
+        <li><code>$_ENV</code> — variables d'environnement</li>
+      </ul>
+    `,
+    code: `<span class="cmt">&lt;!-- formulaire.html --&gt;</span>\n<span class="kw">&lt;form</span> method=<span class="str">"post"</span> action=<span class="str">"traitement.php"</span><span class="kw">&gt;</span>\n  &lt;input type=<span class="str">"text"</span>  name=<span class="str">"nom"</span>  placeholder=<span class="str">"Nom"</span>&gt;\n  &lt;input type=<span class="str">"email"</span> name=<span class="str">"mail"</span> placeholder=<span class="str">"Email"</span>&gt;\n  &lt;button type=<span class="str">"submit"</span>&gt;Envoyer&lt;/button&gt;\n<span class="kw">&lt;/form&gt;</span>\n\n<span class="cmt">&lt;?php /* traitement.php */ ?&gt;</span>\n<?php\n  <span class="kw">if</span> (<span class="fn">isset</span>(<span class="var">$_POST</span>[<span class="str">"nom"</span>])) {\n    <span class="var">$nom</span>  = <span class="fn">htmlspecialchars</span>(<span class="fn">trim</span>(<span class="var">$_POST</span>[<span class="str">"nom"</span>]));\n    <span class="var">$mail</span> = <span class="fn">filter_input</span>(\n      INPUT_POST, <span class="str">"mail"</span>, FILTER_VALIDATE_EMAIL\n    );\n    <span class="kw">if</span> (<span class="var">$mail</span>) {\n      <span class="kw">echo</span> <span class="str">"Bienvenue, "</span> . <span class="var">$nom</span>;\n    } <span class="kw">else</span> {\n      <span class="kw">echo</span> <span class="str">"Email invalide !"</span>;\n    }\n  }\n?>`,
+    sandbox: `<?php\n// Simulation de $_POST (normalement vient d'un formulaire HTML)\n$_POST["nom"] = "  Alice Dupont  ";\n$_POST["age"] = "25";\n$_POST["email"] = "alice@example.com";\n\n// Traitement sécurisé\nif (isset($_POST["nom"])) {\n    $nom = htmlspecialchars(trim($_POST["nom"]));\n    $age = (int) $_POST["age"];\n    $email = filter_var($_POST["email"], FILTER_VALIDATE_EMAIL);\n\n    echo "Nom : " . $nom . "\\n";\n    echo "Age : " . $age . " ans\\n";\n    echo "Email " . ($email ? "valide : " . $email : "INVALIDE") . "\\n";\n}\n?>`,
+    quiz: {
+      question: 'Quelle fonction protège contre les attaques XSS en PHP ?',
+      options: ['strip_whitespace()', 'htmlspecialchars()', 'md5()', 'urlencode()'],
+      correct: 1,
+      explain: 'htmlspecialchars() convertit les caractères spéciaux HTML (&, <, >, ", \') en entités HTML, empêchant l\'injection de code malveillant.'
+    }
+  },
+  // ---- COOKIES ----
+  {
+    id: 'cookies', icon: '🍪', category: 'Web avec PHP', title: 'Les Cookies',
+    tag: 'Intermédiaire',
+    content: `
+      <p>Un cookie est un petit fichier texte stocké sur le navigateur de l'utilisateur. PHP peut créer, lire et supprimer des cookies facilement.</p>
+      <h3>Créer un cookie : setcookie()</h3>
+      <ul>
+        <li><code>setcookie(nom, valeur, expiration)</code></li>
+        <li>Doit être appelé AVANT tout affichage HTML</li>
+        <li>L'expiration est un timestamp Unix (<code>time() + secondes</code>)</li>
+      </ul>
+      <h3>Paramètres de setcookie()</h3>
+      <ul>
+        <li><strong>name</strong> — nom du cookie</li>
+        <li><strong>value</strong> — valeur stockée</li>
+        <li><strong>expires</strong> — durée de vie (0 = fermeture navigateur)</li>
+        <li><strong>path</strong> — chemin de validité (<code>/</code> = tout le site)</li>
+        <li><strong>domain</strong> — domaine de validité</li>
+        <li><strong>secure</strong> — HTTPS uniquement</li>
+        <li><strong>httponly</strong> — inaccessible en JavaScript</li>
+      </ul>
+      <h3>Lire et supprimer</h3>
+      <ul>
+        <li>Lire : <code>$_COOKIE["nom"]</code></li>
+        <li>Supprimer : <code>setcookie("nom", "", time()-3600)</code></li>
+      </ul>
+    `,
+    code: `<?php\n  <span class="cmt">// Créer un cookie (24h)</span>\n  <span class="fn">setcookie</span>(\n    <span class="str">"utilisateur"</span>,\n    <span class="str">"Alice"</span>,\n    <span class="fn">time</span>() + (<span class="num">60</span> * <span class="num">60</span> * <span class="num">24</span>),\n    <span class="str">"/"</span>,     <span class="cmt">// path</span>\n    <span class="str">""</span>,      <span class="cmt">// domain</span>\n    <span class="kw">true</span>,   <span class="cmt">// secure (HTTPS)</span>\n    <span class="kw">true</span>    <span class="cmt">// httpOnly</span>\n  );\n\n  <span class="cmt">// Lire un cookie</span>\n  <span class="kw">if</span> (<span class="fn">isset</span>(<span class="var">$_COOKIE</span>[<span class="str">"utilisateur"</span>])) {\n    <span class="var">$user</span> = <span class="fn">htmlspecialchars</span>(<span class="var">$_COOKIE</span>[<span class="str">"utilisateur"</span>]);\n    <span class="kw">echo</span> <span class="str">"Bonjour, "</span> . <span class="var">$user</span>;\n  }\n\n  <span class="cmt">// Supprimer un cookie</span>\n  <span class="fn">setcookie</span>(<span class="str">"utilisateur"</span>, <span class="str">""</span>, <span class="fn">time</span>() - <span class="num">3600</span>);\n?>`,
+    sandbox: `<?php\n// Simulation de cookies (dans un vrai projet, ils sont dans $_COOKIE)\n$_COOKIE["langue"] = "fr";\n$_COOKIE["theme"] = "dark";\n\n// Lire les cookies\nif (isset($_COOKIE["langue"])) {\n    echo "Langue : " . $_COOKIE["langue"] . "\\n";\n}\nif (isset($_COOKIE["theme"])) {\n    echo "Thème : " . $_COOKIE["theme"] . "\\n";\n}\n\n// Durée d'expiration\n$expire_dans = 7 * 24 * 60 * 60; // 7 jours en secondes\necho "Cookie valable : " . ($expire_dans / 3600) . " heures\\n";\n?>`,
+    quiz: {
+      question: 'Où sont stockés les cookies PHP ?',
+      options: ['Sur le serveur', 'Dans la base de données', 'Dans le navigateur de l\'utilisateur', 'Dans un fichier sur le serveur'],
+      correct: 2,
+      explain: 'Les cookies sont stockés côté client, dans le navigateur de l\'utilisateur. C\'est pourquoi on ne doit jamais y stocker de données sensibles sans chiffrement.'
+    }
+  },
+  // ---- SESSIONS ----
+  {
+    id: 'sessions', icon: '🔑', category: 'Web avec PHP', title: 'Les Sessions',
+    tag: 'Intermédiaire',
+    content: `
+      <p>Une session permet de conserver des données d'un utilisateur entre plusieurs pages. Contrairement aux cookies, les données de session sont stockées <strong>côté serveur</strong>.</p>
+      <h3>Fonctionnement</h3>
+      <ul>
+        <li>PHP crée un ID de session unique (PHPSESSID)</li>
+        <li>Cet ID est transmis par cookie ou URL</li>
+        <li>Les données sont stockées sur le serveur</li>
+        <li>Plus sécurisé que les cookies pour les données sensibles</li>
+      </ul>
+      <h3>Fonctions essentielles</h3>
+      <ul>
+        <li><code>session_start()</code> — démarre/reprend la session (toujours en premier !)</li>
+        <li><code>$_SESSION["cle"] = valeur</code> — stocker une donnée</li>
+        <li><code>$_SESSION["cle"]</code> — lire une donnée</li>
+        <li><code>unset($_SESSION["cle"])</code> — supprimer une variable</li>
+        <li><code>session_destroy()</code> — détruire toute la session (déconnexion)</li>
+      </ul>
+      <h3>Sessions vs Cookies</h3>
+      <ul>
+        <li>Sessions — stockées serveur, plus sécurisées, expirent à la fermeture du navigateur</li>
+        <li>Cookies — stockés client, persistent plus longtemps, limités à 4Ko</li>
+      </ul>
+    `,
+    code: `<?php\n  <span class="fn">session_start</span>(); <span class="cmt">// TOUJOURS en premier</span>\n\n  <span class="cmt">// Stocker des données</span>\n  <span class="var">$_SESSION</span>[<span class="str">"user_id"</span>]  = <span class="num">42</span>;\n  <span class="var">$_SESSION</span>[<span class="str">"username"</span>] = <span class="str">"Alice"</span>;\n  <span class="var">$_SESSION</span>[<span class="str">"role"</span>]     = <span class="str">"admin"</span>;\n\n  <span class="cmt">// Lire une session</span>\n  <span class="kw">if</span> (<span class="fn">isset</span>(<span class="var">$_SESSION</span>[<span class="str">"username"</span>])) {\n    <span class="kw">echo</span> <span class="str">"Connecté : "</span> . <span class="var">$_SESSION</span>[<span class="str">"username"</span>];\n  }\n\n  <span class="cmt">// Déconnexion complète</span>\n  <span class="kw">function</span> <span class="fn">deconnecter</span>() {\n    <span class="var">$_SESSION</span> = [];\n    <span class="fn">session_destroy</span>();\n  }\n\n  <span class="cmt">// ID de session</span>\n  <span class="kw">echo</span> <span class="fn">session_id</span>(); <span class="cmt">// abc123xyz...</span>\n?>`,
+    sandbox: `<?php\n// Simulation de session\n$_SESSION = [];\n\n// Connexion simulée\n$_SESSION["user_id"] = 1;\n$_SESSION["username"] = "Alice";\n$_SESSION["role"] = "admin";\n$_SESSION["connecte"] = true;\n\necho "=== Données de session ===\\n";\nforeach ($_SESSION as $cle => $val) {\n    echo $cle . " : " . $val . "\\n";\n}\n\n// Vérifier si connecté\nif (isset($_SESSION["connecte"]) && $_SESSION["connecte"]) {\n    echo "\\nBienvenue " . $_SESSION["username"] . " !";\n    echo " (Rôle: " . $_SESSION["role"] . ")";\n}\n?>`,
+    quiz: {
+      question: 'Où sont stockées les données de session PHP ?',
+      options: ['Dans le navigateur (cookie)', 'Dans la base de données', 'Sur le serveur', 'Dans l\'URL'],
+      correct: 2,
+      explain: 'Les données de session sont stockées côté serveur (dans des fichiers temporaires par défaut). Seul l\'ID de session (PHPSESSID) est transmis au client.'
+    }
+  },
+  // ---- REQUIRE / INCLUDE ----
+  {
+    id: 'includes', icon: '📂', category: 'Web avec PHP', title: 'require() & include()',
+    tag: 'Intermédiaire',
+    content: `
+      <p>PHP permet d'inclure le contenu d'un fichier dans un autre avec <code>include()</code> et <code>require()</code>. Indispensable pour organiser son code (header, footer, config, fonctions...).</p>
+      <h3>4 fonctions d'inclusion</h3>
+      <ul>
+        <li><code>include("fichier.php")</code> — inclut le fichier. Si absent : warning, exécution continue.</li>
+        <li><code>require("fichier.php")</code> — inclut le fichier. Si absent : erreur fatale, arrêt.</li>
+        <li><code>include_once("fichier.php")</code> — inclut une seule fois (évite les doublons)</li>
+        <li><code>require_once("fichier.php")</code> — require + une seule fois. Recommandé pour config/classes.</li>
+      </ul>
+      <h3>Quand utiliser quoi ?</h3>
+      <ul>
+        <li><code>require_once</code> — fichiers critiques : config.php, connexion BD, classes</li>
+        <li><code>include</code> — fichiers optionnels : widgets, blocs de page</li>
+        <li><code>require</code> — fichiers essentiels inclus une seule fois</li>
+      </ul>
+      <h3>Architecture typique</h3>
+      <ul>
+        <li><code>config.php</code> — constantes, paramètres BDD</li>
+        <li><code>header.php</code> — navigation, balises head</li>
+        <li><code>footer.php</code> — pied de page, scripts JS</li>
+        <li><code>functions.php</code> — fonctions utilitaires</li>
+      </ul>
+    `,
+    code: `<?php\n  <span class="cmt">/* config.php */</span>\n  <span class="fn">define</span>(<span class="str">"DB_HOST"</span>, <span class="str">"localhost"</span>);\n  <span class="fn">define</span>(<span class="str">"DB_NAME"</span>, <span class="str">"mabase"</span>);\n  <span class="fn">define</span>(<span class="str">"SITE_URL"</span>, <span class="str">"https://monsite.fr"</span>);\n?>\n\n<?php\n  <span class="cmt">/* index.php */</span>\n  <span class="kw">require_once</span> <span class="str">"config.php"</span>;    <span class="cmt">// critique</span>\n  <span class="kw">require_once</span> <span class="str">"functions.php"</span>; <span class="cmt">// critique</span>\n  <span class="kw">include</span> <span class="str">"header.php"</span>;        <span class="cmt">// optionnel</span>\n\n  <span class="kw">echo</span> <span class="str">"&lt;h1&gt;Bienvenue sur "</span> . SITE_URL . <span class="str">"&lt;/h1&gt;"</span>;\n\n  <span class="kw">include</span> <span class="str">"footer.php"</span>;        <span class="cmt">// optionnel</span>\n\n  <span class="cmt">// Les variables du fichier inclus</span>\n  <span class="cmt">// sont disponibles dans la portée courante</span>\n?>`,
+    sandbox: `<?php\n// Simulation de fichiers inclus\n\n// Contenu simulé de config.php\ndefine("SITE_NOM", "MonSitePHP");\ndefine("VERSION", "2.0");\n\n// Contenu simulé de functions.php\nfunction bonjour($nom) {\n    return "Bonjour, " . htmlspecialchars($nom) . " !";\n}\n\nfunction formatDate($timestamp) {\n    return date("d/m/Y", $timestamp);\n}\n\n// index.php utilise tout\necho SITE_NOM . " v" . VERSION . "\\n";\necho bonjour("Alice") . "\\n";\necho "Aujourd'hui : " . formatDate(time()) . "\\n";\n?>`,
+    quiz: {
+      question: 'Quelle est la différence entre include() et require() ?',
+      options: [
+        'Aucune différence, ils sont identiques',
+        'require() provoque une erreur fatale si le fichier est absent, include() génère juste un avertissement',
+        'include() est plus rapide que require()',
+        'require() ne peut inclure que des fichiers .php'
+      ],
+      correct: 1,
+      explain: 'require() arrête l\'exécution du script (erreur fatale) si le fichier est manquant. include() continue l\'exécution avec un simple warning. Utilisez require() pour les fichiers critiques.'
+    }
+  },
+  {
+    id: 'poo', icon: '🏗️', category: 'POO', title: 'Classes & Objets',
+    tag: 'Avancé',
+    content: `
+      <p>La Programmation Orientée Objet (POO) organise le code autour d'objets — des entités qui regroupent données (propriétés) et comportements (méthodes).</p>
+      <h3>Concepts clés</h3>
+      <ul>
+        <li><strong>Classe</strong> — le plan/modèle de l'objet</li>
+        <li><strong>Objet</strong> — instance d'une classe</li>
+        <li><strong>Propriété</strong> — variable d'un objet</li>
+        <li><strong>Méthode</strong> — fonction d'un objet</li>
+        <li><strong>__construct()</strong> — constructeur, appelé à l'instanciation</li>
+        <li><strong>$this</strong> — référence à l'objet courant</li>
+      </ul>
+    `,
+    code: `<?php\n  <span class="kw">class</span> <span class="fn">Animal</span> {\n    <span class="kw">public</span> <span class="var">$nom</span>;\n    <span class="kw">private</span> <span class="var">$age</span>;\n\n    <span class="kw">public function</span> <span class="fn">__construct</span>(<span class="var">$nom</span>, <span class="var">$age</span>) {\n      <span class="kw">$this</span>-><span class="var">nom</span> = <span class="var">$nom</span>;\n      <span class="kw">$this</span>-><span class="var">age</span> = <span class="var">$age</span>;\n    }\n\n    <span class="kw">public function</span> <span class="fn">presenter</span>() {\n      <span class="kw">return</span> <span class="str">"Je suis "</span> . <span class="kw">$this</span>-><span class="var">nom</span>\n           . <span class="str">", j'ai "</span> . <span class="kw">$this</span>-><span class="var">age</span> . <span class="str">" ans."</span>;\n    }\n  }\n\n  <span class="var">$chat</span> = <span class="kw">new</span> <span class="fn">Animal</span>(<span class="str">"Minou"</span>, <span class="num">3</span>);\n  <span class="kw">echo</span> <span class="var">$chat</span>-><span class="fn">presenter</span>();\n?>`,
+    sandbox: `<?php\nclass Voiture {\n    public $marque;\n    public $vitesse = 0;\n\n    public function __construct($marque) {\n        $this->marque = $marque;\n    }\n\n    public function accelerer($v) {\n        $this->vitesse += $v;\n        return $this->marque . " : " . $this->vitesse . " km/h";\n    }\n}\n\n$maCar = new Voiture("Peugeot");\necho $maCar->accelerer(60) . "\\n";\necho $maCar->accelerer(30) . "\\n";\n?>`,
+    quiz: {
+      question: 'À quoi sert $this en PHP orienté objet ?',
+      options: [
+        'C\'est une variable globale réservée',
+        'Il fait référence à l\'objet courant dans une méthode',
+        'Il désigne la classe parente',
+        'Il s\'utilise uniquement dans le constructeur'
+      ],
+      correct: 1,
+      explain: '$this fait référence à l\'instance courante de la classe dans laquelle la méthode est définie.'
+    }
+  },
+  {
+    id: 'securite', icon: '🔒', category: 'Sécurité', title: 'Sécuriser les Mots de Passe',
+    tag: 'Avancé',
+    content: `
+      <p>Ne jamais stocker les mots de passe en clair ! PHP fournit des fonctions natives pour hacher et vérifier les mots de passe de manière sécurisée.</p>
+      <h3>Fonctions essentielles</h3>
+      <ul>
+        <li><code>password_hash()</code> — hache le mot de passe (bcrypt par défaut)</li>
+        <li><code>password_verify()</code> — vérifie un mot de passe contre son hash</li>
+        <li><code>PASSWORD_DEFAULT</code> — algorithme recommandé</li>
+        <li><code>PASSWORD_BCRYPT</code> — bcrypt explicite</li>
+      </ul>
+      <h3>Bonnes pratiques</h3>
+      <ul>
+        <li>Toujours utiliser password_hash() et password_verify()</li>
+        <li>Utiliser PASSWORD_DEFAULT (se met à jour avec PHP)</li>
+        <li>Ne jamais utiliser md5() ou sha1() pour les mots de passe</li>
+        <li>Stocker le hash entier (60+ caractères) en base de données</li>
+      </ul>
+    `,
+    code: `<?php\n  <span class="cmt">// Hacher un mot de passe</span>\n  <span class="var">$mdp</span>  = <span class="str">"monMotDePasse123"</span>;\n  <span class="var">$hash</span> = <span class="fn">password_hash</span>(<span class="var">$mdp</span>, <span class="kw">PASSWORD_DEFAULT</span>);\n\n  <span class="cmt">// Stocker $hash en base de données</span>\n  <span class="kw">echo</span> <span class="var">$hash</span>; <span class="cmt">// $2y$10$abc... (60 chars)</span>\n\n  <span class="cmt">// Vérifier lors de la connexion</span>\n  <span class="var">$saisie</span> = <span class="str">"monMotDePasse123"</span>;\n  <span class="kw">if</span> (<span class="fn">password_verify</span>(<span class="var">$saisie</span>, <span class="var">$hash</span>)) {\n    <span class="kw">echo</span> <span class="str">"Connexion réussie !"</span>;\n  } <span class="kw">else</span> {\n    <span class="kw">echo</span> <span class="str">"Mot de passe incorrect."</span>;\n  }\n?>`,
+    sandbox: `<?php\n$mdp = "secret123";\n$hash = password_hash($mdp, PASSWORD_DEFAULT);\necho "Hash: " . substr($hash, 0, 30) . "...\\n";\n\n$ok = password_verify("secret123", $hash);\necho $ok ? "✓ Correct!" : "✗ Incorrect";\n?>`,
+    quiz: {
+      question: 'Quelle fonction NE PAS utiliser pour hacher des mots de passe ?',
+      options: ['password_hash()', 'PASSWORD_DEFAULT', 'md5()', 'password_verify()'],
+      correct: 2,
+      explain: 'md5() est un algorithme de hachage rapide et déprécié pour les mots de passe. Utilisez toujours password_hash() avec PASSWORD_DEFAULT.'
+    }
+  }
+];
+
+const cheatData = [
+  { title: 'Echo / Print', code: `<?php\necho "texte";\necho "a" . "b";\nprint "texte";\n?>` },
+  { title: 'Commentaires', code: `<?php\n// Ligne unique\n# Ligne unique (shell)\n/* Multi\n   lignes */\n/** PHPDoc */\n?>` },
+  { title: 'Constantes', code: `<?php\ndefine("MAX", 100);\ndefine("PI", 3.14);\necho MAX; // pas de $\necho PHP_VERSION;\n?>` },
+  { title: 'Variables', code: `<?php\n$nom = "Alice";\n$age = 25;\n$pi  = 3.14;\n$ok  = true;\necho gettype($age); // integer\n?>` },
+  { title: 'Opérateurs arithm.', code: `<?php\n$a + $b;  // addition\n$a - $b;  // soustraction\n$a * $b;  // multiplication\n$a / $b;  // division\n$a % $b;  // modulo\n$a ** $b; // puissance\n?>` },
+  { title: 'Opérateurs comparaison', code: `<?php\n$a == $b;  // égal (valeur)\n$a === $b; // identique (val+type)\n$a != $b;  // différent\n$a <=> $b; // -1, 0, ou 1\n$x ?? "défaut"; // null coalescing\n?>` },
+  { title: 'Conditions', code: `<?php\nif ($x > 0) {\n  echo "positif";\n} elseif ($x == 0) {\n  echo "zéro";\n} else {\n  echo "négatif";\n}\n?>` },
+  { title: 'Switch', code: `<?php\nswitch ($jour) {\n  case "lundi":\n    echo "Début semaine";\n    break;\n  case "vendredi":\n    echo "Fin semaine";\n    break;\n  default:\n    echo "Milieu";\n}\n?>` },
+  { title: 'Ternaire / Null Coal.', code: `<?php\n// Ternaire\n$statut = ($age >= 18)\n  ? "majeur" : "mineur";\n\n// Null coalescing\n$nom = $_GET["nom"] ?? "Inconnu";\n?>` },
+  { title: 'Boucle for', code: `<?php\nfor ($i=0; $i<5; $i++) {\n  echo $i . "\\n";\n}\n?>` },
+  { title: 'Boucle while', code: `<?php\n$i = 0;\nwhile ($i < 5) {\n  echo $i;\n  $i++;\n}\n?>` },
+  { title: 'Boucle foreach', code: `<?php\n$arr = ["a","b","c"];\nforeach ($arr as $k => $v) {\n  echo $k . ": " . $v;\n}\n?>` },
+  { title: 'Tableau indexé', code: `<?php\n$fruits = ["pomme","banane"];\necho $fruits[0]; // pomme\narray_push($fruits, "cerise");\necho count($fruits); // 3\n?>` },
+  { title: 'Tableau associatif', code: `<?php\n$p = [\n  "nom" => "Alice",\n  "age" => 25\n];\necho $p["nom"]; // Alice\n?>` },
+  { title: 'Fonctions string', code: `<?php\nstrlen("hello");     // 5\nstrtoupper("hi");   // HI\nstr_replace("a","b","cat"); // cbt\nsubstr("hello",1,3);// ell\ntrim("  test  ");   // test\n?>` },
+  { title: 'Fonctions math', code: `<?php\nround(3.7);   // 4\nfloor(3.9);  // 3\nceil(3.1);   // 4\nrand(1,10);  // aléatoire\npow(2,8);    // 256\n?>` },
+  { title: 'Fonctions utilisateur', code: `<?php\nfunction saluer($nom, $titre="M.") {\n  return "Bonjour " . $titre . " " . $nom;\n}\necho saluer("Dupont");\necho saluer("Martin", "Mme");\n?>` },
+  { title: 'Formulaires $_POST', code: `<?php\nif (isset($_POST["nom"])) {\n  $nom = htmlspecialchars(\n    trim($_POST["nom"])\n  );\n  echo "Nom : " . $nom;\n}\n?>` },
+  { title: 'Formulaires $_GET', code: `<?php\n// URL: page.php?id=5&lang=fr\n$id   = (int)($_GET["id"] ?? 0);\n$lang = $_GET["lang"] ?? "fr";\necho $id . " / " . $lang;\n?>` },
+  { title: 'Cookies', code: `<?php\n// Créer (24h)\nsetcookie("user","Alice",\n  time()+86400, "/");\n\n// Lire\n$u = $_COOKIE["user"] ?? "";\n\n// Supprimer\nsetcookie("user","",time()-1);\n?>` },
+  { title: 'Sessions', code: `<?php\nsession_start();\n$_SESSION["user"] = "Alice";\n$_SESSION["role"] = "admin";\n\nif (isset($_SESSION["user"])) {\n  echo $_SESSION["user"];\n}\nsession_destroy(); // déconnexion\n?>` },
+  { title: 'Include / Require', code: `<?php\ninclude "header.php";       // optionnel\nrequire "config.php";       // critique\ninclude_once "fn.php";      // une fois\nrequire_once "db.php";      // critique+\n?>` },
+  { title: 'Classe / Objet', code: `<?php\nclass Chien {\n  public $nom;\n  public function __construct($n){\n    $this->nom = $n;\n  }\n  public function aboyer(){\n    return $this->nom . ": Woof!";\n  }\n}\n$d = new Chien("Rex");\necho $d->aboyer();\n?>` },
+  { title: 'Mots de passe', code: `<?php\n$h = password_hash($mdp,\n  PASSWORD_DEFAULT);\nif (password_verify($saisie,$h)){\n  echo "Connexion OK";\n}\n?>` },
+];
+
+const quickQuizzes = [
+  { q: 'Comment déclarer une variable en PHP ?', opts: ['var x = 5', '$x = 5', 'int x = 5', 'x := 5'], ans: 1 },
+  { q: 'Quelle fonction affiche du texte en PHP ?', opts: ['print_text()', 'console.log()', 'echo', 'display()'], ans: 2 },
+  { q: 'Comment concaténer des chaînes en PHP ?', opts: ['+', '&', '.', ','], ans: 2 },
+  { q: 'PHP est exécuté côté...', opts: ['navigateur', 'serveur', 'client', 'base de données'], ans: 1 },
+  { q: 'Quelle balise ouvre un fichier PHP ?', opts: ['<php>', '[php]', '<?php', '<%php'], ans: 2 },
+  { q: 'Comment définir une constante PHP ?', opts: ['$MAX = 10', 'const($MAX, 10)', 'define("MAX", 10)', 'constant MAX = 10'], ans: 2 },
+  { q: 'Quel style de commentaire PHP est incorrect ?', opts: ['// comment', '# comment', '/* comment */', '<!-- comment -->'], ans: 3 },
+  { q: 'Quelle superglobale reçoit les données d\'un formulaire POST ?', opts: ['$_FORM', '$_POST', '$_INPUT', '$_REQUEST_POST'], ans: 1 },
+  { q: 'Quelle fonction démarre une session PHP ?', opts: ['start_session()', 'session_begin()', 'session_start()', 'open_session()'], ans: 2 },
+  { q: 'Où sont stockées les données de session ?', opts: ['Navigateur', 'Cookie client', 'Serveur', 'URL'], ans: 2 },
+  { q: 'Que fait require_once() si le fichier est introuvable ?', opts: ['Rien', 'Warning et continue', 'Erreur fatale et arrêt', 'Reessaye 3 fois'], ans: 2 },
+  { q: 'Quelle opération donne le reste d\'une division ?', opts: ['/', '//', '%', '**'], ans: 2 },
+];
+
+// ===== STATE =====
+let currentLesson = 0;
+let completed = new Set();
+let quizAnswered = {};
+let studentPrenom = '';
+let studentNom = '';
+
+// ===== MODAL =====
+function startFormation() {
+  const p = document.getElementById('inputPrenom').value.trim();
+  const n = document.getElementById('inputNom').value.trim();
+  if (!p || !n) {
+    document.getElementById('inputPrenom').style.borderColor = p ? '' : 'var(--red)';
+    document.getElementById('inputNom').style.borderColor = n ? '' : 'var(--red)';
+    return;
+  }
+  studentPrenom = p; studentNom = n;
+  document.getElementById('studentAvatar').textContent = (p[0]+n[0]).toUpperCase();
+  document.getElementById('studentName').textContent = p + ' ' + n;
+  document.getElementById('modalOverlay').style.display = 'none';
+  init();
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('modalOverlay').style.display !== 'none') startFormation();
+});
+
+// ===== INIT =====
+function init() {
+  buildSidebar(); showLesson(0); buildCheat(); buildQuickQuiz(); updateProgress();
+}
+
+// ===== SIDEBAR =====
+function buildSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  let html = '<div class="sidebar-title">Curriculum</div>';
+  let lastCat = '';
+  lessons.forEach((l, i) => {
+    if (l.category !== lastCat) { html += `<div class="sidebar-category">${l.category}</div>`; lastCat = l.category; }
+    const isDone = completed.has(l.id) ? 'done' : '';
+    const isActive = i === currentLesson ? 'active' : '';
+    html += `<div class="sidebar-item ${isDone} ${isActive}" id="si-${i}" onclick="showLesson(${i})"><span class="check"></span>${l.icon} ${l.title}</div>`;
+  });
+  // Add TD Authentification link
+  html += `<div class="sidebar-item" onclick="showTD()"><span class="check"></span>📝 TD Authentification</div>`;
+  // Add TD Panier link
+  html += `<div class="sidebar-item" onclick="showTDPanier()"><span class="check"></span>🛒 TD Panier d'Achat</div>`;
+  // Add TD MySQL link
+  html += `<div class="sidebar-item" onclick="showTDMySQL()"><span class="check"></span>🗄️ TD MySQL</div>`;
+  // Add M107 module link
+  html += `<div class="sidebar-item" onclick="showM107()"><span class="check"></span>📚 M107 - Sites Dynamiques</div>`;
+  sidebar.innerHTML = html;
+}
+
+// ===== TD =====
+function showTD() {
+  const container = document.getElementById('lessonContent');
+  container.innerHTML = `
+    <div class="lesson-card visible">
+      <div class="lesson-header">
+        <div class="lesson-icon">📝</div>
+        <div>
+          <h2>TD Authentification</h2>
+          <span class="tag">Pratique</span>
+        </div>
+      </div>
+      <div style="border-bottom:1px solid var(--border)">
+        <div class="tabs" id="tdTabs">
+          <button class="tab-btn active" onclick="switchTDTab('intro',this)">📋 Intro</button>
+          <button class="tab-btn" onclick="switchTDTab('html',this)">🌐 HTML</button>
+          <button class="tab-btn" onclick="switchTDTab('auth',this)">🔐 PHP Auth</button>
+          <button class="tab-btn" onclick="switchTDTab('client',this)">👤 Client</button>
+          <button class="tab-btn" onclick="switchTDTab('fournisseur',this)">🏢 Fournisseur</button>
+          <button class="tab-btn" onclick="switchTDTab('exercices',this)">🎯 Exercices</button>
+          <button class="tab-btn" onclick="switchTDTab('recap',this)">📚 Récap</button>
+        </div>
+      </div>
+      <div class="lesson-body">
+        <div id="td-intro" class="tab-panel active">
+          <h1 style="color: var(--php);">🔐 Système de Connexion PHP - Guide Complet</h1>
+          <p><strong style="color: var(--accent);">Niveau:</strong> Débutant</p>
+          <p><strong style="color: var(--accent);">Objectif:</strong> Apprendre à créer un système d'authentification avec gestion de rôles</p>
+          <hr style="border-color: var(--border);">
+          <h2 style="color: var(--php);">📋 Liste des fichiers à créer</h2>
+          <ol style="color: var(--text);">
+            <li><strong>index.html</strong> - Formulaire de connexion</li>
+            <li><strong>3_authentification.php</strong> - Traitement et vérification</li>
+            <li><strong>liste_client.php</strong> - Page réservée aux clients</li>
+            <li><strong>liste_fournisseur.php</strong> - Page réservée aux fournisseurs</li>
+          </ol>
+        </div>
+        <div id="td-html" class="tab-panel">
+          <h2 style="color: var(--php);">📄 Fichier 1: index.html</h2>
+          <p><strong style="color: var(--accent);">Description:</strong> Ce fichier contient le formulaire de connexion que l'utilisateur va remplir.</p>
+          <h3 style="color: var(--php2);">Points clés à comprendre:</h3>
+          <ul style="color: var(--text);">
+            <li><strong>method="POST"</strong>: Envoie les données de manière sécurisée (cachées)</li>
+            <li><strong>action="3_authentification.php"</strong>: Indique vers quel fichier envoyer les données</li>
+            <li><strong>type="password"</strong>: Masque les caractères saisis</li>
+            <li><strong>name="username"</strong>: Nom de la variable récupérée en PHP</li>
+            <li><strong>required</strong>: Rend le champ obligatoire</li>
+          </ul>
+          <h3 style="color: var(--php2);">Code complet:</h3>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">HTML</span>
+            </div>
+            <pre style="color: var(--text);">&lt;!DOCTYPE html&gt;
+&lt;html lang="fr"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Page de Connexion&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Connexion&lt;/h1&gt;
+    &lt;form action="3_authentification.php" method="POST"&gt;
+        &lt;label for="username"&gt;Nom d'utilisateur :&lt;/label&gt;
+        &lt;input type="text" name="username" id="username" 
+               placeholder="Entrez votre login" required&gt;
+        &lt;br&gt;&lt;br&gt;
+        &lt;label for="password"&gt;Mot de passe :&lt;/label&gt;
+        &lt;input type="password" name="password" id="password" 
+               placeholder="Entrez votre mot de passe" required&gt;
+        &lt;br&gt;&lt;br&gt;
+        &lt;button type="submit"&gt;Se connecter&lt;/button&gt;
+    &lt;/form&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+          </div>
+        </div>
+        <div id="td-auth" class="tab-panel">
+          <h2 style="color: var(--php);">📄 Fichier 2: 3_authentification.php</h2>
+          <p><strong style="color: var(--accent);">Description:</strong> Ce fichier reçoit les données du formulaire, vérifie les identifiants et redirige l'utilisateur selon son rôle.</p>
+          <h3 style="color: var(--php2);">Concepts importants:</h3>
+          <ul style="color: var(--text);">
+            <li><strong>$_POST[]</strong>: Tableau contenant les données envoyées en POST</li>
+            <li><strong>isset()</strong>: Vérifie si une variable existe</li>
+            <li><strong>&& (AND)</strong>: Les deux conditions doivent être vraies</li>
+            <li><strong>foreach</strong>: Boucle pour parcourir un tableau</li>
+            <li><strong>header()</strong>: Redirige vers une autre page</li>
+            <li><strong>session_start()</strong>: Démarre une session utilisateur</li>
+          </ul>
+          <h3 style="color: var(--php2);">Code complet commenté:</h3>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">PHP</span>
+            </div>
+            <pre style="color: var(--text);">&lt;?php
+/**
+ * FICHIER: 3_authentification.php
+ * ROLE: Traiter la connexion utilisateur
+ */
+
+// ============================================
+// ÉTAPE 1: Démarrer la session
+// ============================================
+// session_start() permet de créer une session pour 
+// garder l'utilisateur connecté sur les autres pages
+session_start();
+
+// ============================================
+// ÉTAPE 2: Vérifier si le formulaire a été soumis
+// ============================================
+// isset() vérifie si les variables existent
+// && (AND) signifie que les deux doivent exister
+if (isset($_POST['username']) && isset($_POST['password'])) {
+    
+    // ============================================
+    // ÉTAPE 3: Récupérer les données du formulaire
+    // ============================================
+    // $_POST['username'] contient ce que l'utilisateur a saisi
+    $user_input = $_POST['username'];
+    $pass_input = $_POST['password'];
+
+    // ============================================
+    // ÉTAPE 4: Créer la liste des utilisateurs
+    // ============================================
+    // Tableau associatif multidimensionnel
+    // Chaque utilisateur est un tableau avec:
+    // - login: son identifiant
+    // - password: son mot de passe
+    // - role: son type (client ou fournisseur)
+    // - nom: son nom complet
+    
+    $liste_utilisateurs = [
+        [
+            "login" => "client1", 
+            "password" => "azerty", 
+            "role" => "client",
+            "nom" => "Jean Dupont"
+        ],
+        [
+            "login" => "client2", 
+            "password" => "123456", 
+            "role" => "client",
+            "nom" => "Marie Curie"
+        ],
+        [
+            "login" => "fournisseur1", 
+            "password" => "fourni99", 
+            "role" => "fournisseur",
+            "nom" => "Entreprise ABC"
+        ]
+    ];
+
+    // ============================================
+    // ÉTAPE 5: Initialiser les variables de contrôle
+    // ============================================
+    $trouve = false;  // false = utilisateur non trouvé
+    $role_user = "";  // Sera rempli si connexion réussie
+    $nom_user = "";   // Sera rempli si connexion réussie
+
+    // ============================================
+    // ÉTAPE 6: Parcourir tous les utilisateurs
+    // ============================================
+    // foreach parcourt chaque élément du tableau
+    // À chaque tour, $utilisateur contient un utilisateur
+    foreach ($liste_utilisateurs as $utilisateur) {
+        
+        // ============================================
+        // ÉTAPE 7: Vérifier login ET mot de passe
+        // ============================================
+        // && (AND) est CRUCIAL pour la sécurité
+        // Les deux conditions doivent être vraies:
+        // 1. Le login correspond
+        // 2. Le mot de passe correspond
+        // 
+        // Si on utilisait || (OR), ce serait une faille!
+        // Car un seul des deux suffirait
+        
+        if ($utilisateur['login'] == $user_input && 
+            $utilisateur['password'] == $pass_input) {
+            
+            // ============================================
+            // CONNEXION RÉUSSIE!
+            // ============================================
+            $trouve = true;  // On a trouvé l'utilisateur
+            $role_user = $utilisateur['role'];  // On récupère son rôle
+            $nom_user = $utilisateur['nom'];    // On récupère son nom
+            
+            // break arrête la boucle immédiatement
+            // Inutile de continuer à chercher
+            break; 
+        }
+    }
+
+    // ============================================
+    // ÉTAPE 8: Vérifier si la connexion a réussi
+    // ============================================
+    if ($trouve == true) {
+        // ============================================
+        // CAS 1: Connexion réussie
+        // ============================================
+        echo "&lt;h1&gt;Bonjour " . $nom_user . "!&lt;/h1&gt;";
+        echo "&lt;p&gt;Votre rôle est: " . $role_user . "&lt;/p&gt;";
+        echo "&lt;p&gt;Connexion réussie. Redirection...&lt;/p&gt;";
+
+        // Enregistrer les informations dans la session
+        // Ces variables seront accessibles sur les autres pages
+        $_SESSION['login'] = $user_input;
+        $_SESSION['role'] = $role_user;
+        $_SESSION['nom'] = $nom_user;
+
+        // ============================================
+        // ÉTAPE 9: Rediriger selon le rôle
+        // ============================================
+        if ($role_user == "client") {
+            // Redirection vers la page client
+            header("Location: liste_client.php");
+            exit();  // Important: arrête le script après header()
+        } 
+        elseif ($role_user == "fournisseur") {
+            // Redirection vers la page fournisseur
+            header("Location: liste_fournisseur.php");
+            exit();  // Important: arrête le script après header()
+        }
+
+    } else {
+        // ============================================
+        // CAS 2: Connexion échouée
+        // ============================================
+        // Si on arrive ici, c'est qu'aucun utilisateur
+        // ne correspond dans le tableau
+        echo "&lt;h1&gt;Échec de la connexion&lt;/h1&gt;";
+        echo "&lt;p&gt;Le nom d'utilisateur ou le mot de passe est incorrect.&lt;/p&gt;";
+        echo "&lt;a href='index.html'&gt;Retour à la page de login&lt;/a&gt;";
+    }
+
+} else {
+    // ============================================
+    // CAS 3: Accès direct au fichier
+    // ============================================
+    // Si quelqu'un essaie d'accéder directement à 
+    // 3_authentification.php sans passer par le formulaire
+    echo "Accès interdit. Veuillez passer par le formulaire.";
+}
+?&gt;</pre>
+          </div>
+        </div>
+        <div id="td-client" class="tab-panel">
+          <h2 style="color: var(--php);">📄 Fichier 3: liste_client.php</h2>
+          <p><strong style="color: var(--accent);">Description:</strong> Page accessible uniquement aux utilisateurs connectés avec le rôle "client".</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">PHP</span>
+            </div>
+            <pre style="color: var(--text);">&lt;?php
+/**
+ * FICHIER: liste_client.php
+ * ROLE: Afficher l'espace client
+ * ACCÈS: Réservé aux utilisateurs avec role="client"
+ */
+
+// Démarrer la session pour accéder aux variables de session
+session_start();
+
+// ============================================
+// VÉRIFICATION DE SÉCURITÉ
+// ============================================
+// On vérifie deux choses:
+// 1. isset($_SESSION['role']): L'utilisateur est-il connecté?
+// 2. $_SESSION['role'] != 'client': Est-il vraiment client?
+// 
+// Le ! signifie "NON" (négation)
+// Si une des conditions est vraie, on redirige vers le login
+
+if (!isset($_SESSION['role']) || $_SESSION['role'] != 'client') {
+    // header() redirige vers une autre page
+    header("Location: index.html");
+    exit();  // Important: arrête le script immédiatement
+}
+?&gt;
+
+&lt;!DOCTYPE html&gt;
+&lt;html lang="fr"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Espace Client&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+    &lt;h1&gt;Espace Client&lt;/h1&gt;
+    &lt;p&gt;Bienvenue dans votre espace client.&lt;/p&gt;
+    &lt;p&gt;Voici la liste de vos commandes (exemple).&lt;/p&gt;
+
+    &lt;!-- Liste des commandes fictives --&gt;
+    &lt;ul&gt;
+        &lt;li&gt;Commande #101 - En livraison&lt;/li&gt;
+        &lt;li&gt;Commande #102 - Livrée&lt;/li&gt;
+        &lt;li&gt;Commande #103 - En attente&lt;/li&gt;
+    &lt;/ul&gt;
+
+    &lt;hr&gt;
+    
+    &lt;!-- Lien de déconnexion --&gt;
+    &lt;a href="index.html"&gt;Se déconnecter&lt;/a&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+          </div>
+        </div>
+        <div id="td-fournisseur" class="tab-panel">
+          <h2 style="color: var(--php);">📄 Fichier 4: liste_fournisseur.php</h2>
+          <p><strong style="color: var(--accent);">Description:</strong> Page accessible uniquement aux utilisateurs connectés avec le rôle "fournisseur".</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">PHP</span>
+            </div>
+            <pre style="color: var(--text);">&lt;?php
+/**
+ * FICHIER: liste_fournisseur.php
+ * ROLE: Afficher l'espace fournisseur
+ * ACCÈS: Réservé aux utilisateurs avec role="fournisseur"
+ */
+
+// Démarrer la session pour accéder aux variables de session
+session_start();
+
+// ============================================
+// VÉRIFICATION DE SÉCURITÉ
+// ============================================
+// Même logique que pour liste_client.php
+// Mais on vérifie que le rôle est "fournisseur"
+
+if (!isset($_SESSION['role']) || $_SESSION['role'] != 'fournisseur') {
+    header("Location: index.html");
+    exit();
+}
+?&gt;
+
+&lt;!DOCTYPE html&gt;
+&lt;html lang="fr"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Espace Fournisseur&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+    &lt;h1&gt;Espace Fournisseur&lt;/h1&gt;
+    &lt;p&gt;Bienvenue dans votre espace professionnel.&lt;/p&gt;
+    &lt;p&gt;Voici la liste de vos produits (exemple).&lt;/p&gt;
+
+    &lt;!-- Liste des produits fictifs --&gt;
+    &lt;ul&gt;
+        &lt;li&gt;Produit A - Stock: 50&lt;/li&gt;
+        &lt;li&gt;Produit B - Stock: 12&lt;/li&gt;
+        &lt;li&gt;Produit C - Stock: 100&lt;/li&gt;
+    &lt;/ul&gt;
+
+    &lt;hr&gt;
+    
+    &lt;!-- Lien de déconnexion --&gt;
+    &lt;a href="index.html"&gt;Se déconnecter&lt;/a&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+          </div>
+        </div>
+        <div id="td-exercices" class="tab-panel">
+          <h2 style="color: var(--php);">🎯 Exercices Pratiques</h2>
+          <h3 style="color: var(--php2);">Exercice 1: Ajouter un administrateur</h3>
+          <p style="color: var(--text);"><strong>Objectif:</strong> Ajouter un troisième type d'utilisateur (admin)</p>
+          <ol style="color: var(--text);">
+            <li>Ajoutez un utilisateur avec le rôle "admin" dans le tableau $liste_utilisateurs</li>
+            <li>Créez un fichier <strong>admin_dashboard.php</strong></li>
+            <li>Ajoutez une condition dans 3_authentification.php pour rediriger les admins</li>
+          </ol>
+          <h3 style="color: var(--php2);">Exercice 2: Validation du mot de passe</h3>
+          <p style="color: var(--text);"><strong>Objectif:</strong> Vérifier que le mot de passe fait au moins 6 caractères</p>
+          <div class="code-block">
+            <pre style="color: var(--text);">if (strlen($pass_input) &lt; 6) {
+    echo "Le mot de passe doit faire au moins 6 caractères";
+}</pre>
+          </div>
+        </div>
+        <div id="td-recap" class="tab-panel">
+          <h2 style="color: var(--php);">📚 Récapitulatif des Concepts</h2>
+          <h3 style="color: var(--php2);">1. Les Variables Superglobales</h3>
+          <ul style="color: var(--text);">
+            <li><strong>$_POST[]</strong>: Données envoyées via method="POST"</li>
+            <li><strong>$_SESSION[]</strong>: Variables de session (persistantes)</li>
+          </ul>
+          <h3 style="color: var(--php2);">2. Les Structures Conditionnelles</h3>
+          <ul style="color: var(--text);">
+            <li><strong>if</strong>: Exécute du code si la condition est vraie</li>
+            <li><strong>else</strong>: Exécute du code si la condition est fausse</li>
+            <li><strong>elseif</strong>: Permet de tester plusieurs conditions</li>
+          </ul>
+          <h3 style="color: var(--php2);">3. Les Opérateurs Logiques</h3>
+          <ul style="color: var(--text);">
+            <li><strong>&& (AND)</strong>: Les deux conditions doivent être vraies</li>
+            <li><strong>|| (OR)</strong>: Au moins une condition doit être vraie</li>
+            <li><strong>! (NOT)</strong>: Inverse la condition</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ===== TD PANIER =====
+function showTDPanier() {
+  const container = document.getElementById('lessonContent');
+  container.innerHTML = `
+    <div class="lesson-card visible">
+      <div class="lesson-header">
+        <div class="lesson-icon">🛒</div>
+        <div>
+          <h2>TD Panier d'Achat</h2>
+          <span class="tag">Pratique</span>
+        </div>
+      </div>
+      <div style="border-bottom:1px solid var(--border)">
+        <div class="tabs" id="panierTabs">
+          <button class="tab-btn active" onclick="switchPanierTab('intro',this)">📋 Intro</button>
+          <button class="tab-btn" onclick="switchPanierTab('catalogue',this)">📦 Catalogue</button>
+          <button class="tab-btn" onclick="switchPanierTab('panier',this)">🛒 Gestion Panier</button>
+          <button class="tab-btn" onclick="switchPanierTab('session',this)">💾 Sessions</button>
+          <button class="tab-btn" onclick="switchPanierTab('commande',this)">✅ Validation</button>
+          <button class="tab-btn" onclick="switchPanierTab('exercices',this)">🎯 Exercices</button>
+        </div>
+      </div>
+      <div class="lesson-body">
+        <div id="panier-intro" class="tab-panel active">
+          <h1 style="color: var(--php);">🛒 Système de Panier d'Achat PHP</h1>
+          <p><strong style="color: var(--accent);">Niveau:</strong> Intermédiaire</p>
+          <p><strong style="color: var(--accent);">Objectif:</strong> Créer un système complet de e-commerce avec panier persistant</p>
+          <hr style="border-color: var(--border);">
+          <h2 style="color: var(--php);">📋 Liste des fichiers à créer</h2>
+          <ol style="color: var(--text);">
+            <li><strong>catalogue.php</strong> - Affichage des produits</li>
+            <li><strong>ajouter_panier.php</strong> - Ajout d'articles au panier</li>
+            <li><strong>panier.php</strong> - Affichage et gestion du panier</li>
+            <li><strong>supprimer_panier.php</strong> - Suppression d'articles</li>
+            <li><strong>valider_commande.php</strong> - Finalisation de la commande</li>
+          </ol>
+          <h3 style="color: var(--php2);">Concepts appris:</h3>
+          <ul style="color: var(--text);">
+            <li>Manipulation avancée des tableaux</li>
+            <li>Utilisation des sessions pour la persistance</li>
+            <li>Calculs et opérations mathématiques</li>
+            <li>Gestion des quantités et stocks</li>
+            <li>Redirections et flux utilisateur</li>
+          </ul>
+        </div>
+        <div id="panier-catalogue" class="tab-panel">
+          <h2 style="color: var(--php);">📦 Catalogue de Produits</h2>
+          <p><strong style="color: var(--accent);">Description:</strong> Page d'accueil affichant tous les produits disponibles avec possibilité d'ajout au panier.</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">PHP</span>
+            </div>
+            <pre style="color: var(--text);">&lt;?php
+/**
+ * FICHIER: catalogue.php
+ * ROLE: Afficher le catalogue des produits
+ */
+
+// Démarrer la session pour accéder au panier
+session_start();
+
+// ============================================
+// CATALOGUE DE PRODUITS
+// ============================================
+$produits = [
+    [
+        "id" => 1,
+        "nom" => "Ordinateur Portable",
+        "prix" => 899.99,
+        "stock" => 5,
+        "description" => "Ordinateur portable 15.6\" haute performance"
+    ],
+    [
+        "id" => 2,
+        "nom" => "Souris Gaming",
+        "prix" => 49.99,
+        "stock" => 12,
+        "description" => "Souris gaming RGB avec 7 boutons programmables"
+    ],
+    [
+        "id" => 3,
+        "nom" => "Clavier Mécanique",
+        "prix" => 129.99,
+        "stock" => 8,
+        "description" => "Clavier mécanique avec switches bleus"
+    ]
+];
+?&gt;
+
+&lt;!DOCTYPE html&gt;
+&lt;html lang="fr"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Catalogue - Boutique PHP&lt;/title&gt;
+    &lt;style&gt;
+        .produit { border: 1px solid #ddd; padding: 15px; margin: 10px; }
+        .prix { color: green; font-weight: bold; }
+        .stock { color: orange; }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;🛍️ Notre Catalogue&lt;/h1&gt;
+    
+    &lt;!-- Affichage du nombre d'articles dans le panier --&gt;
+    &lt;p&gt;
+        &lt;a href="panier.php"&gt;🛒 Panier&lt;/a&gt; 
+        (&lt;?php echo isset($_SESSION['panier']) ? count($_SESSION['panier']) : 0; ?&gt; articles)
+    &lt;/p&gt;
+
+    &lt;!-- BOUCLE POUR AFFICHER CHAQUE PRODUIT --&gt;
+    &lt;?php foreach ($produits as $produit): ?&gt;
+        &lt;div class="produit"&gt;
+            &lt;h3&gt;&lt;?php echo $produit['nom']; ?&gt;&lt;/h3&gt;
+            &lt;p&gt;&lt;?php echo $produit['description']; ?&gt;&lt;/p&gt;
+            &lt;p class="prix"&gt;&lt;?php echo number_format($produit['prix'], 2); ?&gt; €&lt;/p&gt;
+            &lt;p class="stock"&gt;Stock: &lt;?php echo $produit['stock']; ?&gt;&lt;/p&gt;
+            
+            &lt;!-- FORMULAIRE D'AJOUT AU PANIER --&gt;
+            &lt;form action="ajouter_panier.php" method="POST"&gt;
+                &lt;input type="hidden" name="id_produit" value="&lt;?php echo $produit['id']; ?&gt;"&gt;
+                &lt;label&gt;Quantité: &lt;/label&gt;
+                &lt;input type="number" name="quantite" value="1" min="1" max="&lt;?php echo $produit['stock']; ?&gt;"&gt;
+                &lt;button type="submit"&gt;Ajouter au panier&lt;/button&gt;
+            &lt;/form&gt;
+        &lt;/div&gt;
+    &lt;?php endforeach; ?&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+          </div>
+        </div>
+        <div id="panier-panier" class="tab-panel">
+          <h2 style="color: var(--php);">🛒 Gestion du Panier</h2>
+          <p><strong style="color: var(--accent);">Description:</strong> Scripts pour ajouter et gérer les articles dans le panier avec persistance via sessions.</p>
+          <h3 style="color: var(--php2);">1. ajouter_panier.php</h3>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">PHP</span>
+            </div>
+            <pre style="color: var(--text);">&lt;?php
+/**
+ * FICHIER: ajouter_panier.php
+ * ROLE: Ajouter un produit au panier
+ */
+
+session_start();
+
+// ============================================
+// VÉRIFICATION DES DONNÉES
+// ============================================
+if (!isset($_POST['id_produit']) || !isset($_POST['quantite'])) {
+    header("Location: catalogue.php");
+    exit();
+}
+
+$id_produit = (int)$_POST['id_produit'];
+$quantite = (int)$_POST['quantite'];
+
+// ============================================
+// INITIALISER LE PANIER SI NÉCESSAIRE
+// ============================================
+if (!isset($_SESSION['panier'])) {
+    $_SESSION['panier'] = [];
+}
+
+// ============================================
+// AJOUTER OU METTRE À JOUR LE PRODUIT
+// ============================================
+if (isset($_SESSION['panier'][$id_produit])) {
+    // Le produit existe déjà, on ajoute la quantité
+    $_SESSION['panier'][$id_produit] += $quantite;
+} else {
+    // Nouveau produit dans le panier
+    $_SESSION['panier'][$id_produit] = $quantite;
+}
+
+// ============================================
+// REDIRECTION VERS LE CATALOGUE
+// ============================================
+header("Location: catalogue.php?message=Produit ajouté au panier");
+exit();
+?&gt;</pre>
+          </div>
+          <h3 style="color: var(--php2);">2. panier.php - Affichage du panier</h3>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">PHP</span>
+            </div>
+            <pre style="color: var(--text);">&lt;?php
+/**
+ * FICHIER: panier.php
+ * ROLE: Afficher et gérer le contenu du panier
+ */
+
+session_start();
+
+// Catalogue des produits (même que catalogue.php)
+$produits = [
+    1 => ["nom" => "Ordinateur Portable", "prix" => 899.99, "stock" => 5],
+    2 => ["nom" => "Souris Gaming", "prix" => 49.99, "stock" => 12],
+    3 => ["nom" => "Clavier Mécanique", "prix" => 129.99, "stock" => 8]
+];
+
+$total = 0;
+?&gt;
+
+&lt;!DOCTYPE html&gt;
+&lt;html lang="fr"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Mon Panier&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;🛒 Mon Panier&lt;/h1&gt;
+    
+    &lt;a href="catalogue.php"&gt;← Continuer mes achats&lt;/a&gt;
+    
+    &lt;?php if (!isset($_SESSION['panier']) || empty($_SESSION['panier'])): ?&gt;
+        &lt;p&gt;Votre panier est vide.&lt;/p&gt;
+    &lt;?php else: ?&gt;
+        &lt;table border="1"&gt;
+            &lt;tr&gt;
+                &lt;th&gt;Produit&lt;/th&gt;
+                &lt;th&gt;Prix unitaire&lt;/th&gt;
+                &lt;th&gt;Quantité&lt;/th&gt;
+                &lt;th&gt;Total&lt;/th&gt;
+                &lt;th&gt;Actions&lt;/th&gt;
+            &lt;/tr&gt;
+            
+            &lt;?php foreach ($_SESSION['panier'] as $id => $quantite): ?&gt;
+                &lt;?php 
+                $produit = $produits[$id];
+                $sous_total = $produit['prix'] * $quantite;
+                $total += $sous_total;
+                ?&gt;
+                
+                &lt;tr&gt;
+                    &lt;td&gt;&lt;?php echo $produit['nom']; ?&gt;&lt;/td&gt;
+                    &lt;td&gt;&lt;?php echo number_format($produit['prix'], 2); ?&gt; €&lt;/td&gt;
+                    &lt;td&gt;&lt;?php echo $quantite; ?&gt;&lt;/td&gt;
+                    &lt;td&gt;&lt;?php echo number_format($sous_total, 2); ?&gt; €&lt;/td&gt;
+                    &lt;td&gt;
+                        &lt;a href="supprimer_panier.php?id=&lt;?php echo $id; ?&gt;"&gt;Supprimer&lt;/a&gt;
+                    &lt;/td&gt;
+                &lt;/tr&gt;
+            &lt;?php endforeach; ?&gt;
+            
+            &lt;tr&gt;
+                &lt;td colspan="3"&gt;&lt;strong&gt;TOTAL&lt;/strong&gt;&lt;/td&gt;
+                &lt;td colspan="2"&gt;&lt;strong&gt;&lt;?php echo number_format($total, 2); ?&gt; €&lt;/strong&gt;&lt;/td&gt;
+            &lt;/tr&gt;
+        &lt;/table&gt;
+        
+        &lt;br&gt;
+        &lt;a href="valider_commande.php"&gt;✅ Valider ma commande&lt;/a&gt;
+    &lt;?php endif; ?&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+          </div>
+        </div>
+        <div id="panier-session" class="tab-panel">
+          <h2 style="color: var(--php);">💾 Utilisation des Sessions</h2>
+          <p><strong style="color: var(--accent);">Description:</strong> Les sessions permettent de conserver les données du panier entre les pages.</p>
+          <h3 style="color: var(--php2);">supprimer_panier.php</h3>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">PHP</span>
+            </div>
+            <pre style="color: var(--text);">&lt;?php
+/**
+ * FICHIER: supprimer_panier.php
+ * ROLE: Supprimer un article du panier
+ */
+
+session_start();
+
+// Vérifier qu'un ID de produit est fourni
+if (!isset($_GET['id'])) {
+    header("Location: panier.php");
+    exit();
+}
+
+$id_supprimer = (int)$_GET['id'];
+
+// Supprimer le produit du panier
+if (isset($_SESSION['panier'][$id_supprimer])) {
+    unset($_SESSION['panier'][$id_supprimer]);
+}
+
+// Redirection vers le panier
+header("Location: panier.php?message=Produit supprimé");
+exit();
+?&gt;</pre>
+          </div>
+          <h3 style="color: var(--php2);">Pourquoi utiliser les sessions ?</h3>
+          <ul style="color: var(--text);">
+            <li><strong>Persistance:</strong> Les données survivent aux rechargements de page</li>
+            <li><strong>Utilisateur unique:</strong> Chaque visiteur a son propre panier</li>
+            <li><strong>Sécurité:</strong> Données stockées côté serveur</li>
+            <li><strong>Expiration:</strong> Automatique après inactivité</li>
+          </ul>
+        </div>
+        <div id="panier-commande" class="tab-panel">
+          <h2 style="color: var(--php);">✅ Validation de Commande</h2>
+          <p><strong style="color: var(--accent);">Description:</strong> Finalisation de la commande avec calcul des frais et confirmation.</p>
+          <h3 style="color: var(--php2);">valider_commande.php</h3>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">PHP</span>
+            </div>
+            <pre style="color: var(--text);">&lt;?php
+/**
+ * FICHIER: valider_commande.php
+ * ROLE: Traiter et confirmer la commande
+ */
+
+session_start();
+
+// Vérifier qu'il y a des articles dans le panier
+if (!isset($_SESSION['panier']) || empty($_SESSION['panier'])) {
+    header("Location: catalogue.php");
+    exit();
+}
+
+// Catalogue des produits
+$produits = [
+    1 => ["nom" => "Ordinateur Portable", "prix" => 899.99],
+    2 => ["nom" => "Souris Gaming", "prix" => 49.99],
+    3 => ["nom" => "Clavier Mécanique", "prix" => 129.99]
+];
+
+// Calcul du total
+$total = 0;
+foreach ($_SESSION['panier'] as $id => $quantite) {
+    $total += $produits[$id]['prix'] * $quantite;
+}
+
+// Frais de port (exemple simple)
+$frais_port = ($total > 500) ? 0 : 9.99;
+$total_final = $total + $frais_port;
+
+// Simuler l'enregistrement de la commande
+$numero_commande = "CMD" . date("YmdHis") . rand(100, 999);
+
+// Vider le panier après validation
+unset($_SESSION['panier']);
+?&gt;
+
+&lt;!DOCTYPE html&gt;
+&lt;html lang="fr"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Commande Validée&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;✅ Commande Validée !&lt;/h1&gt;
+    
+    &lt;p&gt;&lt;strong&gt;Numéro de commande:&lt;/strong&gt; &lt;?php echo $numero_commande; ?&gt;&lt;/p&gt;
+    &lt;p&gt;&lt;strong&gt;Montant total:&lt;/strong&gt; &lt;?php echo number_format($total_final, 2); ?&gt; €&lt;/p&gt;
+    
+    &lt;h2&gt;Détails de votre commande&lt;/h2&gt;
+    &lt;!-- Ici on pourrait afficher le détail des articles commandés --&gt;
+    
+    &lt;p&gt;Un email de confirmation vous a été envoyé.&lt;/p&gt;
+    
+    &lt;a href="catalogue.php"&gt;Continuer mes achats&lt;/a&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+          </div>
+        </div>
+        <div id="panier-exercices" class="tab-panel">
+          <h2 style="color: var(--php);">🎯 Exercices Pratiques</h2>
+          <h3 style="color: var(--php2);">Exercice 1: Ajouter une réduction</h3>
+          <p style="color: var(--text);"><strong>Objectif:</strong> Appliquer une réduction de 10% si le total dépasse 1000€</p>
+          <div class="code-block">
+            <pre style="color: var(--text);">if ($total > 1000) {
+    $reduction = $total * 0.1;
+    $total_final = $total - $reduction;
+    echo "Réduction appliquée: " . number_format($reduction, 2) . " €";
+}</pre>
+          </div>
+          <h3 style="color: var(--php2);">Exercice 2: Vérification du stock</h3>
+          <p style="color: var(--text);"><strong>Objectif:</strong> Empêcher l'ajout au panier si la quantité demandée dépasse le stock disponible</p>
+          <h3 style="color: var(--php2);">Exercice 3: Code promo</h3>
+          <p style="color: var(--text);"><strong>Objectif:</strong> Ajouter un champ pour saisir un code promo (ex: "PROMO10" = -10€)</p>
+          <h3 style="color: var(--php2);">Exercice 4: Historique des commandes</h3>
+          <p style="color: var(--text);"><strong>Objectif:</strong> Sauvegarder les commandes dans un tableau en session pour les afficher dans un historique</p>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ===== TD MYSQL =====
+function showTDMySQL() {
+  const container = document.getElementById('lessonContent');
+  container.innerHTML = `
+    <div class="lesson-card visible">
+      <div class="lesson-header">
+        <div class="lesson-icon">🗄️</div>
+        <div>
+          <h2>TD MySQL - Base de Données</h2>
+          <span class="tag">Avancé</span>
+        </div>
+      </div>
+      <div style="border-bottom:1px solid var(--border)">
+        <div class="tabs" id="mysqlTabs">
+          <button class="tab-btn active" onclick="switchMySQLTab('intro',this)">📋 Intro</button>
+          <button class="tab-btn" onclick="switchMySQLTab('connexion',this)">🔗 Connexion</button>
+          <button class="tab-btn" onclick="switchMySQLTab('select',this)">📖 SELECT</button>
+          <button class="tab-btn" onclick="switchMySQLTab('insert',this)">➕ INSERT</button>
+          <button class="tab-btn" onclick="switchMySQLTab('update',this)">✏️ UPDATE</button>
+          <button class="tab-btn" onclick="switchMySQLTab('delete',this)">🗑️ DELETE</button>
+          <button class="tab-btn" onclick="switchMySQLTab('securite',this)">🔒 Sécurité</button>
+          <button class="tab-btn" onclick="switchMySQLTab('exercices',this)">🎯 Exercices</button>
+        </div>
+      </div>
+      <div class="lesson-body">
+        <div id="mysql-intro" class="tab-panel active">
+          <h1 style="color: var(--php);">🗄️ PHP et Base de Données MySQL</h1>
+          <p><strong style="color: var(--accent);">Niveau:</strong> Avancé</p>
+          <p><strong style="color: var(--accent);">Objectif:</strong> Apprendre à interagir avec une base de données MySQL en PHP</p>
+          <hr style="border-color: var(--border);">
+          <h2 style="color: var(--php);">📊 Qu'est-ce que MySQL ?</h2>
+          <p style="color: var(--text);">MySQL est un système de gestion de base de données relationnelle (SGBDR) très populaire pour les applications web. Il permet de :</p>
+          <ul style="color: var(--text);">
+            <li><strong>Stocker</strong> les données de manière organisée</li>
+            <li><strong>Récupérer</strong> les données avec des requêtes</li>
+            <li><strong>Mettre à jour</strong> les données existantes</li>
+            <li><strong>Supprimer</strong> les données obsolètes</li>
+          </ul>
+          <h2 style="color: var(--php);">📋 Exemple de Base de Données</h2>
+          <p style="color: var(--text);">Nous allons créer une application de gestion d'utilisateurs avec le tableau suivant :</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">SQL</span>
+            </div>
+            <pre style="color: var(--text);">CREATE TABLE utilisateurs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nom VARCHAR(100),
+    email VARCHAR(100),
+    age INT,
+    date_inscription DATETIME
+);
+
+-- Exemples de données:
+INSERT INTO utilisateurs (nom, email, age, date_inscription) VALUES
+('Alice Dupont', 'alice@example.com', 25, NOW()),
+('Bob Martin', 'bob@example.com', 30, NOW()),
+('Charlie Durand', 'charlie@example.com', 28, NOW());</pre>
+          </div>
+        </div>
+        <div id="mysql-connexion" class="tab-panel">
+          <h2 style="color: var(--php);">🔗 Connexion à la Base de Données</h2>
+          <p><strong style="color: var(--accent);">Description:</strong> Créer une connexion persistante et sécurisée à MySQL</p>
+          <h3 style="color: var(--php2);">1. Méthode: Connexion avec MySQLi</h3>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">PHP</span>
+            </div>
+            <pre style="color: var(--text);">&lt;?php
+/**
+ * FICHIER: connexion.php
+ * ROLE: Gérer la connexion à la base de données
+ */
+
+// ============================================
+// PARAMÈTRES DE CONNEXION
+// ============================================
+// À adapter selon votre configuration
+$serveur = "localhost";      // Adresse du serveur MySQL
+$utilisateur = "root";       // Nom d'utilisateur MySQL
+$mot_de_passe = "password";  // Mot de passe MySQL
+$base_de_donnees = "ma_boutique";  // Nom de la BD
+
+// ============================================
+// CONNEXION À LA BASE DE DONNÉES
+// ============================================
+// MySQLi = MySQL Improved
+// Il existe deux approches: orientée objet et procédurale
+// Ici, nous utilisons l'approche procédurale
+
+// mysqli_connect() crée une connexion
+// Les paramètres sont: serveur, utilisateur, mot de passe, base
+$connexion = mysqli_connect($serveur, $utilisateur, $mot_de_passe, $base_de_donnees);
+
+// ============================================
+// VÉRIFICATION DE LA CONNEXION
+// ============================================
+// Si la connexion échoue, mysqli_connect_error() retourne l'erreur
+if (!$connexion) {
+    die("Erreur de connexion: " . mysqli_connect_error());
+    // die() arrête l'exécution du script
+}
+
+echo "Connexion réussie !";
+
+// ============================================
+// FERMER LA CONNEXION (optionnel)
+// ============================================
+// PHP ferme automatiquement la connexion à la fin du script
+// Mais on peut la fermer manuellement si nécessaire
+// mysqli_close($connexion);
+?&gt;</pre>
+          </div>
+          <h3 style="color: var(--php2);">2. Améliorations - Gestion des erreurs</h3>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">PHP</span>
+            </div>
+            <pre style="color: var(--text);">&lt;?php
+/**
+ * FICHIER: connexion_securisee.php
+ * ROLE: Connexion avec gestion d'erreurs améliorée
+ */
+
+// ============================================
+// PARAMÈTRES DE CONNEXION
+// ============================================
+define('DB_HOST', 'localhost');
+define('DB_USER', 'root');
+define('DB_PASS', 'password');
+define('DB_NAME', 'ma_boutique');
+
+// ============================================
+// ÉTABLIR LA CONNEXION
+// ============================================
+try {
+    $connexion = mysqli_connect(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+    
+    // Vérifier la connexion
+    if (!$connexion) {
+        throw new Exception("Erreur de connexion: " . mysqli_connect_error());
+    }
+    
+    // Définir le charset UTF-8
+    mysqli_set_charset($connexion, "utf8mb4");
+    
+} catch (Exception $e) {
+    // Enregistrer l'erreur dans un log
+    error_log($e->getMessage());
+    
+    // Afficher un message générique à l'utilisateur
+    die("Une erreur est survenue. Veuillez réessayer plus tard.");
+}
+?&gt;</pre>
+          </div>
+        </div>
+        <div id="mysql-select" class="tab-panel">
+          <h2 style="color: var(--php);">📖 Récupérer les Données (SELECT)</h2>
+          <p><strong style="color: var(--accent);">Description:</strong> Exécuter des requêtes SELECT pour afficher les données</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">PHP</span>
+            </div>
+            <pre style="color: var(--text);">&lt;?php
+/**
+ * FICHIER: afficher_utilisateurs.php
+ * ROLE: Afficher tous les utilisateurs
+ */
+
+session_start();
+require 'connexion.php';
+
+// ============================================
+// REQUÊTE SQL
+// ============================================
+// SELECT permet de récupérer les données
+$requete = "SELECT id, nom, email, age FROM utilisateurs ORDER BY nom ASC";
+
+// ============================================
+// EXÉCUTER LA REQUÊTE
+// ============================================
+// mysqli_query() exécute la requête
+// Retourne un objet de résultats (ou FALSE en cas d'erreur)
+$resultat = mysqli_query($connexion, $requete);
+
+// ============================================
+// VÉRIFIER LE RÉSULTAT
+// ============================================
+if (!$resultat) {
+    die("Erreur dans la requête: " . mysqli_error($connexion));
+}
+
+// ============================================
+// RÉCUPÉRER LES DONNÉES
+// ============================================
+// mysqli_fetch_assoc() récupère une ligne en tant que tableau associatif
+// On l'utilise dans une boucle while pour parcourir tous les résultats
+
+echo "&lt;table border='1'&gt;";
+echo "&lt;tr&gt;&lt;th&gt;ID&lt;/th&gt;&lt;th&gt;Nom&lt;/th&gt;&lt;th&gt;Email&lt;/th&gt;&lt;th&gt;Âge&lt;/th&gt;&lt;/tr&gt;";
+
+while ($ligne = mysqli_fetch_assoc($resultat)) {
+    // $ligne est un tableau associatif
+    // $ligne['id'], $ligne['nom'], etc.
+    echo "&lt;tr&gt;";
+    echo "&lt;td&gt;" . $ligne['id'] . "&lt;/td&gt;";
+    echo "&lt;td&gt;" . $ligne['nom'] . "&lt;/td&gt;";
+    echo "&lt;td&gt;" . $ligne['email'] . "&lt;/td&gt;";
+    echo "&lt;td&gt;" . $ligne['age'] . "&lt;/td&gt;";
+    echo "&lt;/tr&gt;";
+}
+
+echo "&lt;/table&gt;";
+
+// ============================================
+// LIBÉRER LES RESSOURCES
+// ============================================
+// mysqli_free_result() libère la mémoire utilisée
+mysqli_free_result($resultat);
+?&gt;</pre>
+          </div>
+        </div>
+        <div id="mysql-insert" class="tab-panel">
+          <h2 style="color: var(--php);">➕ Ajouter des Données (INSERT)</h2>
+          <p><strong style="color: var(--accent);">Description:</strong> Insérer de nouveaux enregistrements dans la base de données</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">PHP</span>
+            </div>
+            <pre style="color: var(--text);">&lt;?php
+/**
+ * FICHIER: ajouter_utilisateur.php
+ * ROLE: Ajouter un nouvel utilisateur
+ */
+
+require 'connexion.php';
+
+// ============================================
+// RÉCUPÉRER LES DONNÉES DU FORMULAIRE
+// ============================================
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $nom = $_POST['nom'];
+    $email = $_POST['email'];
+    $age = $_POST['age'];
+    
+    // ============================================
+    // CONSTRUIRE LA REQUÊTE INSERT
+    // ============================================
+    // INSERT permet d'ajouter de nouvelles lignes
+    // VALUES fournit les valeurs à insérer
+    
+    // ATTENTION: Cette approche n'est PAS sécurisée !
+    // Voir la section "Sécurité" pour utiliser les prepared statements
+    $requete = "INSERT INTO utilisateurs (nom, email, age, date_inscription) 
+                VALUES ('$nom', '$email', $age, NOW())";
+    
+    // ============================================
+    // EXÉCUTER LA REQUÊTE
+    // ============================================
+    if (mysqli_query($connexion, $requete)) {
+        // Récupérer l'ID auto-généré
+        $id_nouveau = mysqli_insert_id($connexion);
+        echo "Utilisateur ajouté avec succès ! ID: " . $id_nouveau;
+    } else {
+        echo "Erreur: " . mysqli_error($connexion);
+    }
+}
+?&gt;
+
+&lt;form method="POST"&gt;
+    &lt;label&gt;Nom:&lt;/label&gt;
+    &lt;input type="text" name="nom" required&gt;
+    
+    &lt;label&gt;Email:&lt;/label&gt;
+    &lt;input type="email" name="email" required&gt;
+    
+    &lt;label&gt;Âge:&lt;/label&gt;
+    &lt;input type="number" name="age" required&gt;
+    
+    &lt;button type="submit"&gt;Ajouter&lt;/button&gt;
+&lt;/form&gt;</pre>
+          </div>
+        </div>
+        <div id="mysql-update" class="tab-panel">
+          <h2 style="color: var(--php);">✏️ Modifier les Données (UPDATE)</h2>
+          <p><strong style="color: var(--accent);">Description:</strong> Mettre à jour les enregistrements existants</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">PHP</span>
+            </div>
+            <pre style="color: var(--text);">&lt;?php
+/**
+ * FICHIER: modifier_utilisateur.php
+ * ROLE: Modifier les données d'un utilisateur
+ */
+
+require 'connexion.php';
+
+// ============================================
+// RÉCUPÉRER L'ID À MODIFIER
+// ============================================
+if (!isset($_GET['id'])) {
+    die("Aucun utilisateur spécifié");
+}
+
+$id = (int)$_GET['id'];
+
+// ============================================
+// SI FORMULAIRE SOUMIS
+// ============================================
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $nom = $_POST['nom'];
+    $email = $_POST['email'];
+    $age = $_POST['age'];
+    
+    // UPDATE modifie les données existantes
+    // WHERE spécifie quelle ligne modifier
+    $requete = "UPDATE utilisateurs 
+                SET nom = '$nom', email = '$email', age = $age 
+                WHERE id = $id";
+    
+    if (mysqli_query($connexion, $requete)) {
+        // mysqli_affected_rows() retourne le nombre de lignes modifiées
+        $lignes_modifiees = mysqli_affected_rows($connexion);
+        echo "Utilisateur modifié ! (" . $lignes_modifiees . " ligne(s) modifiée(s))";
+    } else {
+        echo "Erreur: " . mysqli_error($connexion);
+    }
+} else {
+    // ============================================
+    // RÉCUPÉRER LES DONNÉES ACTUELLES
+    // ============================================
+    $requete = "SELECT nom, email, age FROM utilisateurs WHERE id = $id";
+    $resultat = mysqli_query($connexion, $requete);
+    $utilisateur = mysqli_fetch_assoc($resultat);
+    
+    if (!$utilisateur) {
+        die("Utilisateur non trouvé");
+    }
+}
+?&gt;
+
+&lt;form method="POST"&gt;
+    &lt;label&gt;Nom:&lt;/label&gt;
+    &lt;input type="text" name="nom" value="&lt;?php echo $utilisateur['nom']; ?&gt;" required&gt;
+    
+    &lt;label&gt;Email:&lt;/label&gt;
+    &lt;input type="email" name="email" value="&lt;?php echo $utilisateur['email']; ?&gt;" required&gt;
+    
+    &lt;label&gt;Âge:&lt;/label&gt;
+    &lt;input type="number" name="age" value="&lt;?php echo $utilisateur['age']; ?&gt;" required&gt;
+    
+    &lt;button type="submit"&gt;Modifier&lt;/button&gt;
+&lt;/form&gt;</pre>
+          </div>
+        </div>
+        <div id="mysql-delete" class="tab-panel">
+          <h2 style="color: var(--php);">🗑️ Supprimer les Données (DELETE)</h2>
+          <p><strong style="color: var(--accent);">Description:</strong> Supprimer des enregistrements de la base de données</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">PHP</span>
+            </div>
+            <pre style="color: var(--text);">&lt;?php
+/**
+ * FICHIER: supprimer_utilisateur.php
+ * ROLE: Supprimer un utilisateur
+ */
+
+require 'connexion.php';
+
+// ============================================
+// RÉCUPÉRER L'ID À SUPPRIMER
+// ============================================
+if (!isset($_GET['id'])) {
+    die("Aucun utilisateur spécifié");
+}
+
+$id = (int)$_GET['id'];
+
+// ============================================
+// SUPPRIMER L'UTILISATEUR
+// ============================================
+// DELETE supprime les lignes correspondant à la condition WHERE
+// ATTENTION: Sans WHERE, TOUS les enregistrements seraient supprimés !
+
+$requete = "DELETE FROM utilisateurs WHERE id = $id";
+
+if (mysqli_query($connexion, $requete)) {
+    $lignes_supprimees = mysqli_affected_rows($connexion);
+    
+    if ($lignes_supprimees > 0) {
+        echo "Utilisateur supprimé avec succès !";
+        // Rediriger vers la liste
+        header("Location: afficher_utilisateurs.php");
+        exit();
+    } else {
+        echo "Aucun utilisateur trouvé avec cet ID";
+    }
+} else {
+    echo "Erreur: " . mysqli_error($connexion);
+}
+?&gt;</pre>
+          </div>
+        </div>
+        <div id="mysql-securite" class="tab-panel">
+          <h2 style="color: var(--php);">🔒 Sécurité: Injection SQL</h2>
+          <p><strong style="color: var(--accent);">Description:</strong> Protéger votre application contre les injections SQL</p>
+          <h3 style="color: var(--php2);">⚠️ Qu'est-ce qu'une injection SQL ?</h3>
+          <p style="color: var(--text);">Une injection SQL est une attaque où un utilisateur malveillant insère du code SQL dans un formulaire pour modifier le comportement de la requête.</p>
+          <h3 style="color: var(--php2);">Exemple d'attaque vulnérable:</h3>
+          <div class="code-block">
+            <pre style="color: var(--text);">// CODE VULNÉRABLE - NE PAS UTILISER
+$email = $_POST['email'];  // L'utilisateur saisit: admin@test.com' OR '1'='1
+$requete = "SELECT * FROM utilisateurs WHERE email = '$email'";
+// Cela devient: SELECT * FROM utilisateurs WHERE email = 'admin@test.com' OR '1'='1'
+// La condition '1'='1' est toujours vraie, donc on récupère TOUS les utilisateurs !</pre>
+          </div>
+          <h3 style="color: var(--php2);">✅ Solution: Prepared Statements</h3>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">PHP</span>
+            </div>
+            <pre style="color: var(--text);">&lt;?php
+/**
+ * APPROCHE SÉCURISÉE avec Prepared Statements
+ */
+
+require 'connexion.php';
+
+// ============================================
+// RECUPÉRER LES DONNÉES (non sûres à priori)
+// ============================================
+$nom = $_POST['nom'];
+$email = $_POST['email'];
+
+// ============================================
+// PRÉPARER LA REQUÊTE
+// ============================================
+// Les ? sont des "placeholders" (emplacements vides)
+// Les données seront insérées de manière sécurisée
+$requete = $connexion->prepare("INSERT INTO utilisateurs (nom, email) VALUES (?, ?)");
+
+// ============================================
+// BINDER LES PARAMÈTRES
+// ============================================
+// "ss" signifie "string, string" (deux chaînes de caractères)
+// Les types possibles: s (string), i (integer), d (double), b (blob)
+$requete->bind_param("ss", $nom, $email);
+
+// ============================================
+// EXÉCUTER LA REQUÊTE
+// ============================================
+if ($requete->execute()) {
+    echo "Utilisateur ajouté avec sécurité !";
+} else {
+    echo "Erreur: " . $requete->error;
+}
+
+// ============================================
+// FERMER LA DÉCLARATION
+// ============================================
+$requete->close();
+?&gt;</pre>
+          </div>
+          <h3 style="color: var(--php2);">⭐ Bonnes pratiques:</h3>
+          <ul style="color: var(--text);">
+            <li><strong>Toujours utiliser les Prepared Statements</strong> pour les données utilisateur</li>
+            <li><strong>Valider et nettoyer</strong> les données en entrée</li>
+            <li><strong>Ne jamais afficher</strong> les erreurs SQL à l'utilisateur</li>
+            <li><strong>Utiliser des comptes MySQL limités</strong> (pas le compte root)</li>
+            <li><strong>Chiffrer</strong> les mots de passe avec password_hash()</li>
+          </ul>
+        </div>
+        <div id="mysql-exercices" class="tab-panel">
+          <h2 style="color: var(--php);">🎯 Exercices Pratiques</h2>
+          <h3 style="color: var(--php2);">Exercice 1: CRUD Complet</h3>
+          <p style="color: var(--text);"><strong>Objectif:</strong> Créer une application complète d'administration avec <strong>Create, Read, Update, Delete</strong></p>
+          <ol style="color: var(--text);">
+            <li>Créer la table utilisateurs dans MySQL</li>
+            <li>Développer une page pour afficher tous les utilisateurs</li>
+            <li>Créer un formulaire d'ajout de nouvel utilisateur</li>
+            <li>Implémenter la modification d'un utilisateur</li>
+            <li>Ajouter la suppression avec confirmation</li>
+          </ol>
+          <h3 style="color: var(--php2);">Exercice 2: Recherche et Filtrage</h3>
+          <p style="color: var(--text);"><strong>Objectif:</strong> Ajouter une barre de recherche pour filtrer les utilisateurs par nom</p>
+          <div class="code-block">
+            <pre style="color: var(--text);">$recherche = $_GET['q'] ?? '';
+$requete = "SELECT * FROM utilisateurs WHERE nom LIKE '%$recherche%'";</pre>
+          </div>
+          <h3 style="color: var(--php2);">Exercice 3: Pagination</h3>
+          <p style="color: var(--text);"><strong>Objectif:</strong> Afficher les utilisateurs par groupes de 10 au lieu de tout afficher</p>
+          <h3 style="color: var(--php2);">Exercice 4: Statistiques</h3>
+          <p style="color: var(--text);"><strong>Objectif:</strong> Afficher le nombre total d'utilisateurs, l'âge moyen, etc.</p>
+          <div class="code-block">
+            <pre style="color: var(--text);">// Fonctions d'agrégation SQL
+SELECT COUNT(*) as total FROM utilisateurs;
+SELECT AVG(age) as age_moyen FROM utilisateurs;
+SELECT MAX(age) as age_max, MIN(age) as age_min FROM utilisateurs;</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ===== LESSON =====
+function showLesson(idx) {
+  currentLesson = idx;
+  const l = lessons[idx];
+  const container = document.getElementById('lessonContent');
+  const isDone = completed.has(l.id);
+  container.innerHTML = `
+    <div class="lesson-card visible">
+      <div class="lesson-header">
+        <div class="lesson-icon">${l.icon}</div>
+        <div>
+          <h2>${l.title}</h2>
+          <span class="tag">${l.tag}</span>
+        </div>
+      </div>
+      <div style="border-bottom:1px solid var(--border)">
+        <div class="tabs" id="lessonTabs">
+          <button class="tab-btn active" onclick="switchTab('theory',this)">📖 Cours</button>
+          <button class="tab-btn" onclick="switchTab('code',this)">💻 Exemple</button>
+          <button class="tab-btn" onclick="switchTab('sandbox',this)">🧪 Exercice</button>
+          <button class="tab-btn" onclick="switchTab('quiz',this)">❓ Quiz</button>
+        </div>
+      </div>
+      <div class="lesson-body">
+        <div id="panel-theory" class="tab-panel active">${l.content}</div>
+        <div id="panel-code" class="tab-panel">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">PHP</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+            </div>
+            <pre>${l.code}</pre>
+          </div>
+        </div>
+        <div id="panel-sandbox" class="tab-panel">
+          <div class="sandbox-section">
+            <div class="sandbox-header">
+              <span class="sandbox-title">🧪 Éditeur PHP Simulé</span>
+              <button class="run-btn" onclick="runCode()">▶ Exécuter</button>
+            </div>
+            <textarea class="code-editor" id="sandboxCode">${l.sandbox}</textarea>
+            <div class="sandbox-output" id="sandboxOutput">→ Cliquez sur Exécuter pour voir le résultat...</div>
+          </div>
+        </div>
+        <div id="panel-quiz" class="tab-panel">
+          <div class="quiz-section">
+            <div class="quiz-title">🎯 Quiz</div>
+            <div class="quiz-question">${l.quiz.question}</div>
+            <div class="quiz-options" id="quizOptions">
+              ${l.quiz.options.map((o, i) => `<button class="quiz-option" onclick="checkAnswer(${i}, ${l.quiz.correct}, '${escStr(l.quiz.explain)}')">${o}</button>`).join('')}
+            </div>
+            <div class="quiz-feedback" id="quizFeedback"></div>
+          </div>
+        </div>
+        <div class="lesson-nav">
+          <button class="nav-btn" onclick="showLesson(${idx-1})" ${idx===0?'disabled':''}>← Précédent</button>
+          <button class="complete-btn ${isDone?'done-state':''}" onclick="markDone('${l.id}')">
+            ${isDone ? '✓ Complété' : 'Marquer comme complété'}
+          </button>
+          <button class="nav-btn" onclick="showLesson(${idx+1})" ${idx===lessons.length-1?'disabled':''}>Suivant →</button>
+        </div>
+      </div>
+    </div>
+  `;
+  buildSidebar();
+  updateProgress();
+}
+
+function escStr(s){ return s.replace(/'/g,"&#39;"); }
+
+function switchTab(panel, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + panel).classList.add('active');
+  btn.classList.add('active');
+}
+
+function switchTDTab(panel, btn) {
+  document.querySelectorAll('#tdTabs .tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('#tdTabs .tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('td-' + panel).classList.add('active');
+  btn.classList.add('active');
+}
+
+function switchPanierTab(panel, btn) {
+  document.querySelectorAll('#panierTabs .tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('#panierTabs .tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panier-' + panel).classList.add('active');
+  btn.classList.add('active');
+}
+
+function switchMySQLTab(panel, btn) {
+  document.querySelectorAll('#mysqlTabs .tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('#mysqlTabs .tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('mysql-' + panel).classList.add('active');
+  btn.classList.add('active');
+}
+
+function switchM107Tab(panel, btn) {
+  document.querySelectorAll('#m107Tabs .tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('#m107Tabs .tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('m107-' + panel).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ===== QUIZ =====
+function checkAnswer(idx, correct, explain) {
+  const opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(o => o.disabled = true);
+  opts[correct].classList.add('correct');
+  if (idx !== correct) opts[idx].classList.add('wrong');
+  const fb = document.getElementById('quizFeedback');
+  fb.className = 'quiz-feedback show ' + (idx === correct ? 'ok' : 'ko');
+  fb.textContent = idx === correct ? '✓ Correct ! ' + explain : '✗ ' + explain;
+}
+
+// ===== SANDBOX =====
+function runCode() {
+  const code = document.getElementById('sandboxCode').value;
+  const output = document.getElementById('sandboxOutput');
+  output.textContent = '';
+  try {
+    const result = simulatePHP(code);
+    output.textContent = result || '(aucun affichage)';
+  } catch(e) {
+    output.style.color = 'var(--red)';
+    output.textContent = 'Erreur : ' + e.message;
+    output.style.color = 'var(--red)';
+    setTimeout(() => output.style.color = 'var(--green)', 1000);
+  }
+}
+
+function simulatePHP(code) {
+  // Basic PHP simulator
+  let out = '';
+  code = code.replace(/^<\?php\s*/i,'').replace(/\?>\s*$/,'');
+  const lines = code.split('\n');
+  const vars = {
+    '_POST': {}, '_GET': {}, '_SESSION': {}, '_COOKIE': {}, '_SERVER': {REQUEST_METHOD:'POST'},
+    '_ENV': {}, '_REQUEST': {}
+  };
+  const funcs = {};
+
+  function evalExpr(expr) {
+    expr = expr.trim();
+    // string
+    if (/^"(.*)"$/s.test(expr)) return expr.slice(1,-1).replace(/\\n/g,'\n');
+    if (/^'(.*)'$/s.test(expr)) return expr.slice(1,-1);
+    // number
+    if (/^-?\d+(\.\d+)?$/.test(expr)) return parseFloat(expr);
+    // bool
+    if (expr==='true') return true; if (expr==='false') return false; if (expr==='null') return null;
+    // superglobal array: $_POST["key"] or $_SESSION["key"]
+    const sg = expr.match(/^\$(_\w+)\[["'](\w+)["']\]$/);
+    if (sg) { const obj = vars[sg[1]]; return (obj && obj[sg[2]] !== undefined) ? obj[sg[2]] : null; }
+    // variable
+    if (/^\$\w+$/.test(expr)) return vars[expr.slice(1)] ?? null;
+    // concat
+    if (expr.includes(' . ')) {
+      return expr.split(/\s+\.\s+/).map(evalExpr).join('');
+    }
+    // arithmetic
+    const m = expr.match(/^(.+?)\s*([+\-*\/%])\s*(.+)$/);
+    if (m) {
+      const a = evalExpr(m[1]), b = evalExpr(m[3]);
+      if (m[2]==='+') return +a + +b;
+      if (m[2]==='-') return +a - +b;
+      if (m[2]==='*') return +a * +b;
+      if (m[2]==='/') return +a / +b;
+    }
+    // func call
+    const fc = expr.match(/^(\w+)\((.*)?\)$/);
+    if (fc) return callFn(fc[1], fc[2]);
+    return expr;
+  }
+
+  function callFn(name, args) {
+    const a = args ? args.split(',').map(s=>evalExpr(s.trim())) : [];
+    if (name==='strlen') return String(a[0]).length;
+    if (name==='strtoupper') return String(a[0]).toUpperCase();
+    if (name==='strtolower') return String(a[0]).toLowerCase();
+    if (name==='count') return Array.isArray(a[0]) ? a[0].length : 0;
+    if (name==='round') return Math.round(a[0]);
+    if (name==='floor') return Math.floor(a[0]);
+    if (name==='ceil') return Math.ceil(a[0]);
+    if (name==='pow') return Math.pow(a[0],a[1]);
+    if (name==='rand') return Math.floor(Math.random()*(a[1]-a[0]+1))+a[0];
+    if (name==='abs') return Math.abs(a[0]);
+    if (name==='substr') return String(a[0]).substr(a[1],a[2]);
+    if (name==='gettype') { const t=typeof a[0]; return t==='number'?(Number.isInteger(a[0])?'integer':'double'):t==='boolean'?'boolean':'string'; }
+    if (name==='password_hash') return '$2y$10$' + btoa(String(a[0])).substring(0,40);
+    if (name==='password_verify') return btoa(String(a[0])).substring(0,40) === String(a[1]).substring(7,47);
+    if (name==='is_array') return Array.isArray(a[0]);
+    if (name==='implode'||name==='join') return a[1].join(a[0]);
+    if (name==='explode') return String(a[1]).split(a[0]);
+    if (name==='trim') return String(a[0]).trim();
+    if (name==='ltrim') return String(a[0]).trimStart();
+    if (name==='rtrim') return String(a[0]).trimEnd();
+    if (name==='intval') return parseInt(a[0]);
+    if (name==='floatval') return parseFloat(a[0]);
+    if (name==='str_replace') return String(a[2]).replaceAll(a[0],a[1]);
+    if (name==='htmlspecialchars') return String(a[0]).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    if (name==='strip_tags') return String(a[0]).replace(/<[^>]*>/g,'');
+    if (name==='isset') return a[0] !== null && a[0] !== undefined;
+    if (name==='is_null') return a[0] === null;
+    if (name==='is_numeric') return !isNaN(a[0]);
+    if (name==='number_format') return parseFloat(a[0]).toFixed(a[1]||0);
+    if (name==='date') { const d=new Date(a[1]?a[1]*1000:Date.now()); const f=String(a[0]); return f.replace('d',String(d.getDate()).padStart(2,'0')).replace('m',String(d.getMonth()+1).padStart(2,'0')).replace('Y',d.getFullYear()).replace('H',String(d.getHours()).padStart(2,'0')).replace('i',String(d.getMinutes()).padStart(2,'0')).replace('s',String(d.getSeconds()).padStart(2,'0')); }
+    if (name==='time') return Math.floor(Date.now()/1000);
+    if (name==='mktime') return Math.floor(Date.now()/1000);
+    if (name==='filter_var') { const val=String(a[0]); if(a[1]==='FILTER_VALIDATE_EMAIL'||String(a[1]).includes('EMAIL')) return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)?val:false; return val; }
+    if (name==='filter_input') return null; // simulate as null in sandbox
+    if (name==='array_push') { if(Array.isArray(vars[args.split(',')[0].trim().replace('$','')])) vars[args.split(',')[0].trim().replace('$','')].push(a[1]); return null; }
+    if (name==='in_array') return Array.isArray(a[1])&&a[1].includes(a[0]);
+    if (name==='array_key_exists') return a[1]&&a[0] in a[1];
+    if (name==='sort') return null;
+    if (name==='max') return Math.max(...a);
+    if (name==='min') return Math.min(...a);
+    if (name==='define') return null;
+    if (name==='session_start') return null;
+    if (name==='session_destroy') return null;
+    if (name==='unset') return null;
+    if (name==='setcookie') return null;
+    if (name==='header') return null;
+    if (name==='phpinfo') return '(phpinfo simulé)';
+    if (name==='print_r') { out += JSON.stringify(a[0], null, 2) + '\n'; return null; }
+    if (name==='var_dump') { out += typeof a[0] + '(' + JSON.stringify(a[0]) + ')\n'; return null; }
+    if (name==='sprintf') { let s=String(a[0]); for(let i=1;i<a.length;i++) s=s.replace(/%[sd]/,a[i]); return s; }
+    if (name==='ucfirst') return String(a[0]).charAt(0).toUpperCase()+String(a[0]).slice(1);
+    if (name==='strtolower') return String(a[0]).toLowerCase();
+    return '(fn:' + name + ')';
+  }
+
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i].trim();
+    if (!line || line.startsWith('//')) { i++; continue; }
+    // echo
+    if (/^echo\s+(.+);$/.test(line)) {
+      const val = evalExpr(line.match(/^echo\s+(.+);$/)[1]);
+      out += String(val===null?'':val===true?'1':val===false?'':val);
+    }
+    // superglobal array assign: $_POST["key"] = val
+    else if (/^\$(_POST|_GET|_SESSION|_COOKIE|_SERVER)\[/.test(line)) {
+      const m = line.match(/^\$(_\w+)\[["'](\w+)["']\]\s*=\s*(.+);$/);
+      if (m) { if(!vars[m[1]]) vars[m[1]]=[]; vars[m[1]][m[2]] = evalExpr(m[3]); }
+    }
+    // assignment
+    else if (/^\$(\w+)\s*=\s*(.+);$/.test(line)) {
+      const m = line.match(/^\$(\w+)\s*=\s*(.+);$/);
+      vars[m[1]] = evalExpr(m[2]);
+    }
+    // for loop
+    else if (/^for\s*\(/.test(line)) {
+      const hdr = line.match(/for\s*\(\$(\w+)\s*=\s*(-?\d+);\s*\$\w+\s*([<>]=?)\s*(-?\d+);\s*\$\w+(\+\+|--)\)/);
+      if (hdr) {
+        const v=hdr[1], from=parseInt(hdr[2]), op=hdr[3], to=parseInt(hdr[4]), inc=hdr[5]==='++';
+        let body=[]; let depth=1; let j=i+1;
+        while(j<lines.length&&depth>0){ if(lines[j].includes('{'))depth++; if(lines[j].includes('}'))depth--; if(depth>0)body.push(lines[j]); j++; }
+        let ctr=from; let guard=0;
+        while(guard++<500){
+          const cond=(op==='<'&&ctr<to)||(op==='<='&&ctr<=to)||(op==='>'&&ctr>to)||(op==='>='&&ctr>=to);
+          if(!cond)break; vars[v]=ctr;
+          const sub=simulatePHPSub(body.join('\n'),vars,callFn,evalExpr); out+=sub;
+          ctr+=(inc?1:-1);
+        }
+        i=j; continue;
+      }
+    }
+    // foreach
+    else if (/^foreach\s*\(/.test(line)) {
+      const m=line.match(/foreach\s*\(\$(\w+)\s+as\s+\$(\w+)\s*\)/)||line.match(/foreach\s*\(\$(\w+)\s+as\s+\$(\w+)\s*=>\s*\$(\w+)\s*\)/);
+      if(m){
+        const arr=vars[m[1]]||[]; let body=[]; let depth=1; let j=i+1;
+        while(j<lines.length&&depth>0){if(lines[j].includes('{'))depth++;if(lines[j].includes('}'))depth--;if(depth>0)body.push(lines[j]);j++;}
+        for(const item of (Array.isArray(arr)?arr:Object.values(arr))){
+          vars[m[2]]=item; const sub=simulatePHPSub(body.join('\n'),vars,callFn,evalExpr); out+=sub;
+        }
+        i=j; continue;
+      }
+    }
+    i++;
+  }
+  return out;
+}
+
+function simulatePHPSub(code, vars, callFn, evalExpr) {
+  let out = '';
+  for (const line of code.split('\n')) {
+    const l = line.trim();
+    if (!l || l.startsWith('//')) continue;
+    if (/^echo\s+(.+);$/.test(l)) {
+      const val = evalExpr(l.match(/^echo\s+(.+);$/)[1]);
+      out += String(val===null?'':val===true?'1':val===false?'':val);
+    } else if (/^\$(\w+)\s*=\s*(.+);$/.test(l)) {
+      const m=l.match(/^\$(\w+)\s*=\s*(.+);$/); vars[m[1]]=evalExpr(m[2]);
+    }
+  }
+  return out;
+}
+
+// ===== COMPLETE =====
+function markDone(id) {
+  completed.add(id);
+  const btn = document.querySelector('.complete-btn');
+  if(btn){ btn.textContent='✓ Complété'; btn.classList.add('done-state'); }
+  buildSidebar(); updateProgress();
+  if (completed.size === lessons.length) {
+    setTimeout(() => launchConfetti(), 300);
+    setTimeout(() => showCompletionBanner(), 900);
+  }
+}
+
+function showCompletionBanner() {
+  // Mettre en avant le bouton certificat
+  const certBtn = document.getElementById('certNavBtn');
+  certBtn.style.cssText += 'background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#000;font-weight:800;border:none;animation:pulse 1.5s infinite;';
+  certBtn.textContent = '🏆 Certificat prêt !';
+
+  // Bannière en bas de l'écran
+  const existing = document.getElementById('completionBanner');
+  if (existing) existing.remove();
+  const banner = document.createElement('div');
+  banner.id = 'completionBanner';
+  banner.style.cssText = `
+    position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);z-index:9998;
+    background:linear-gradient(135deg,#0f2a1e,#1a3a28);
+    border:1px solid #22d3a0;color:#fff;
+    padding:1.1rem 2rem;border-radius:16px;font-weight:700;font-size:0.95rem;
+    box-shadow:0 8px 40px rgba(34,211,160,0.35),0 0 0 1px rgba(34,211,160,0.2);
+    display:flex;align-items:center;gap:1.2rem;min-width:340px;
+    animation:slideUp 0.5s cubic-bezier(.22,.9,.36,1);
+  `;
+  banner.innerHTML = `
+    <span style="font-size:1.8rem;">🎉</span>
+    <div>
+      <div style="font-size:1rem;font-weight:800;color:#22d3a0;">Félicitations, ${studentPrenom} !</div>
+      <div style="font-size:0.82rem;font-weight:400;color:rgba(200,230,220,0.8);margin-top:2px;">Formation PHP complétée — votre certificat est prêt</div>
+    </div>
+    <button onclick="switchView('cert',document.getElementById('certNavBtn'));document.getElementById('completionBanner').remove();"
+      style="background:#22d3a0;color:#000;border:none;padding:0.5rem 1.1rem;border-radius:8px;
+             cursor:pointer;font-family:'Syne',sans-serif;font-weight:800;font-size:0.82rem;white-space:nowrap;flex-shrink:0;">
+      Voir → 
+    </button>
+    <button onclick="this.parentElement.remove();"
+      style="background:none;border:none;color:rgba(200,230,220,0.5);cursor:pointer;font-size:1.1rem;line-height:1;padding:0 0.2rem;flex-shrink:0;">✕</button>
+  `;
+  document.body.appendChild(banner);
+}
+
+// ===== PROGRESS =====
+function updateProgress() {
+  const pct = Math.round((completed.size/lessons.length)*100);
+  const bar=document.getElementById('mainProgress'); if(bar) bar.style.width=pct+'%';
+  const lbl=document.getElementById('progressLabel'); if(lbl) lbl.textContent=completed.size+' / '+lessons.length+' leçon'+(completed.size>1?'s':'')+' complétée'+(completed.size>1?'s':'')+' — '+pct+'%';
+  const ring=document.getElementById('miniRingFill'); if(ring) ring.style.strokeDashoffset=(2*Math.PI*11)*(1-pct/100);
+  buildCatProgress();
+  const certBtn=document.getElementById('certNavBtn'); if(certBtn) certBtn.style.opacity=completed.size===lessons.length?'1':'0.5';
+}
+
+function buildCatProgress() {
+  const grid=document.getElementById('catProgressGrid'); if(!grid) return;
+  const cats={}; lessons.forEach(l=>{if(!cats[l.category])cats[l.category]={total:0,done:0};cats[l.category].total++;if(completed.has(l.id))cats[l.category].done++;});
+  const colors=['#7c6df8','#f59e0b','#22d3a0','#f87171','#38bdf8','#a78bfa','#fb923c']; let ci=0;
+  grid.innerHTML=Object.entries(cats).map(([cat,data])=>{
+    const p=Math.round((data.done/data.total)*100); const color=colors[ci++%colors.length];
+    return `<div class="cat-progress-card"><div class="cat-progress-name">${cat}</div><div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:${p}%;background:${color}"></div></div><div class="cat-label"><span>${data.done}/${data.total} leçons</span><strong>${p}%</strong></div></div>`;
+  }).join('');
+}
+
+// ===== CERTIFICATE =====
+function renderCertView() {
+  const container=document.getElementById('certContent');
+  const allDone=completed.size===lessons.length;
+  if(!allDone){
+    const pct=Math.round((completed.size/lessons.length)*100);
+    const rem=lessons.length-completed.size;
+    const cats={};
+    lessons.forEach(l=>{if(!cats[l.category])cats[l.category]={total:0,done:0,color:catColor(l.category)};cats[l.category].total++;if(completed.has(l.id))cats[l.category].done++;});
+    const catBars=Object.entries(cats).map(([name,c])=>{
+      const cp=Math.round(c.done/c.total*100);
+      return `<div style="margin-bottom:0.6rem;">
+        <div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:4px;"><span style="color:var(--muted)">${name}</span><span style="color:var(--text);font-weight:700;">${c.done}/${c.total}</span></div>
+        <div style="background:var(--border);border-radius:99px;height:5px;overflow:hidden;">
+          <div style="height:100%;width:${cp}%;background:${c.color};border-radius:99px;transition:width 0.5s;"></div>
+        </div>
+      </div>`;
+    }).join('');
+
+    container.innerHTML=`
+      <div class="cert-locked">
+        <div class="lock-icon">🔒</div>
+        <h3>Certificat verrouillé</h3>
+        <div class="progress-num">${pct}%</div>
+        <p>Il vous reste <strong>${rem} leçon${rem>1?'s':''}</strong> à compléter pour débloquer le certificat de <strong>${studentPrenom} ${studentNom}</strong>.</p>
+        <div style="text-align:left;margin:1.5rem 0 0;">
+          <div style="font-size:0.7rem;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:0.8rem;">Progression par module</div>
+          ${catBars}
+        </div>
+        <button onclick="switchView('learn',document.querySelector('nav button'))" style="margin-top:1rem;background:var(--php);border:none;color:#fff;padding:0.7rem 2rem;border-radius:8px;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem;width:100%;">
+          Reprendre la formation →
+        </button>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML=`
+    <div class="cert-wrapper">
+      <div style="text-align:center;margin-bottom:1.5rem;">
+        <div style="font-size:0.75rem;font-weight:700;letter-spacing:2px;color:var(--green);text-transform:uppercase;margin-bottom:0.4rem;">🎉 Formation complète — Félicitations ${studentPrenom} !</div>
+      </div>
+      <div class="cert-actions">
+        <button class="cert-action-btn" onclick="downloadCert()">⬇ Télécharger PNG</button>
+        <button class="cert-action-btn primary" onclick="printCert()">🖨 Imprimer / Exporter PDF</button>
+      </div>
+      <canvas id="certificateCanvas"></canvas>
+    </div>`;
+  setTimeout(drawCertificate, 120);
+}
+
+function catColor(cat){
+  return {'Introduction':'#7c6df8','Bases du langage':'#f59e0b','Web avec PHP':'#22d3a0','POO':'#f87171','Sécurité':'#60a5fa'}[cat]||'#a78bfa';
+}
+
+function drawCertificate(){
+  const canvas=document.getElementById('certificateCanvas'); if(!canvas)return;
+  const W=1200,H=850; canvas.width=W; canvas.height=H; canvas.style.width='100%';
+  const ctx=canvas.getContext('2d');
+
+  // ── Fond dégradé premium ──
+  const bg=ctx.createLinearGradient(0,0,W,H);
+  bg.addColorStop(0,'#08090f'); bg.addColorStop(0.5,'#0d1022'); bg.addColorStop(1,'#08090f');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+  // ── Grille de points décorative ──
+  ctx.fillStyle='rgba(124,109,248,0.05)';
+  for(let x=30;x<W;x+=45) for(let y=30;y<H;y+=45){
+    ctx.beginPath();ctx.arc(x,y,1.2,0,Math.PI*2);ctx.fill();
+  }
+
+  // ── Halos de lumière ──
+  [[180,180,280,'rgba(124,109,248,0.14)'],[W-180,H-180,240,'rgba(245,158,11,0.10)'],[W/2,H/2,400,'rgba(34,211,160,0.05)']].forEach(([gx,gy,gr,gc])=>{
+    const g=ctx.createRadialGradient(gx,gy,0,gx,gy,gr); g.addColorStop(0,gc);g.addColorStop(1,'transparent');
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(gx,gy,gr,0,Math.PI*2);ctx.fill();
+  });
+
+  // ── Bordures doubles ──
+  const border=(inset,lw,col)=>{ctx.strokeStyle=col;ctx.lineWidth=lw;rrect(ctx,inset,inset,W-inset*2,H-inset*2,16);ctx.stroke();};
+  border(20,3,'#f59e0b'); border(28,1,'rgba(245,158,11,0.28)');
+
+  // ── Coins Art Déco ──
+  [[24,24,40,0],[W-24,24,-40,0],[24,H-24,40,Math.PI],[W-24,H-24,-40,Math.PI]].forEach(([cx,cy,s])=>{
+    ctx.save();ctx.translate(cx,cy);ctx.strokeStyle='#f59e0b';ctx.lineWidth=2.5;
+    ctx.beginPath();ctx.moveTo(Math.sign(s)*Math.abs(s),0);ctx.lineTo(0,0);ctx.lineTo(0,Math.sign(cy<H/2?1:-1)*Math.abs(s));ctx.stroke();
+    ctx.restore();
+  });
+
+  // ── Lignes séparatrices dégradées ──
+  const hline=(y,alpha=0.35)=>{
+    const g=ctx.createLinearGradient(80,y,W-80,y);
+    g.addColorStop(0,'transparent');g.addColorStop(0.3,`rgba(245,158,11,${alpha})`);g.addColorStop(0.7,`rgba(124,109,248,${alpha})`);g.addColorStop(1,'transparent');
+    ctx.strokeStyle=g;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(80,y);ctx.lineTo(W-80,y);ctx.stroke();
+  };
+
+  // ── Badge PHP en haut ──
+  ctx.save();
+  ctx.shadowColor='#7c6df8';ctx.shadowBlur=30;
+  ctx.fillStyle='rgba(124,109,248,0.12)';ctx.strokeStyle='rgba(124,109,248,0.5)';ctx.lineWidth=1.5;
+  rrect(ctx,W/2-72,46,144,42,21);ctx.fill();ctx.stroke();
+  ctx.font='bold 17px "Courier New",monospace';ctx.fillStyle='#a78bfa';ctx.textAlign='center';ctx.fillText('<?php  />', W/2, 74);
+  ctx.restore();
+
+  // ── "CERTIFICAT DE RÉUSSITE" ──
+  ctx.save();
+  ctx.font='900 13px Arial,sans-serif';ctx.fillStyle='#f59e0b';ctx.textAlign='center';ctx.letterSpacing='8px';
+  ctx.fillText('CERTIFICAT  DE  RÉUSSITE',W/2,138);
+  ctx.restore();
+
+  hline(158,0.4);
+
+  // ── Étoiles décoratives ──
+  const star=(x,y,sz,col)=>{ctx.font=sz+'px serif';ctx.fillStyle=col;ctx.textAlign='center';ctx.fillText('★',x,y);};
+  star(W/2-170,155,18,'rgba(245,158,11,0.5)'); star(W/2+170,155,18,'rgba(245,158,11,0.5)');
+
+  // ── "Ce certificat est décerné à" ──
+  ctx.font='italic 19px Georgia,serif';ctx.fillStyle='rgba(160,170,210,0.7)';ctx.textAlign='center';
+  ctx.fillText('Ce certificat est décerné à', W/2, 215);
+
+  // ── NOM en grand ──
+  const fullName = studentPrenom + ' ' + studentNom.toUpperCase();
+  ctx.save();
+  ctx.shadowColor='rgba(245,158,11,0.5)';ctx.shadowBlur=35;
+  const nameGrad=ctx.createLinearGradient(W/2-380,0,W/2+380,0);
+  nameGrad.addColorStop(0,'#f59e0b');nameGrad.addColorStop(0.5,'#ffffff');nameGrad.addColorStop(1,'#f59e0b');
+  ctx.fillStyle=nameGrad;ctx.font='bold 62px Georgia,serif';ctx.textAlign='center';
+  ctx.fillText(fullName,W/2,305);
+  ctx.restore();
+
+  // Soulignement doré du nom
+  const nmW=Math.min(ctx.measureText(fullName).width*0.72,700);
+  const ulG=ctx.createLinearGradient(W/2-nmW/2,0,W/2+nmW/2,0);
+  ulG.addColorStop(0,'transparent');ulG.addColorStop(0.5,'rgba(245,158,11,0.7)');ulG.addColorStop(1,'transparent');
+  ctx.strokeStyle=ulG;ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(W/2-nmW/2,320);ctx.lineTo(W/2+nmW/2,320);ctx.stroke();
+
+  hline(348,0.35);
+
+  // ── Corps du texte ──
+  ctx.font='italic 19px Georgia,serif';ctx.fillStyle='rgba(160,170,210,0.75)';ctx.textAlign='center';
+  ctx.fillText('pour avoir suivi et complété avec succès la formation', W/2, 395);
+
+  ctx.save();
+  ctx.shadowColor='rgba(124,109,248,0.4)';ctx.shadowBlur=18;
+  const titleG=ctx.createLinearGradient(W/2-340,0,W/2+340,0);
+  titleG.addColorStop(0,'#7c6df8');titleG.addColorStop(0.5,'#c4b5fd');titleG.addColorStop(1,'#7c6df8');
+  ctx.fillStyle=titleG;ctx.font='bold 36px Arial,sans-serif';ctx.textAlign='center';
+  ctx.fillText('Développement Web avec PHP', W/2, 445);
+  ctx.restore();
+
+  ctx.font='15px Arial,sans-serif';ctx.fillStyle='rgba(130,140,185,0.7)';ctx.textAlign='center';
+  ctx.fillText('Introduction · Variables & Constantes · Tableaux · Opérateurs · Conditions · Boucles · Fonctions · Formulaires · Cookies · Sessions · POO · Sécurité',W/2,482);
+
+  // ── 3 Badges de stats ──
+  const total=lessons.length; const done=completed.size; const pct=Math.round(done/total*100);
+  const stats=[{icon:'📚',val:String(total),sub:'Leçons complétées'},{icon:'🎯',val:pct+'%',sub:'Taux de réussite'},{icon:'🏆',val:'Expert',sub:'Niveau obtenu'}];
+  stats.forEach((s,si)=>{
+    const bx=[W/2-260,W/2,W/2+260][si], by=555;
+    ctx.save();
+    ctx.fillStyle='rgba(124,109,248,0.08)';ctx.strokeStyle='rgba(124,109,248,0.25)';ctx.lineWidth=1;
+    rrect(ctx,bx-75,by-44,150,88,12);ctx.fill();ctx.stroke();
+    ctx.restore();
+    ctx.font='24px serif';ctx.textAlign='center';ctx.fillText(s.icon,bx,by-14);
+    const vG=ctx.createLinearGradient(bx-30,0,bx+30,0);vG.addColorStop(0,'#7c6df8');vG.addColorStop(1,'#22d3a0');
+    ctx.save();ctx.shadowColor='rgba(124,109,248,0.3)';ctx.shadowBlur=8;ctx.fillStyle=vG;ctx.font='bold 26px Arial,sans-serif';ctx.textAlign='center';ctx.fillText(s.val,bx,by+18);ctx.restore();
+    ctx.font='12px Arial,sans-serif';ctx.fillStyle='rgba(130,140,185,0.7)';ctx.textAlign='center';ctx.fillText(s.sub,bx,by+40);
+  });
+
+  // Séparateurs entre badges
+  [W/2-152,W/2+152].forEach(sx=>{
+    ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(sx,520);ctx.lineTo(sx,640);ctx.stroke();
+  });
+
+  hline(662,0.3);
+
+  // ── Barre de progression ──
+  const barX=120,barY=688,barW=W-240,barH=8;
+  ctx.fillStyle='rgba(255,255,255,0.05)';rrect(ctx,barX,barY,barW,barH,4);ctx.fill();
+  const barG=ctx.createLinearGradient(barX,0,barX+barW,0);barG.addColorStop(0,'#7c6df8');barG.addColorStop(1,'#22d3a0');
+  ctx.fillStyle=barG;rrect(ctx,barX,barY,barW*(pct/100),barH,4);ctx.fill();
+  ctx.font='11px Arial,sans-serif';ctx.fillStyle='rgba(130,140,185,0.5)';
+  ctx.textAlign='left';ctx.fillText(done+'/'+total+' leçons complétées',barX,706);
+  ctx.textAlign='right';ctx.fillText(pct+'% de réussite',barX+barW,706);
+
+  // ── Pied : Date · N° Certificat · Signature ──
+  const dateStr=new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+  const certId='PHP-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*90000)+10000);
+
+  const col3=(x,label,value,valueStyle)=>{
+    ctx.font='11px Arial,sans-serif';ctx.fillStyle='rgba(120,130,170,0.65)';ctx.textAlign='center';ctx.fillText(label,x,740);
+    ctx.font=valueStyle||'bold 16px Arial,sans-serif';ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(value,x,762);
+  };
+  col3(240,'DATE DE DÉLIVRANCE',dateStr);
+  ctx.font='bold 14px "Courier New",monospace';ctx.fillStyle='#7c6df8';ctx.textAlign='center';
+  ctx.font='11px Arial,sans-serif';ctx.fillStyle='rgba(120,130,170,0.65)';ctx.fillText('N° CERTIFICAT',W/2,740);
+  ctx.font='bold 15px "Courier New",monospace';ctx.fillStyle='#a78bfa';ctx.fillText(certId,W/2,762);
+  ctx.font='11px Arial,sans-serif';ctx.fillStyle='rgba(120,130,170,0.65)';ctx.textAlign='center';ctx.fillText('DÉLIVRÉ PAR',W-240,740);
+  ctx.font='italic bold 17px Georgia,serif';ctx.fillStyle='#f59e0b';ctx.fillText('Smartcodai',W-240,762);
+
+  // Séparateurs verticaux bas
+  [W/2-160,W/2+160].forEach(sx=>{ctx.strokeStyle='rgba(255,255,255,0.07)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(sx,728);ctx.lineTo(sx,775);ctx.stroke();});
+
+  // ── Trophée central ──
+  ctx.font='46px serif';ctx.textAlign='center';ctx.fillText('🏆',W/2,824);
+
+  // ── Filigrane légal ──
+  ctx.font='10px Arial,sans-serif';ctx.fillStyle='rgba(100,110,150,0.2)';ctx.textAlign='center';
+  ctx.fillText('Ce certificat atteste de la réussite de la formation PHP complète · Smartcodai · '+new Date().getFullYear(),W/2,840);
+}
+function rrect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
+function downloadCert(){const canvas=document.getElementById('certificateCanvas');const link=document.createElement('a');link.download='certificat-php-'+studentPrenom.toLowerCase()+'-'+studentNom.toLowerCase()+'.png';link.href=canvas.toDataURL('image/png');link.click();}
+function printCert(){window.print();}
+
+// ===== CONFETTI =====
+function launchConfetti(){
+  const colors=['#7c6df8','#f59e0b','#22d3a0','#f87171','#a78bfa','#38bdf8'];
+  for(let i=0;i<90;i++){const el=document.createElement('div');el.className='confetti-piece';el.style.left=Math.random()*100+'vw';el.style.background=colors[Math.floor(Math.random()*colors.length)];el.style.width=(Math.random()*10+5)+'px';el.style.height=(Math.random()*10+5)+'px';el.style.borderRadius=Math.random()>.5?'50%':'2px';el.style.animationDuration=(Math.random()*2.5+1.5)+'s';el.style.animationDelay=(Math.random()*1.2)+'s';document.body.appendChild(el);setTimeout(()=>el.remove(),5000);}
+}
+
+// ===== COPY =====
+function copyCode(btn){const pre=btn.closest('.code-block').querySelector('pre');navigator.clipboard.writeText(pre.innerText).then(()=>{btn.textContent='✓ Copié !';setTimeout(()=>btn.textContent='Copier',2000);});}
+
+// ===== CHEATSHEET =====
+function buildCheat(){document.getElementById('cheatGrid').innerHTML=cheatData.map(c=>`<div class="cheat-card" data-title="${c.title.toLowerCase()}"><div class="cheat-card-head">PHP · ${c.title}</div><pre>${c.code}</pre></div>`).join('');}
+function filterCheat(q){document.querySelectorAll('.cheat-card').forEach(c=>{c.style.display=c.dataset.title.includes(q.toLowerCase())?'':'none';});}
+
+// ===== QUICK QUIZ =====
+function buildQuickQuiz(){
+  document.getElementById('quickQuizContainer').innerHTML=quickQuizzes.map((q,qi)=>`<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.2rem;"><div style="font-size:0.7rem;color:var(--php);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:0.6rem;">Question ${qi+1}</div><div style="font-weight:600;font-size:1rem;margin-bottom:0.8rem;">${q.q}</div><div style="display:grid;gap:0.5rem;" id="qq-${qi}">${q.opts.map((o,oi)=>`<button class="quiz-option" onclick="quickCheck(${qi},${oi},${q.ans})">${o}</button>`).join('')}</div><div class="quiz-feedback" id="qqfb-${qi}"></div></div>`).join('');
+}
+function quickCheck(qi,chosen,correct){const c=document.getElementById('qq-'+qi);c.querySelectorAll('.quiz-option').forEach(b=>b.disabled=true);c.querySelectorAll('.quiz-option')[correct].classList.add('correct');if(chosen!==correct)c.querySelectorAll('.quiz-option')[chosen].classList.add('wrong');const fb=document.getElementById('qqfb-'+qi);fb.className='quiz-feedback show '+(chosen===correct?'ok':'ko');fb.textContent=chosen===correct?'✓ Bonne réponse !':'✗ Ce n\'est pas la bonne réponse.';}
+
+// ===== NAV =====
+function switchView(view,btn){
+  ['learn','cheat','quiz-all','cert'].forEach(v=>{const el=document.getElementById('view-'+v);if(el)el.style.display=v===view?'':'none';});
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  if(view==='cert') renderCertView();
+}
+</script>
+</body>
+</html>

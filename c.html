@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cours Interactif - Développement Web Dynamique PHP</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --secondary: #7c3aed;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1e293b;
+            --light: #f8fafc;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--dark);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            padding: 40px 20px;
+            animation: fadeInDown 1s ease;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--success), var(--primary));
+            z-index: 1000;
+            transition: width 0.3s ease;
+        }
+
+        .parts-grid {
+            display: grid;
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .part-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transform: translateY(50px);
+            opacity: 0;
+            animation: slideUp 0.6s ease forwards;
+        }
+
+        .part-card:nth-child(1) { animation-delay: 0.1s; }
+        .part-card:nth-child(2) { animation-delay: 0.2s; }
+        .part-card:nth-child(3) { animation-delay: 0.3s; }
+        .part-card:nth-child(4) { animation-delay: 0.4s; }
+
+        .part-header {
+            padding: 30px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .part-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        .part-1 .part-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .part-2 .part-header { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .part-3 .part-header { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .part-4 .part-header { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+
+        .part-number {
+            font-size: 4rem;
+            font-weight: bold;
+            opacity: 0.3;
+            position: absolute;
+            top: 10px;
+            right: 30px;
+        }
+
+        .part-title {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .part-duration {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .part-content {
+            padding: 30px;
+        }
+
+        .chapters-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .chapter-item {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            position: relative;
+        }
+
+        .chapter-item:hover {
+            transform: translateX(10px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .part-1 .chapter-item:hover { border-left-color: #667eea; }
+        .part-2 .chapter-item:hover { border-left-color: #f5576c; }
+        .part-3 .chapter-item:hover { border-left-color: #00f2fe; }
+        .part-4 .chapter-item:hover { border-left-color: #43e97b; }
+
+        .chapter-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chapter-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .part-1 .chapter-icon { background: #667eea; }
+        .part-2 .chapter-icon { background: #f5576c; }
+        .part-3 .chapter-icon { background: #00f2fe; }
+        .part-4 .chapter-icon { background: #43e97b; }
+
+        .chapter-topics {
+            font-size: 0.9rem;
+            color: #64748b;
+            padding-left: 40px;
+        }
+
+        .interactive-zone {
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 12px;
+            border: 2px dashed #cbd5e1;
+        }
+
+        .quiz-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quiz-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: scaleIn 0.3s ease;
+        }
+
+        .modal-header {
+            padding: 30px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .question {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: var(--light);
+            border-radius: 12px;
+        }
+
+        .question-text {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option {
+            padding: 15px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option:hover {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .option.correct {
+            border-color: var(--success);
+            background: #d1fae5;
+        }
+
+        .option.wrong {
+            border-color: var(--danger);
+            background: #fee2e2;
+        }
+
+        .key-points {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .key-point {
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .key-point-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .part-1 .key-point-icon { background: #ede9fe; color: #667eea; }
+        .part-2 .key-point-icon { background: #fce7f3; color: #f5576c; }
+        .part-3 .key-point-icon { background: #cffafe; color: #00f2fe; }
+        .part-4 .key-point-icon { background: #d1fae5; color: #43e97b; }
+
+        .code-snippet {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            position: relative;
+        }
+
+        .code-snippet::before {
+            content: 'PHP';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 0.7rem;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist li {
+            padding: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checklist li::before {
+            content: '✓';
+            width: 24px;
+            height: 24px;
+            background: var(--success);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.8rem; }
+            .part-title { font-size: 1.4rem; }
+            .stats-bar { flex-direction: column; gap: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progressBar"></div>
+    
+    <div class="container">
+        <header>
+            <h1>🚀 Développement Web Dynamique</h1>
+            <p>Parcours interactif complet - PHP & Architecture MVC</p>
+        </header>
+
+        <div class="stats-bar">
+            <div class="stat">
+                <div class="stat-value">4</div>
+                <div class="stat-label">Parties</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">77h</div>
+                <div class="stat-label">Formation</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">12+</div>
+                <div class="stat-label">Chapitres</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">∞</div>
+                <div class="stat-label">Possibilités</div>
+            </div>
+        </div>
+
+        <div class="parts-grid">
+            <!-- PARTIE 1 -->
+            <div class="part-card part-1">
+                <div class="part-header">
+                    <div class="part-number">01</div>
+                    <h2 class="part-title">Introduction Client/Serveur</h2>
+                    <span class="part-duration">⏱️ 12 heures</span>
+                </div>
+                <div class="part-content">
+                    <div class="key-points">
+                        <div class="key-point">
+                            <div class="key-point-icon">🌐</div>
+                            <div>
+                                <strong>Architecture Client/Serveur</strong>
+                                <p style="font-size: 0.9rem; color: #64748b;">Comprendre le modèle de communication entre machines</p>
+                            </div>
+                        </div>
+                        <div class="key-point">
+                            <div class="key-point-icon">🔧</div>
+                            <div>
+                                <strong>Environnement PHP</strong>
+                                <p style="font-size: 0.9rem; color: #64748b;">Installation Apache, MySQL, VS Code</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chapters-list" style="margin-top: 25px;">
+                        <div class="chapter-item" onclick="openModal('modal1-1')">
+                            <div class="chapter-title">
+                                <div class="chapter-icon">1</div>
+                                <span>Architecture Client/Serveur</span>
+                            </div>
+                            <div class="chapter-topics">
+                                Principes 2-tiers, 3-tiers, types de serveurs web, middleware
+                            </div>
+                        </div>
+                        <div class="chapter-item" onclick="openModal('modal1-2')">
+                            <div class="chapter-title">
+                                <div class="chapter-icon">2</div>
+                                <span>Introduction au PHP</span>
+                            </div>
+                            <div class="chapter-topics">
+                                Historique, syntaxe, types de données, configuration
+                            </div>
+                        </div>
+                        <div class="chapter-item" onclick="openModal('modal1-3')">
+                            <div class="chapter-title">
+                                <div class="chapter-icon">3</div>
+                                <span>Environnement de Développement</span>
+                            </div>
+                            <div class="chapter-topics">
+                                Apache vs Nginx, installation, configuration, VS Code
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="interactive-zone">
+                        <h3 style="margin-bottom: 15px;">🎯 Testez vos connaissances</h3>
+                        <button class="quiz-btn" onclick="openQuiz(1)">
+                            <span>▶</span> Lancer le Quiz Partie 1
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PARTIE 2 -->
+            <div class="part-card part-2">
+                <div class="part-header">
+                    <div class="part-number">02</div>
+                    <h2 class="part-title">Programmer en PHP</h2>
+                    <span class="part-duration">⏱️ 48 heures</span>
+                </div>
+                <div class="part-content">
+                    <div class="key-points">
+                        <div class="key-point">
+                            <div class="key-point-icon">💻</div>
+                            <div>
+                                <strong>Langage PHP Avancé</strong>
+                                <p style="font-size: 0.9rem; color: #64748b;">Variables, tableaux, fichiers, flux de contrôle</p>
+                            </div>
+                        </div>
+                        <div class="key-point">
+                            <div class="key-point-icon">🎨</div>
+                            <div>
+                                <strong>Programmation Orientée Objet</strong>
+                                <p style="font-size: 0.9rem; color: #64748b;">Classes, objets, méthodes magiques, encapsulation</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chapters-list" style="margin-top: 25px;">
+                        <div class="chapter-item" onclick="openModal('modal2-1')">
+                            <div class="chapter-title">
+                                <div class="chapter-icon">1</div>
+                                <span>Maîtriser le Langage PHP</span>
+                            </div>
+                            <div class="chapter-topics">
+                                Syntaxe, variables, constantes, types, boucles, formulaires, fonctions
+                            </div>
+                        </div>
+                        <div class="chapter-item" onclick="openModal('modal2-2')">
+                            <div class="chapter-title">
+                                <div class="chapter-icon">2</div>
+                                <span>Traiter les Données</span>
+                            </div>
+                            <div class="chapter-topics">
+                                Tableaux indexés/associatifs, manipulation de fichiers
+                            </div>
+                        </div>
+                        <div class="chapter-item" onclick="openModal('modal2-3')">
+                            <div class="chapter-title">
+                                <div class="chapter-icon">3</div>
+                                <span>Programmation Orientée Objet</span>
+                            </div>
+                            <div class="chapter-topics">
+                                Classes, héritage, encapsulation, méthodes magiques (__construct, __get, __set...)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="interactive-zone">
+                        <h3 style="margin-bottom: 15px;">🎯 Testez vos connaissances</h3>
+                        <button class="quiz-btn" onclick="openQuiz(2)" style="background: #f5576c;">
+                            <span>▶</span> Lancer le Quiz Partie 2
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PARTIE 3 -->
+            <div class="part-card part-3">
+                <div class="part-header">
+                    <div class="part-number">03</div>
+                    <h2 class="part-title">Manipuler les Données</h2>
+                    <span class="part-duration">⏱️ 36 heures</span>
+                </div>
+                <div class="part-content">
+                    <div class="key-points">
+                        <div class="key-point">
+                            <div class="key-point-icon">🗄️</div>
+                            <div>
+                                <strong>Bases de Données MySQL</strong>
+                                <p style="font-size: 0.9rem; color: #64748b;">PDO, CRUD, requêtes préparées</p>
+                            </div>
+                        </div>
+                        <div class="key-point">
+                            <div class="key-point-icon">🔒</div>
+                            <div>
+                                <strong>Sécurité Web</strong>
+                                <p style="font-size: 0.9rem; color: #64748b;">Sessions, cookies, injection SQL, XSS</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chapters-list" style="margin-top: 25px;">
+                        <div class="chapter-item" onclick="openModal('modal3-1')">
+                            <div class="chapter-title">
+                                <div class="chapter-icon">1</div>
+                                <span>Scripts d'Accès aux Données</span>
+                            </div>
+                            <div class="chapter-topics">
+                                Connexion PDO, CRUD, formulaires, récupération de résultats
+                            </div>
+                        </div>
+                        <div class="chapter-item" onclick="openModal('modal3-2')">
+                            <div class="chapter-title">
+                                <div class="chapter-icon">2</div>
+                                <span>Sécuriser les Données</span>
+                            </div>
+                            <div class="chapter-topics">
+                                Sessions, cookies, configurations sécurisées, attaques courantes
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="interactive-zone">
+                        <h3 style="margin-bottom: 15px;">🎯 Testez vos connaissances</h3>
+                        <button class="quiz-btn" onclick="openQuiz(3)" style="background: #00f2fe; color: #1e293b;">
+                            <span>▶</span> Lancer le Quiz Partie 3
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PARTIE 4 -->
+            <div class="part-card part-4">
+                <div class="part-header">
+                    <div class="part-number">04</div>
+                    <h2 class="part-title">Architecture MVC & Web Services</h2>
+                    <span class="part-duration">⏱️ 24 heures</span>
+                </div>
+                <div class="part-content">
+                    <div class="key-points">
+                        <div class="key-point">
+                            <div class="key-point-icon">🏗️</div>
+                            <div>
+                                <strong>Pattern MVC</strong>
+                                <p style="font-size: 0.9rem; color: #64748b;">Modèle-Vue-Contrôleur en PHP natif</p>
+                            </div>
+                        </div>
+                        <div class="key-point">
+                            <div class="key-point-icon">🌐</div>
+                            <div>
+                                <strong>APIs & Web Services</strong>
+                                <p style="font-size: 0.9rem; color: #64748b;">SOAP, REST API, JSON, XML</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chapters-list" style="margin-top: 25px;">
+                        <div class="chapter-item" onclick="openModal('modal4-1')">
+                            <div class="chapter-title">
+                                <div class="chapter-icon">1</div>
+                                <span>Développer en MVC Natif</span>
+                            </div>
+                            <div class="chapter-topics">
+                                Structure MVC, création des composants, frameworks (Laravel, Symfony)
+                            </div>
+                        </div>
+                        <div class="chapter-item" onclick="openModal('modal4-2')">
+                            <div class="chapter-title">
+                                <div class="chapter-icon">2</div>
+                                <span>Web Services & API REST</span>
+                            </div>
+                            <div class="chapter-topics">
+                                SOAP, WSDL, RESTful API, méthodes HTTP, création d'API
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="interactive-zone">
+                        <h3 style="margin-bottom: 15px;">🎯 Testez vos connaissances</h3>
+                        <button class="quiz-btn" onclick="openQuiz(4)" style="background: #43e97b; color: #1e293b;">
+                            <span>▶</span> Lancer le Quiz Partie 4
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALS POUR LES DÉTAILS DE CHAPITRES -->
+    
+    <!-- Modal 1-1: Architecture Client/Serveur -->
+    <div class="modal" id="modal1-1">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Architecture Client/Serveur</h2>
+                <button class="close-btn" onclick="closeModal('modal1-1')">×</button>
+            </div>
+            <div class="modal-body">
+                <h3>🎯 Objectifs d'apprentissage</h3>
+                <ul class="checklist">
+                    <li>Identifier les différents types de serveurs web</li>
+                    <li>Comprendre l'architecture client/serveur</li>
+                    <li>Maîtriser les architectures 2-tiers et 3-tiers</li>
+                    <li>Connaître le rôle du middleware</li>
+                </ul>
+
+                <h3 style="margin-top: 25px;">💡 Concepts Clés</h3>
+                <div class="code-snippet">
+// Architecture 2-tiers : Client ↔ Serveur
+Client (Présentation) → Serveur (Données)
+
+// Architecture 3-tiers : Séparation des responsabilités
+Client (Présentation) → Serveur d'application (Traitement) → SGBD (Données)</div>
+
+                <h3 style="margin-top: 25px;">📊 Comparaison Architectures</h3>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                    <tr style="background: #f1f5f9;">
+                        <th style="padding: 12px; text-align: left; border: 1px solid #e2e8f0;">Critère</th>
+                        <th style="padding: 12px; text-align: left; border: 1px solid #e2e8f0;">2-tiers</th>
+                        <th style="padding: 12px; text-align: left; border: 1px solid #e2e8f0;">3-tiers</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Sécurité</td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Faible</td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Élevée</td>
+                    </tr>
+                    <tr style="background: #f8fafc;">
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Performance</td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Faible (trafic réseau)</td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Bonne</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Évolutivité</td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Limitée</td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Excellente</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 1-2: Introduction PHP -->
+    <div class="modal" id="modal1-2">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Introduction au Langage PHP</h2>
+                <button class="close-btn" onclick="closeModal('modal1-2')">×</button>
+            </div>
+            <div class="modal-body">
+                <h3>📜 Historique de PHP</h3>
+                <p style="margin-bottom: 15px;">PHP (Hypertext Preprocessor) a été créé en 1994 par Rasmus Lerdorf. Évolution majeure :</p>
+                <ul style="margin-left: 20px; line-height: 2;">
+                    <li><strong>1995</strong> : PHP/FI 2.0 - Première version publique</li>
+                    <li><strong>1998</strong> : PHP 3.0 - Réécriture complète</li>
+                    <li><strong>2000</strong> : PHP 4.0 - Performance améliorée</li>
+                    <li><strong>2004</strong> : PHP 5.0 - POO complète</li>
+                    <li><strong>2015</strong> : PHP 7.0 - Performance x2</li>
+                    <li><strong>2020</strong> : PHP 8.0 - JIT, Attributes, Union Types</li>
+                </ul>
+
+                <h3 style="margin-top: 25px;">🚀 Points Forts de PHP</h3>
+                <div class="code-snippet">
+&lt;?php
+// PHP est un langage côté serveur
+// Le code est exécuté sur le serveur, pas sur le navigateur
+
+// Syntaxe de base
+echo "Hello World!";
+$name = "Étudiant";
+echo "Bonjour $name";
+
+// Types de données
+$entier = 42;           // int
+$decimal = 3.14;        // float
+$texte = "Chaîne";      // string
+$booleen = true;        // bool
+$tableau = [1, 2, 3];   // array
+?&gt;</div>
+
+                <h3 style="margin-top: 25px;">🔧 Configuration Requise</h3>
+                <ul class="checklist">
+                    <li>Serveur Web (Apache/Nginx)</li>
+                    <li>PHP 7.4+ recommandé (8.0+ idéal)</li>
+                    <li>Extension MySQL/PDO</li>
+                    <li>Éditeur de code (VS Code recommandé)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 1-3: Environnement -->
+    <div class="modal" id="modal1-3">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Environnement de Développement</h2>
+                <button class="close-btn" onclick="closeModal('modal1-3')">×</button>
+            </div>
+            <div class="modal-body">
+                <h3>🔧 Installation Apache</h3>
+                <div class="code-snippet">
+# Installation comme service Windows
+httpd.exe -k install
+
+# Démarrer le service
+httpd.exe -k start
+
+# Redémarrer
+httpd.exe -k restart</div>
+
+                <h3 style="margin-top: 25px;">⚖️ Apache vs Nginx</h3>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                    <tr style="background: #f1f5f9;">
+                        <th style="padding: 12px; text-align: left; border: 1px solid #e2e8f0;">Critère</th>
+                        <th style="padding: 12px; text-align: left; border: 1px solid #e2e8f0;">Apache</th>
+                        <th style="padding: 12px; text-align: left; border: 1px solid #e2e8f0;">Nginx</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Architecture</td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Multi-thread</td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Event-driven</td>
+                    </tr>
+                    <tr style="background: #f8fafc;">
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Contenu statique</td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Bon</td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Excellent</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Configuration</td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Simple (.htaccess)</td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Plus complexe</td>
+                    </tr>
+                </table>
+
+                <h3 style="margin-top: 25px;">💻 Extensions VS Code Recommandées</h3>
+                <ul class="checklist">
+                    <li>PHP Intelephense (autocomplétion)</li>
+                    <li>PHP Debug (débogage)</li>
+                    <li>PHP Formatter (formatage)</li>
+                    <li>PHP DocBlocker (documentation)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2-1: Maîtriser PHP -->
+    <div class="modal" id="modal2-1">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Maîtriser le Langage PHP</h2>
+                <button class="close-btn" onclick="closeModal('modal2-1')">×</button>
+            </div>
+            <div class="modal-body">
+                <h3>📦 Variables et Types</h3>
+                <div class="code-snippet">
+&lt;?php
+// Variables dynamiques
+$var = "Hello";
+$$var = "World";  // $Hello = "World"
+echo "$var ${$var}";  // Hello World
+
+// Portée des variables
+$global = "Je suis globale";
+
+function test() {
+    global $global;  // Accès à la variable globale
+    echo $global;
+}
+
+// Variables statiques
+function compteur() {
+    static $count = 0;
+    return ++$count;
+}</div>
+
+                <h3 style="margin-top: 25px;">🔄 Structures de Contrôle</h3>
+                <div class="code-snippet">
+// Syntaxe alternative (templates)
+<?php if ($condition): ?>
+    <p>Condition vraie</p>
+<?php elseif ($autre): ?>
+    <p>Autre condition</p>
+<?php else: ?>
+    <p>Sinon</p>
+<?php endif; ?>
+
+// Match (PHP 8+)
+$result = match($status) {
+    200 => 'OK',
+    404 => 'Not Found',
+    default => 'Unknown'
+};</div>
+
+                <h3 style="margin-top: 25px;">📝 Formulaires et Transmission</h3>
+                <div class="code-snippet">
+// Méthode GET - visible dans l'URL
+// page.php?nom=John&age=25
+$nom = $_GET['nom'];
+
+// Méthode POST - données cachées
+$email = $_POST['email'];
+
+// Variables d'environnement
+$ip = $_SERVER['REMOTE_ADDR'];
+$method = $_SERVER['REQUEST_METHOD'];
+
+// Redirection
+header("Location: page.php");
+exit();</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2-2: Traiter les Données -->
+    <div class="modal" id="modal2-2">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Traiter les Données en PHP</h2>
+                <button class="close-btn" onclick="closeModal('modal2-2')">×</button>
+            </div>
+            <div class="modal-body">
+                <h3>📚 Tableaux</h3>
+                <div class="code-snippet">
+// Tableau indexé
+$fruits = ["pomme", "banane", "orange"];
+echo $fruits[0];  // pomme
+
+// Tableau associatif
+$personne = [
+    "nom" => "Dupont",
+    "age" => 25,
+    "ville" => "Paris"
+];
+echo $personne["nom"];  // Dupont
+
+// Fonctions utiles
+array_push($fruits, "kiwi");        // Ajouter
+array_pop($fruits);                  // Retirer dernier
+count($fruits);                      // Compter
+in_array("pomme", $fruits);          // Rechercher
+array_merge($tab1, $tab2);           // Fusionner</div>
+
+                <h3 style="margin-top: 25px;">📁 Manipulation de Fichiers</h3>
+                <div class="code-snippet">
+// Ouvrir un fichier
+$fichier = fopen("data.txt", "r");  // r: lecture, w: écriture, a: ajout
+
+// Lire ligne par ligne
+while ($ligne = fgets($fichier)) {
+    echo $ligne;
+}
+
+// Écrire
+fwrite($fichier, "Nouveau contenu");
+
+// Fermer
+fclose($fichier);
+
+// Méthode simple
+$contenu = file_get_contents("file.txt");
+file_put_contents("file.txt", "Contenu");</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2-3: POO -->
+    <div class="modal" id="modal2-3">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Programmation Orientée Objet</h2>
+                <button class="close-btn" onclick="closeModal('modal2-3')">×</button>
+            </div>
+            <div class="modal-body">
+                <h3>🏗️ Classes et Objets</h3>
+                <div class="code-snippet">
+&lt;?php
+class Voiture {
+    // Attributs privés (encapsulation)
+    private string $marque;
+    private int $vitesse = 0;
+    
+    // Constructeur
+    public function __construct(string $marque) {
+        $this->marque = $marque;
+    }
+    
+    // Méthodes publiques
+    public function accelerer(int $increment): void {
+        $this->vitesse += $increment;
+    }
+    
+    // Getter
+    public function getVitesse(): int {
+        return $this->vitesse;
+    }
+}
+
+// Utilisation
+$maVoiture = new Voiture("Toyota");
+$maVoiture->accelerer(50);
+echo $maVoiture->getVitesse();  // 50</div>
+
+                <h3 style="margin-top: 25px;">✨ Méthodes Magiques</h3>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                    <tr style="background: #f1f5f9;">
+                        <th style="padding: 12px; text-align: left; border: 1px solid #e2e8f0;">Méthode</th>
+                        <th style="padding: 12px; text-align: left; border: 1px solid #e2e8f0;">Description</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;"><code>__construct()</code></td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Constructeur - appelé à la création</td>
+                    </tr>
+                    <tr style="background: #f8fafc;">
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;"><code>__destruct()</code></td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Destructeur - appelé à la destruction</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;"><code>__get($name)</code></td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Accès à propriété inexistante</td>
+                    </tr>
+                    <tr style="background: #f8fafc;">
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;"><code>__set($name, $value)</code></td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Modification propriété inexistante</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;"><code>__toString()</code></td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Conversion en chaîne</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3-1: Accès aux Données -->
+    <div class="modal" id="modal3-1">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Scripts d'Accès aux Données</h2>
+                <button class="close-btn" onclick="closeModal('modal3-1')">×</button>
+            </div>
+            <div class="modal-body">
+                <h3>🔗 Connexion PDO</h3>
+                <div class="code-snippet">
+&lt;?php
+// Paramètres de connexion
+$host = 'localhost';
+$dbname = 'ma_base';
+$username = 'root';
+$password = '';
+
+try {
+    $pdo = new PDO(
+        "mysql:host=$host;dbname=$dbname;charset=utf8",
+        $username,
+        $password,
+        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+    );
+    echo "Connexion réussie !";
+} catch (PDOException $e) {
+    die("Erreur : " . $e->getMessage());
+}</div>
+
+                <h3 style="margin-top: 25px;">📝 Opérations CRUD</h3>
+                <div class="code-snippet">
+// CREATE - Insertion
+$sql = "INSERT INTO users (nom, email) VALUES (:nom, :email)";
+$stmt = $pdo->prepare($sql);
+$stmt->execute(['nom' => 'John', 'email' => 'john@example.com']);
+
+// READ - Lecture
+$stmt = $pdo->query("SELECT * FROM users");
+$users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// UPDATE - Mise à jour
+$sql = "UPDATE users SET email = :email WHERE id = :id";
+$stmt = $pdo->prepare($sql);
+$stmt->execute(['email' => 'new@example.com', 'id' => 1]);
+
+// DELETE - Suppression
+$sql = "DELETE FROM users WHERE id = :id";
+$stmt = $pdo->prepare($sql);
+$stmt->execute(['id' => 1]);</div>
+
+                <h3 style="margin-top: 25px;">🛡️ Requêtes Préparées</h3>
+                <p>Protection contre les injections SQL :</p>
+                <div class="code-snippet">
+// ❌ DANGEREUX - Injection SQL possible
+$pdo->query("SELECT * FROM users WHERE id = $id");
+
+// ✅ SÉCURISÉ - Requête préparée
+$stmt = $pdo->prepare("SELECT * FROM users WHERE id = :id");
+$stmt->execute(['id' => $id]);
+$user = $stmt->fetch();</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3-2: Sécurité -->
+    <div class="modal" id="modal3-2">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Sécuriser les Données</h2>
+                <button class="close-btn" onclick="closeModal('modal3-2')">×</button>
+            </div>
+            <div class="modal-body">
+                <h3>🍪 Cookies</h3>
+                <div class="code-snippet">
+// Créer un cookie sécurisé
+setcookie(
+    "user_id",           // Nom
+    "12345",             // Valeur
+    time() + 3600,       // Expiration (1h)
+    "/",                 // Path
+    "",                  // Domain
+    true,                // Secure (HTTPS uniquement)
+    true                 // HttpOnly (pas d'accès JS)
+);
+
+// Lire un cookie
+$userId = $_COOKIE['user_id'] ?? null;</div>
+
+                <h3 style="margin-top: 25px;">🔐 Sessions</h3>
+                <div class="code-snippet">
+// Démarrer une session
+session_start();
+
+// Stocker des données
+$_SESSION['user_id'] = 123;
+$_SESSION['username'] = 'JohnDoe';
+
+// Vérifier si connecté
+if (isset($_SESSION['user_id'])) {
+    echo "Bienvenue " . $_SESSION['username'];
+}
+
+// Détruire la session
+session_destroy();</div>
+
+                <h3 style="margin-top: 25px;">⚠️ Attaques Courantes & Protection</h3>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                    <tr style="background: #f1f5f9;">
+                        <th style="padding: 12px; text-align: left; border: 1px solid #e2e8f0;">Attaque</th>
+                        <th style="padding: 12px; text-align: left; border: 1px solid #e2e8f0;">Protection</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Injection SQL</td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Requêtes préparées PDO</td>
+                    </tr>
+                    <tr style="background: #f8fafc;">
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">XSS</td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">htmlspecialchars()</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">CSRF</td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Tokens de session</td>
+                    </tr>
+                    <tr style="background: #f8fafc;">
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Session Hijacking</td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">session_regenerate_id()</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 4-1: MVC -->
+    <div class="modal" id="modal4-1">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Architecture MVC</h2>
+                <button class="close-btn" onclick="closeModal('modal4-1')">×</button>
+            </div>
+            <div class="modal-body">
+                <h3>🏗️ Structure MVC</h3>
+                <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin: 15px 0;">
+                    <p><strong>Modèle</strong> → Gère les données et la logique métier</p>
+                    <p style="margin: 10px 0; text-align: center;">⬆️ ⬇️</p>
+                    <p><strong>Contrôleur</strong> → Traite les requêtes, coordonne Modèle et Vue</p>
+                    <p style="margin: 10px 0; text-align: center;">⬆️ ⬇️</p>
+                    <p><strong>Vue</strong> → Affiche l'interface utilisateur</p>
+                </div>
+
+                <h3 style="margin-top: 25px;">📁 Organisation des Fichiers</h3>
+                <div class="code-snippet">
+/mon-projet-mvc
+├── /controllers
+│   └── HomeController.php
+├── /models
+│   └── UserModel.php
+├── /views
+│   └── home.php
+├── /config
+│   └── database.php
+└── index.php  (Routeur)</div>
+
+                <h3 style="margin-top: 25px;">💻 Exemple MVC Natif</h3>
+                <div class="code-snippet">
+// index.php (Routeur)
+$action = $_GET['action'] ?? 'home';
+$controller = new HomeController();
+
+if ($action === 'home') {
+    $controller->index();
+}
+
+// controllers/HomeController.php
+class HomeController {
+    public function index() {
+        $model = new UserModel();
+        $users = $model->getAll();
+        require 'views/home.php';
+    }
+}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 4-2: Web Services -->
+    <div class="modal" id="modal4-2">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Web Services & API REST</h2>
+                <button class="close-btn" onclick="closeModal('modal4-2')">×</button>
+            </div>
+            <div class="modal-body">
+                <h3>🌐 Comparaison SOAP vs REST</h3>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                    <tr style="background: #f1f5f9;">
+                        <th style="padding: 12px; text-align: left; border: 1px solid #e2e8f0;">Critère</th>
+                        <th style="padding: 12px; text-align: left; border: 1px solid #e2e8f0;">SOAP</th>
+                        <th style="padding: 12px; text-align: left; border: 1px solid #e2e8f0;">REST</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Protocole</td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">XML strict</td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">HTTP + JSON/XML</td>
+                    </tr>
+                    <tr style="background: #f8fafc;">
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Performance</td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Plus lourd</td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Léger et rapide</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Cache</td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Non</td>
+                        <td style="padding: 12px; border: 1px solid #e2e8f0;">Oui</td>
+                    </tr>
+                </table>
+
+                <h3 style="margin-top: 25px;">🛠️ Méthodes HTTP REST</h3>
+                <div class="code-snippet">
+// API RESTful en PHP
+// GET    /api/users      → Liste tous les utilisateurs
+// GET    /api/users/1    → Récupère l'utilisateur 1
+// POST   /api/users      → Crée un utilisateur
+// PUT    /api/users/1    → Met à jour l'utilisateur 1
+// DELETE /api/users/1    → Supprime l'utilisateur 1
+
+// Exemple de contrôleur API
+class UserApiController {
+    public function create() {
+        $data = json_decode(file_get_contents('php://input'), true);
+        // Traitement...
+        header('Content-Type: application/json');
+        echo json_encode(['status' => 'success']);
+    }
+}</div>
+
+                <h3 style="margin-top: 25px;">📋 Contraintes REST</h3>
+                <ul class="checklist">
+                    <li>Client-Serveur : Séparation des responsabilités</li>
+                    <li>Sans État : Chaque requête contient toute l'information</li>
+                    <li>Cacheable : Les réponses peuvent être mises en cache</li>
+                    <li>Interface Uniforme : Ressources identifiées par URI</li>
+                    <li>Système en Couches : Architecture hiérarchique</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUIZ MODAL -->
+    <div class="modal" id="quizModal">
+        <div class="modal-content">
+            <div class="modal-header" id="quizHeader">
+                <h2 id="quizTitle">Quiz</h2>
+                <button class="close-btn" onclick="closeModal('quizModal')">×</button>
+            </div>
+            <div class="modal-body" id="quizBody">
+                <!-- Quiz content injected by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Progress Bar
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('progressBar').style.width = scrolled + '%';
+        });
+
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal on outside click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                }
+            });
+        });
+
+        // Quiz Data
+        const quizzes = {
+            1: {
+                title: "Quiz Partie 1 : Client/Serveur & PHP",
+                questions: [
+                    {
+                        q: "Quelle architecture sépare la présentation, le traitement et les données ?",
+                        options: ["1-tier", "2-tiers", "3-tiers", "n-tiers"],
+                        correct: 2
+                    },
+                    {
+                        q: "Quel port utilise HTTP par défaut ?",
+                        options: ["21", "25", "80", "443"],
+                        correct: 2
+                    },
+                    {
+                        q: "Quelle balise ouvre un script PHP ?",
+                        options: ["<?php", "<php>", "<?=", "<script php>"],
+                        correct: 0
+                    },
+                    {
+                        q: "Quel serveur web est le plus utilisé selon W3Techs ?",
+                        options: ["Apache", "Nginx", "IIS", "LiteSpeed"],
+                        correct: 1
+                    }
+                ]
+            },
+            2: {
+                title: "Quiz Partie 2 : Programmation PHP",
+                questions: [
+                    {
+                        q: "Quel mot-clé déclare une constante en PHP ?",
+                        options: ["var", "const", "define", "static"],
+                        correct: 1
+                    },
+                    {
+                        q: "Quelle méthode magique est appelée à la création d'un objet ?",
+                        options: ["__create()", "__init()", "__construct()", "__new()"],
+                        correct: 2
+                    },
+                    {
+                        q: "Comment accède-t-on à une variable globale dans une fonction ?",
+                        options: ["global $var", "$GLOBAL['var']", "extern $var", "import $var"],
+                        correct: 0
+                    },
+                    {
+                        q: "Quelle fonction fusionne deux tableaux ?",
+                        options: ["array_combine()", "array_merge()", "array_join()", "array_fusion()"],
+                        correct: 1
+                    }
+                ]
+            },
+            3: {
+                title: "Quiz Partie 3 : Données & Sécurité",
+                questions: [
+                    {
+                        q: "Quelle classe PHP permet la connexion à MySQL de manière sécurisée ?",
+                        options: ["mysqli", "PDO", "mysql_connect", "Database"],
+                        correct: 1
+                    },
+                    {
+                        q: "Comment protéger contre les injections SQL ?",
+                        options: ["addslashes()", "htmlspecialchars()", "Requêtes préparées", "strip_tags()"],
+                        correct: 2
+                    },
+                    {
+                        q: "Quelle fonction démarre une session ?",
+                        options: ["session_begin()", "session_start()", "start_session()", "init_session()"],
+                        correct: 1
+                    },
+                    {
+                        q: "Quel attribut de cookie empêche l'accès via JavaScript ?",
+                        options: ["Secure", "HttpOnly", "SameSite", "Domain"],
+                        correct: 1
+                    }
+                ]
+            },
+            4: {
+                title: "Quiz Partie 4 : MVC & Web Services",
+                questions: [
+                    {
+                        q: "Dans MVC, qui gère l'affichage ?",
+                        options: ["Modèle", "Vue", "Contrôleur", "Routeur"],
+                        correct: 1
+                    },
+                    {
+                        q: "Quelle méthode HTTP correspond à la création dans REST ?",
+                        options: ["GET", "POST", "PUT", "DELETE"],
+                        correct: 1
+                    },
+                    {
+                        q: "Quel format de données est le plus utilisé avec REST ?",
+                        options: ["XML", "SOAP", "JSON", "YAML"],
+                        correct: 2
+                    },
+                    {
+                        q: "Quel framework PHP utilise l'architecture MVC ?",
+                        options: ["jQuery", "Laravel", "Bootstrap", "React"],
+                        correct: 1
+                    }
+                ]
+            }
+        };
+
+        let currentQuiz = null;
+        let currentQuestion = 0;
+        let score = 0;
+
+        function openQuiz(partNum) {
+            currentQuiz = quizzes[partNum];
+            currentQuestion = 0;
+            score = 0;
+            
+            document.getElementById('quizTitle').textContent = currentQuiz.title;
+            showQuestion();
+            document.getElementById('quizModal').classList.add('active');
+        }
+
+        function showQuestion() {
+            const q = currentQuiz.questions[currentQuestion];
+            const quizBody = document.getElementById('quizBody');
+            
+            let html = `
+                <div style="margin-bottom: 20px;">
+                    <span style="color: #64748b;">Question ${currentQuestion + 1}/${currentQuiz.questions.length}</span>
+                    <div style="height: 4px; background: #e2e8f0; border-radius: 2px; margin-top: 10px;">
+                        <div style="height: 100%; width: ${((currentQuestion + 1) / currentQuiz.questions.length) * 100}%; 
+                                    background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 2px; 
+                                    transition: width 0.3s ease;"></div>
+                    </div>
+                </div>
+                <div class="question">
+                    <div class="question-text">${q.q}</div>
+                    <div class="options">
+            `;
+            
+            q.options.forEach((opt, idx) => {
+                html += `<div class="option" onclick="checkAnswer(${idx})">${opt}</div>`;
+            });
+            
+            html += '</div></div>';
+            quizBody.innerHTML = html;
+        }
+
+        function checkAnswer(selected) {
+            const q = currentQuiz.questions[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            
+            options.forEach((opt, idx) => {
+                opt.style.pointerEvents = 'none';
+                if (idx === q.correct) {
+                    opt.classList.add('correct');
+                } else if (idx === selected && idx !== q.correct) {
+                    opt.classList.add('wrong');
+                }
+            });
+            
+            if (selected === q.correct) score++;
+            
+            setTimeout(() => {
+                currentQuestion++;
+                if (currentQuestion < currentQuiz.questions.length) {
+                    showQuestion();
+                } else {
+                    showResults();
+                }
+            }, 1500);
+        }
+
+        function showResults() {
+            const percentage = (score / currentQuiz.questions.length) * 100;
+            const quizBody = document.getElementById('quizBody');
+            
+            let message, color;
+            if (percentage >= 80) {
+                message = "🎉 Excellent ! Maîtrise confirmée !";
+                color = "#10b981";
+            } else if (percentage >= 60) {
+                message = "👍 Bien ! Quelques révisions à faire.";
+                color = "#f59e0b";
+            } else {
+                message = "📚 Continuez à étudier, vous progresserez !";
+                color = "#ef4444";
+            }
+            
+            quizBody.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <div style="font-size: 4rem; margin-bottom: 20px;">${percentage >= 80 ? '🏆' : percentage >= 60 ? '⭐' : '💪'}</div>
+                    <h2 style="color: ${color}; margin-bottom: 15px;">${message}</h2>
+                    <p style="font-size: 1.2rem; margin-bottom: 10px;">Score : ${score}/${currentQuiz.questions.length}</p>
+                    <p style="color: #64748b;">${percentage}% de réussite</p>
+                    <button class="quiz-btn" onclick="closeModal('quizModal')" style="margin-top: 30px;">
+                        Continuer l'apprentissage
+                    </button>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

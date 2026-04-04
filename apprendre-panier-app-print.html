@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TD Panier d'Achat PHP - Version Imprimable</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    line-height: 1.6;
+    color: #1e293b;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: white;
+  }
+
+  h1 {
+    color: #7c6df8;
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    text-align: center;
+    border-bottom: 3px solid #7c6df8;
+    padding-bottom: 1rem;
+  }
+
+  h2 {
+    color: #7c6df8;
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 3rem 0 1.5rem 0;
+    page-break-before: always;
+  }
+
+  h3 {
+    color: #a78bfa;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 2rem 0 1rem 0;
+  }
+
+  h4 {
+    color: #1e293b;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 1.5rem 0 0.5rem 0;
+  }
+
+  p {
+    margin-bottom: 1rem;
+    color: #475569;
+  }
+
+  strong {
+    color: #f59e0b;
+    font-weight: 700;
+  }
+
+  ul, ol {
+    margin: 1rem 0;
+    padding-left: 2rem;
+  }
+
+  li {
+    margin-bottom: 0.5rem;
+    color: #475569;
+  }
+
+  .code-block {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin: 1.5rem 0;
+    overflow: hidden;
+    page-break-inside: avoid;
+  }
+
+  .code-header {
+    background: #f1f5f9;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #64748b;
+  }
+
+  .code-lang {
+    color: #7c6df8;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  pre {
+    padding: 1rem;
+    margin: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: #1e293b;
+    background: #f8fafc;
+  }
+
+  .highlight {
+    background: #fef3c7;
+    padding: 1rem;
+    border-left: 4px solid #f59e0b;
+    margin: 1rem 0;
+  }
+
+  .info-box {
+    background: #f0f9ff;
+    border: 1px solid #0ea5e9;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+  }
+
+  .warning-box {
+    background: #fef2f2;
+    border: 1px solid #dc2626;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+  }
+
+  .success-box {
+    background: #f0fdf4;
+    border: 1px solid #16a34a;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+  }
+
+  th, td {
+    border: 1px solid #e2e8f0;
+    padding: 0.5rem;
+    text-align: left;
+  }
+
+  th {
+    background: #f8fafc;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  .footer {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 2px solid #e2e8f0;
+    text-align: center;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+
+  @media print {
+    body {
+      max-width: none;
+      margin: 0;
+      padding: 1rem;
+    }
+
+    h2 {
+      page-break-before: always;
+      margin-top: 2rem;
+    }
+
+    .code-block {
+      page-break-inside: avoid;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+  }
+
+  .kw { color: #7c6df8; font-weight: 700; }
+  .fn { color: #f59e0b; }
+  .str { color: #22d3a0; }
+  .cmt { color: #4a5270; font-style: italic; }
+  .var { color: #f87171; }
+  .num { color: #fb923c; }
+</style>
+</head>
+<body>
+
+<h1>🛒 TD Panier d'Achat PHP</h1>
+
+<div class="info-box">
+  <strong>Niveau:</strong> Intermédiaire<br>
+  <strong>Objectif:</strong> Créer un système complet de e-commerce avec panier persistant<br>
+  <strong>Date:</strong> Avril 2026
+</div>
+
+<h2>📋 Introduction et Structure</h2>
+
+<h3>Liste des fichiers à créer</h3>
+<ol>
+  <li><strong>catalogue.php</strong> - Affichage des produits</li>
+  <li><strong>ajouter_panier.php</strong> - Ajout d'articles au panier</li>
+  <li><strong>panier.php</strong> - Affichage et gestion du panier</li>
+  <li><strong>supprimer_panier.php</strong> - Suppression d'articles</li>
+  <li><strong>valider_commande.php</strong> - Finalisation de la commande</li>
+</ol>
+
+<h3>Concepts appris</h3>
+<ul>
+  <li>Manipulation avancée des tableaux PHP</li>
+  <li>Utilisation des sessions pour la persistance des données</li>
+  <li>Calculs et opérations mathématiques</li>
+  <li>Gestion des quantités et stocks</li>
+  <li>Redirections et flux utilisateur</li>
+  <li>Sécurité des formulaires et validation des données</li>
+</ul>
+
+<h2>📦 Catalogue de Produits</h2>
+
+<p><strong>Description:</strong> Page d'accueil affichant tous les produits disponibles avec possibilité d'ajout au panier.</p>
+
+<div class="code-block">
+  <div class="code-header">
+    <span class="code-lang">PHP</span>
+    <span>catalogue.php</span>
+  </div>
+  <pre><span class="cmt">&lt;?php
+/**
+ * FICHIER: catalogue.php
+ * ROLE: Afficher le catalogue des produits
+ */</span>
+
+// Démarrer la session pour accéder au panier
+session_start();
+
+// ============================================
+// CATALOGUE DE PRODUITS
+// ============================================
+$produits = [
+    [
+        <span class="str">"id"</span> => <span class="num">1</span>,
+        <span class="str">"nom"</span> => <span class="str">"Ordinateur Portable"</span>,
+        <span class="str">"prix"</span> => <span class="num">899.99</span>,
+        <span class="str">"stock"</span> => <span class="num">5</span>,
+        <span class="str">"description"</span> => <span class="str">"Ordinateur portable 15.6\" haute performance"</span>
+    ],
+    [
+        <span class="str">"id"</span> => <span class="num">2</span>,
+        <span class="str">"nom"</span> => <span class="str">"Souris Gaming"</span>,
+        <span class="str">"prix"</span> => <span class="num">49.99</span>,
+        <span class="str">"stock"</span> => <span class="num">12</span>,
+        <span class="str">"description"</span> => <span class="str">"Souris gaming RGB avec 7 boutons programmables"</span>
+    ],
+    [
+        <span class="str">"id"</span> => <span class="num">3</span>,
+        <span class="str">"nom"</span> => <span class="str">"Clavier Mécanique"</span>,
+        <span class="str">"prix"</span> => <span class="num">129.99</span>,
+        <span class="str">"stock"</span> => <span class="num">8</span>,
+        <span class="str">"description"</span> => <span class="str">"Clavier mécanique avec switches bleus"</span>
+    ]
+];
+?&gt;</span>
+
+&lt;!DOCTYPE html&gt;
+&lt;html lang=<span class="str">"fr"</span>&gt;
+&lt;head&gt;
+    &lt;meta charset=<span class="str">"UTF-8"</span>&gt;
+    &lt;title&gt;Catalogue - Boutique PHP&lt;/title&gt;
+    &lt;style&gt;
+        .produit { border: <span class="num">1</span>px solid #ddd; padding: <span class="num">15</span>px; margin: <span class="num">10</span>px; }
+        .prix { color: green; font-weight: bold; }
+        .stock { color: orange; }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;🛍️ Notre Catalogue&lt;/h1&gt;
+
+    &lt;!-- Affichage du nombre d'articles dans le panier --&gt;
+    &lt;p&gt;
+        &lt;a href=<span class="str">"panier.php"</span>&gt;🛒 Panier&lt;/a&gt;
+        (&lt;?php echo isset($_SESSION[<span class="str">'panier'</span>]) ? count($_SESSION[<span class="str">'panier'</span>]) : <span class="num">0</span>; ?&gt; articles)
+    &lt;/p&gt;
+
+    &lt;!-- BOUCLE POUR AFFICHER CHAQUE PRODUIT --&gt;
+    &lt;?php foreach ($produits as $produit): ?&gt;
+        &lt;div class=<span class="str">"produit"</span>&gt;
+            &lt;h3&gt;&lt;?php echo $produit[<span class="str">'nom'</span>]; ?&gt;&lt;/h3&gt;
+            &lt;p&gt;&lt;?php echo $produit[<span class="str">'description'</span>]; ?&gt;&lt;/p&gt;
+            &lt;p class=<span class="str">"prix"</span>&gt;&lt;?php echo number_format($produit[<span class="str">'prix'</span>], <span class="num">2</span>); ?&gt; €&lt;/p&gt;
+            &lt;p class=<span class="str">"stock"</span>&gt;Stock: &lt;?php echo $produit[<span class="str">'stock'</span>]; ?&gt;&lt;/p&gt;
+
+            &lt;!-- FORMULAIRE D'AJOUT AU PANIER --&gt;
+            &lt;form action=<span class="str">"ajouter_panier.php"</span> method=<span class="str">"POST"</span>&gt;
+                &lt;input type=<span class="str">"hidden"</span> name=<span class="str">"id_produit"</span> value=<span class="str">"&lt;?php echo $produit['id']; ?&gt;"</span>&gt;
+                &lt;label&gt;Quantité: &lt;/label&gt;
+                &lt;input type=<span class="str">"number"</span> name=<span class="str">"quantite"</span> value=<span class="str">"1"</span> min=<span class="str">"1"</span> max=<span class="str">"&lt;?php echo $produit['stock']; ?&gt;"</span>&gt;
+                &lt;button type=<span class="str">"submit"</span>&gt;Ajouter au panier&lt;/button&gt;
+            &lt;/form&gt;
+        &lt;/div&gt;
+    &lt;?php endforeach; ?&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+</div>
+
+<h2>🛒 Gestion du Panier</h2>
+
+<p><strong>Description:</strong> Scripts pour ajouter et gérer les articles dans le panier avec persistance via sessions.</p>
+
+<h3>1. ajouter_panier.php</h3>
+
+<div class="code-block">
+  <div class="code-header">
+    <span class="code-lang">PHP</span>
+    <span>ajouter_panier.php</span>
+  </div>
+  <pre><span class="cmt">&lt;?php
+/**
+ * FICHIER: ajouter_panier.php
+ * ROLE: Ajouter un produit au panier
+ */</span>
+
+session_start();
+
+// ============================================
+// VÉRIFICATION DES DONNÉES
+// ============================================
+if (!isset($_POST[<span class="str">'id_produit'</span>]) || !isset($_POST[<span class="str">'quantite'</span>])) {
+    header(<span class="str">"Location: catalogue.php"</span>);
+    exit();
+}
+
+$id_produit = (int)$_POST[<span class="str">'id_produit'</span>];
+$quantite = (int)$_POST[<span class="str">'quantite'</span>];
+
+// ============================================
+// INITIALISER LE PANIER SI NÉCESSAIRE
+// ============================================
+if (!isset($_SESSION[<span class="str">'panier'</span>])) {
+    $_SESSION[<span class="str">'panier'</span>] = [];
+}
+
+// ============================================
+// AJOUTER OU METTRE À JOUR LE PRODUIT
+// ============================================
+if (isset($_SESSION[<span class="str">'panier'</span>][$id_produit])) {
+    // Le produit existe déjà, on ajoute la quantité
+    $_SESSION[<span class="str">'panier'</span>][$id_produit] += $quantite;
+} else {
+    // Nouveau produit dans le panier
+    $_SESSION[<span class="str">'panier'</span>][$id_produit] = $quantite;
+}
+
+// ============================================
+// REDIRECTION VERS LE CATALOGUE
+// ============================================
+header(<span class="str">"Location: catalogue.php?message=Produit ajouté au panier"</span>);
+exit();
+?&gt;</pre>
+</div>
+
+<h3>2. panier.php - Affichage du panier</h3>
+
+<div class="code-block">
+  <div class="code-header">
+    <span class="code-lang">PHP</span>
+    <span>panier.php</span>
+  </div>
+  <pre><span class="cmt">&lt;?php
+/**
+ * FICHIER: panier.php
+ * ROLE: Afficher et gérer le contenu du panier
+ */</span>
+
+session_start();
+
+// Catalogue des produits (même que catalogue.php)
+$produits = [
+    <span class="num">1</span> => [<span class="str">"nom"</span> => <span class="str">"Ordinateur Portable"</span>, <span class="str">"prix"</span> => <span class="num">899.99</span>, <span class="str">"stock"</span> => <span class="num">5</span>],
+    <span class="num">2</span> => [<span class="str">"nom"</span> => <span class="str">"Souris Gaming"</span>, <span class="str">"prix"</span> => <span class="num">49.99</span>, <span class="str">"stock"</span> => <span class="num">12</span>],
+    <span class="num">3</span> => [<span class="str">"nom"</span> => <span class="str">"Clavier Mécanique"</span>, <span class="str">"prix"</span> => <span class="num">129.99</span>, <span class="str">"stock"</span> => <span class="num">8</span>]
+];
+
+$total = <span class="num">0</span>;
+?&gt;
+
+&lt;!DOCTYPE html&gt;
+&lt;html lang=<span class="str">"fr"</span>&gt;
+&lt;head&gt;
+    &lt;meta charset=<span class="str">"UTF-8"</span>&gt;
+    &lt;title&gt;Mon Panier&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;🛒 Mon Panier&lt;/h1&gt;
+
+    &lt;a href=<span class="str">"catalogue.php"</span>&gt;← Continuer mes achats&lt;/a&gt;
+
+    &lt;?php if (!isset($_SESSION[<span class="str">'panier'</span>]) || empty($_SESSION[<span class="str">'panier'</span>])): ?&gt;
+        &lt;p&gt;Votre panier est vide.&lt;/p&gt;
+    &lt;?php else: ?&gt;
+        &lt;table border=<span class="str">"1"</span>&gt;
+            &lt;tr&gt;
+                &lt;th&gt;Produit&lt;/th&gt;
+                &lt;th&gt;Prix unitaire&lt;/th&gt;
+                &lt;th&gt;Quantité&lt;/th&gt;
+                &lt;th&gt;Total&lt;/th&gt;
+                &lt;th&gt;Actions&lt;/th&gt;
+            &lt;/tr&gt;
+
+            &lt;?php foreach ($_SESSION[<span class="str">'panier'</span>] as $id => $quantite): ?&gt;
+                &lt;?php
+                $produit = $produits[$id];
+                $sous_total = $produit[<span class="str">'prix'</span>] * $quantite;
+                $total += $sous_total;
+                ?&gt;
+
+                &lt;tr&gt;
+                    &lt;td&gt;&lt;?php echo $produit[<span class="str">'nom'</span>]; ?&gt;&lt;/td&gt;
+                    &lt;td&gt;&lt;?php echo number_format($produit[<span class="str">'prix'</span>], <span class="num">2</span>); ?&gt; €&lt;/td&gt;
+                    &lt;td&gt;&lt;?php echo $quantite; ?&gt;&lt;/td&gt;
+                    &lt;td&gt;&lt;?php echo number_format($sous_total, <span class="num">2</span>); ?&gt; €&lt;/td&gt;
+                    &lt;td&gt;
+                        &lt;a href=<span class="str">"supprimer_panier.php?id=&lt;?php echo $id; ?&gt;"</span>&gt;Supprimer&lt;/a&gt;
+                    &lt;/td&gt;
+                &lt;/tr&gt;
+            &lt;?php endforeach; ?&gt;
+
+            &lt;tr&gt;
+                &lt;td colspan=<span class="str">"3"</span>&gt;&lt;strong&gt;TOTAL&lt;/strong&gt;&lt;/td&gt;
+                &lt;td colspan=<span class="str">"2"</span>&gt;&lt;strong&gt;&lt;?php echo number_format($total, <span class="num">2</span>); ?&gt; €&lt;/strong&gt;&lt;/td&gt;
+            &lt;/tr&gt;
+        &lt;/table&gt;
+
+        &lt;br&gt;
+        &lt;a href=<span class="str">"valider_commande.php"</span>&gt;✅ Valider ma commande&lt;/a&gt;
+    &lt;?php endif; ?&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+</div>
+
+<h2>💾 Utilisation des Sessions</h2>
+
+<p><strong>Description:</strong> Les sessions permettent de conserver les données du panier entre les pages.</p>
+
+<h3>supprimer_panier.php</h3>
+
+<div class="code-block">
+  <div class="code-header">
+    <span class="code-lang">PHP</span>
+    <span>supprimer_panier.php</span>
+  </div>
+  <pre><span class="cmt">&lt;?php
+/**
+ * FICHIER: supprimer_panier.php
+ * ROLE: Supprimer un article du panier
+ */</span>
+
+session_start();
+
+// Vérifier qu'un ID de produit est fourni
+if (!isset($_GET[<span class="str">'id'</span>])) {
+    header(<span class="str">"Location: panier.php"</span>);
+    exit();
+}
+
+$id_supprimer = (int)$_GET[<span class="str">'id'</span>];
+
+// Supprimer le produit du panier
+if (isset($_SESSION[<span class="str">'panier'</span>][$id_supprimer])) {
+    unset($_SESSION[<span class="str">'panier'</span>][$id_supprimer]);
+}
+
+// Redirection vers le panier
+header(<span class="str">"Location: panier.php?message=Produit supprimé"</span>);
+exit();
+?&gt;</pre>
+</div>
+
+<h3>Pourquoi utiliser les sessions ?</h3>
+<ul>
+  <li><strong>Persistance:</strong> Les données survivent aux rechargements de page</li>
+  <li><strong>Utilisateur unique:</strong> Chaque visiteur a son propre panier</li>
+  <li><strong>Sécurité:</strong> Données stockées côté serveur</li>
+  <li><strong>Expiration:</strong> Automatique après inactivité</li>
+</ul>
+
+<h2>✅ Validation de Commande</h2>
+
+<p><strong>Description:</strong> Finalisation de la commande avec calcul des frais et confirmation.</p>
+
+<h3>valider_commande.php</h3>
+
+<div class="code-block">
+  <div class="code-header">
+    <span class="code-lang">PHP</span>
+    <span>valider_commande.php</span>
+  </div>
+  <pre><span class="cmt">&lt;?php
+/**
+ * FICHIER: valider_commande.php
+ * ROLE: Traiter et confirmer la commande
+ */</span>
+
+session_start();
+
+// Vérifier qu'il y a des articles dans le panier
+if (!isset($_SESSION[<span class="str">'panier'</span>]) || empty($_SESSION[<span class="str">'panier'</span>])) {
+    header(<span class="str">"Location: catalogue.php"</span>);
+    exit();
+}
+
+// Catalogue des produits
+$produits = [
+    <span class="num">1</span> => [<span class="str">"nom"</span> => <span class="str">"Ordinateur Portable"</span>, <span class="str">"prix"</span> => <span class="num">899.99</span>],
+    <span class="num">2</span> => [<span class="str">"nom"</span> => <span class="str">"Souris Gaming"</span>, <span class="str">"prix"</span> => <span class="num">49.99</span>],
+    <span class="num">3</span> => [<span class="str">"nom"</span> => <span class="str">"Clavier Mécanique"</span>, <span class="str">"prix"</span> => <span class="num">129.99</span>]
+];
+
+// Calcul du total
+$total = <span class="num">0</span>;
+foreach ($_SESSION[<span class="str">'panier'</span>] as $id => $quantite) {
+    $total += $produits[$id][<span class="str">'prix'</span>] * $quantite;
+}
+
+// Frais de port (exemple simple)
+$frais_port = ($total > <span class="num">500</span>) ? <span class="num">0</span> : <span class="num">9.99</span>;
+$total_final = $total + $frais_port;
+
+// Simuler l'enregistrement de la commande
+$numero_commande = <span class="str">"CMD"</span> . date(<span class="str">"YmdHis"</span>) . rand(<span class="num">100</span>, <span class="num">999</span>);
+
+// Vider le panier après validation
+unset($_SESSION[<span class="str">'panier'</span>]);
+?&gt;
+
+&lt;!DOCTYPE html&gt;
+&lt;html lang=<span class="str">"fr"</span>&gt;
+&lt;head&gt;
+    &lt;meta charset=<span class="str">"UTF-8"</span>&gt;
+    &lt;title&gt;Commande Validée&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;✅ Commande Validée !&lt;/h1&gt;
+
+    &lt;p&gt;&lt;strong&gt;Numéro de commande:&lt;/strong&gt; &lt;?php echo $numero_commande; ?&gt;&lt;/p&gt;
+    &lt;p&gt;&lt;strong&gt;Montant total:&lt;/strong&gt; &lt;?php echo number_format($total_final, <span class="num">2</span>); ?&gt; €&lt;/p&gt;
+
+    &lt;h2&gt;Détails de votre commande&lt;/h2&gt;
+    &lt;!-- Ici on pourrait afficher le détail des articles commandés --&gt;
+
+    &lt;p&gt;Un email de confirmation vous a été envoyé.&lt;/p&gt;
+
+    &lt;a href=<span class="str">"catalogue.php"</span>&gt;Continuer mes achats&lt;/a&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+</div>
+
+<h2>🎯 Exercices Pratiques</h2>
+
+<h3>Exercice 1: Ajouter une réduction</h3>
+<p><strong>Objectif:</strong> Appliquer une réduction de 10% si le total dépasse 1000€</p>
+
+<div class="code-block">
+  <pre>if ($total > <span class="num">1000</span>) {
+    $reduction = $total * <span class="num">0.1</span>;
+    $total_final = $total - $reduction;
+    echo <span class="str">"Réduction appliquée: "</span> . number_format($reduction, <span class="num">2</span>) . <span class="str">" €"</span>;
+}</pre>
+</div>
+
+<h3>Exercice 2: Vérification du stock</h3>
+<p><strong>Objectif:</strong> Empêcher l'ajout au panier si la quantité demandée dépasse le stock disponible</p>
+
+<div class="highlight">
+<p><strong>Solution proposée:</strong></p>
+<pre>// Dans ajouter_panier.php, avant d'ajouter au panier
+if ($quantite > $produits[$id_produit]['stock']) {
+    header("Location: catalogue.php?error=Stock insuffisant");
+    exit();
+}</pre>
+</div>
+
+<h3>Exercice 3: Code promo</h3>
+<p><strong>Objectif:</strong> Ajouter un champ pour saisir un code promo (ex: "PROMO10" = -10€)</p>
+
+<div class="highlight">
+<p><strong>Solution proposée:</strong></p>
+<pre>// Dans valider_commande.php
+$code_promo = isset($_POST['code_promo']) ? strtoupper(trim($_POST['code_promo'])) : '';
+
+if ($code_promo === 'PROMO10') {
+    $total_final -= 10;
+    $message_reduction = "Code promo PROMO10 appliqué (-10€)";
+}</pre>
+</div>
+
+<h3>Exercice 4: Historique des commandes</h3>
+<p><strong>Objectif:</strong> Sauvegarder les commandes dans un tableau en session pour les afficher dans un historique</p>
+
+<div class="highlight">
+<p><strong>Solution proposée:</strong></p>
+<pre>// Dans valider_commande.php, après calcul du total
+if (!isset($_SESSION['historique_commandes'])) {
+    $_SESSION['historique_commandes'] = [];
+}
+
+$commande = [
+    'numero' => $numero_commande,
+    'date' => date('Y-m-d H:i:s'),
+    'total' => $total_final,
+    'articles' => $_SESSION['panier']
+];
+
+$_SESSION['historique_commandes'][] = $commande;</pre>
+</div>
+
+<h2>🤖 Guide des Skills AI</h2>
+
+<p><strong>Description:</strong> Guide complet sur les compétences en Intelligence Artificielle avec Claude et ExplorIA</p>
+
+<h3>📖 Ce guide couvre :</h3>
+<ul>
+  <li>Les fondamentaux de l'IA conversationnelle</li>
+  <li>Techniques avancées avec Claude</li>
+  <li>Intégration d'ExplorIA dans vos projets</li>
+  <li>Cas d'usage pratiques et exemples</li>
+  <li>Bonnes pratiques et optimisation</li>
+</ul>
+
+<div class="info-box">
+  <h4>📄 Guide PDF intégré</h4>
+  <p>Pour consulter le guide complet, ouvrez le fichier PDF :</p>
+  <p><code>file:///Users/admin/Downloads/Guide-Skills-Claude-ExplorIA (1).pdf</code></p>
+</div>
+
+<div class="footer">
+  <p>TD Panier d'Achat PHP - Version imprimable</p>
+  <p>Généré le 4 avril 2026</p>
+</div>
+
+</body>
+</html></content>
+<parameter name="filePath">/Users/admin/Desktop/formation certif/apprendre-panier-app-print.html

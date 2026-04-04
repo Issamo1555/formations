@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TD Panier d'Achat — PHP Interactif</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #151820;
+    --card: #1c2030;
+    --border: #272d3f;
+    --php: #7c6df8;
+    --php2: #a78bfa;
+    --accent: #f59e0b;
+    --green: #22d3a0;
+    --red: #f87171;
+    --text: #e4e8f7;
+    --muted: #6b7694;
+    --code-bg: #0a0c10;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 2.5rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(13,15,20,0.85);
+    backdrop-filter: blur(12px);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo {
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--php); }
+  .logo em { color: var(--accent); font-style: normal; }
+
+  nav { display: flex; gap: 0.4rem; }
+  nav button {
+    background: none; border: 1px solid transparent;
+    color: var(--muted); padding: 0.4rem 1rem;
+    border-radius: 6px; cursor: pointer;
+    font-family: 'Syne', sans-serif; font-size: 0.85rem;
+    transition: all 0.2s;
+  }
+  nav button:hover { color: var(--text); border-color: var(--border); }
+  nav button.active { color: var(--php); border-color: var(--php); background: rgba(124,109,248,0.1); }
+
+  /* HERO */
+  .hero {
+    text-align: center;
+    padding: 4rem 2rem 2.5rem;
+    background: radial-gradient(ellipse 70% 40% at 50% 0%, rgba(124,109,248,0.18) 0%, transparent 70%);
+  }
+  .hero h1 {
+    font-size: clamp(2.2rem, 6vw, 4rem);
+    font-weight: 800;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #fff 30%, var(--php2) 70%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p { color: var(--muted); margin-top: 0.8rem; font-size: 1rem; }
+
+  /* LAYOUT */
+  .app-body {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: calc(100vh - 200px);
+    max-width: 1200px; margin: 0 auto; padding: 1.5rem;
+    gap: 1.5rem;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1rem 0;
+    height: fit-content;
+    position: sticky; top: 80px;
+  }
+  .sidebar-title {
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 2px;
+    color: var(--muted); text-transform: uppercase;
+    padding: 0 1.2rem; margin-bottom: 0.8rem;
+  }
+  .sidebar-section { margin-bottom: 0.6rem; }
+  .sidebar-category {
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 1px;
+    color: var(--php); text-transform: uppercase;
+    padding: 0.4rem 1.2rem; margin-top: 0.4rem;
+  }
+  .sidebar-item {
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.45rem 1.2rem; cursor: pointer;
+    font-size: 0.83rem; color: var(--muted); border-left: 3px solid transparent;
+    transition: all 0.15s; border-radius: 0 6px 6px 0;
+  }
+  .sidebar-item:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+  .sidebar-item.active { color: var(--text); border-left-color: var(--php); background: rgba(124,109,248,0.1); }
+  .sidebar-item .check { width: 14px; height: 14px; border: 1.5px solid var(--border); border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .sidebar-item.done .check { background: var(--green); border-color: var(--green); }
+  .sidebar-item.done .check::after { content: '✓'; font-size: 9px; color: #000; font-weight: bold; }
+
+  /* MAIN */
+  main { min-width: 0; }
+
+  .lesson-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    display: none;
+  }
+  .lesson-card.visible { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .lesson-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-start; gap: 1rem;
+  }
+  .lesson-icon {
+    width: 44px; height: 44px; border-radius: 10px;
+    background: rgba(124,109,248,0.2); display: flex; align-items: center;
+    justify-content: center; font-size: 1.3rem; flex-shrink: 0;
+  }
+  .lesson-header h2 { font-size: 1.4rem; font-weight: 800; line-height: 1.2; }
+  .lesson-header .tag {
+    display: inline-block; margin-top: 0.3rem;
+    font-size: 0.7rem; font-weight: 600; letter-spacing: 1px;
+    background: rgba(124,109,248,0.15); color: var(--php);
+    padding: 2px 10px; border-radius: 99px; text-transform: uppercase;
+  }
+
+  .lesson-body { padding: 2rem; }
+  .lesson-body p { color: #bcc4de; line-height: 1.75; margin-bottom: 1rem; font-size: 0.93rem; }
+  .lesson-body h3 { font-size: 1rem; font-weight: 700; margin: 1.5rem 0 0.6rem; color: var(--php2); }
+  .lesson-body ul { list-style: none; padding: 0; margin-bottom: 1rem; }
+  .lesson-body ul li { color: #bcc4de; padding: 0.25rem 0; font-size: 0.9rem; display: flex; align-items: flex-start; gap: 0.5rem; }
+  .lesson-body ul li::before { content: '→'; color: var(--php); flex-shrink: 0; margin-top: 1px; }
+
+  /* CODE BLOCK */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin: 1rem 0;
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.03);
+  }
+  .code-lang { font-size: 0.72rem; color: var(--php); font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+  .copy-btn {
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    padding: 2px 10px; border-radius: 5px; cursor: pointer; font-size: 0.72rem;
+    font-family: 'Syne', sans-serif; transition: all 0.2s;
+  }
+  .copy-btn:hover { border-color: var(--php); color: var(--php); }
+  pre {
+    padding: 1.2rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    overflow-x: auto;
+    white-space: pre;
+    color: #c9d1f0;
+  }
+  .kw { color: #7c6df8; font-weight: 700; }
+  .fn { color: #f59e0b; }
+  .str { color: #22d3a0; }
+  .cmt { color: #4a5270; font-style: italic; }
+  .var { color: #f87171; }
+  .num { color: #fb923c; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 0.3rem; padding: 0 1.2rem; border-bottom: 1px solid var(--border); margin-bottom: 0; }
+  .tab-btn {
+    background: none; border: none; color: var(--muted);
+    padding: 0.6rem 1rem; cursor: pointer; font-family: 'Syne', sans-serif;
+    font-size: 0.83rem; border-bottom: 2px solid transparent; transition: all 0.2s;
+  }
+  .tab-btn.active { color: var(--php); border-bottom-color: var(--php); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; animation: slideUp 0.4s cubic-bezier(0.22, 0.9, 0.36, 1); }
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media print {
+    header, nav, .sidebar, .tabs { display: none !important; }
+    body { background: white !important; color: black !important; }
+    .lesson-card { display: block !important; margin: 0; padding: 0; border: none !important; }
+    .lesson-body { padding: 1rem !important; }
+    .tab-panel { display: block !important; page-break-before: always; }
+    .tab-panel:first-child { page-break-before: avoid; }
+    .code-block { border: 1px solid #ccc !important; margin: 1rem 0 !important; }
+    pre { white-space: pre-wrap !important; word-wrap: break-word !important; }
+    h1, h2, h3 { color: black !important; page-break-after: avoid; }
+    .lesson-header { border-bottom: 2px solid #000 !important; margin-bottom: 1rem; }
+    .lesson-icon { display: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><span>PHP</span> <em>Panier</em></div>
+  <nav>
+    <button onclick="showTDPanier()">🛒 TD Panier</button>
+    <button onclick="printMode()" style="background: #22d3a0; color: white;">🖨️ Mode Impression</button>
+  </nav>
+</header>
+
+<section class="hero">
+  <h1>🛒 TD Panier d'Achat</h1>
+  <p>Système complet de e-commerce avec panier persistant en PHP</p>
+</section>
+
+<div class="app-body">
+  <aside class="sidebar">
+    <div class="sidebar-title">TD PANIER</div>
+    <div class="sidebar-section">
+      <div class="sidebar-category">Étapes</div>
+      <div class="sidebar-item active" onclick="switchPanierTab('intro')">
+        <span class="check done"></span>📋 Introduction
+      </div>
+      <div class="sidebar-item" onclick="switchPanierTab('catalogue')">
+        <span class="check"></span>📦 Catalogue
+      </div>
+      <div class="sidebar-item" onclick="switchPanierTab('panier')">
+        <span class="check"></span>🛒 Gestion Panier
+      </div>
+      <div class="sidebar-item" onclick="switchPanierTab('session')">
+        <span class="check"></span>💾 Sessions
+      </div>
+      <div class="sidebar-item" onclick="switchPanierTab('commande')">
+        <span class="check"></span>✅ Validation
+      </div>
+      <div class="sidebar-item" onclick="switchPanierTab('exercices')">
+        <span class="check"></span>🎯 Exercices
+      </div>
+      <div class="sidebar-item" onclick="switchPanierTab('skills-ai')">
+        <span class="check"></span>🤖 Skills AI
+      </div>
+    </div>
+  </aside>
+
+  <main>
+    <div id="lessonContent">
+      <!-- Content will be loaded here -->
+    </div>
+  </main>
+</div>
+
+<script>
+// ===== TD PANIER =====
+function showTDPanier() {
+  const container = document.getElementById('lessonContent');
+  container.innerHTML = `
+    <div class="lesson-card visible">
+      <div class="lesson-header">
+        <div class="lesson-icon">🛒</div>
+        <div>
+          <h2>TD Panier d'Achat</h2>
+          <span class="tag">Pratique</span>
+        </div>
+      </div>
+      <div style="border-bottom:1px solid var(--border)">
+        <div class="tabs" id="panierTabs">
+          <button class="tab-btn active" onclick="switchPanierTab('intro',this)">📋 Intro</button>
+          <button class="tab-btn" onclick="switchPanierTab('catalogue',this)">📦 Catalogue</button>
+          <button class="tab-btn" onclick="switchPanierTab('panier',this)">🛒 Gestion Panier</button>
+          <button class="tab-btn" onclick="switchPanierTab('session',this)">💾 Sessions</button>
+          <button class="tab-btn" onclick="switchPanierTab('commande',this)">✅ Validation</button>
+          <button class="tab-btn" onclick="switchPanierTab('exercices',this)">🎯 Exercices</button>
+          <button class="tab-btn" onclick="switchPanierTab('skills-ai',this)">🤖 Skills AI</button>
+        </div>
+      </div>
+      <div class="lesson-body">
+        <div id="panier-intro" class="tab-panel active">
+          <h1 style="color: var(--php);">🛒 Système de Panier d'Achat PHP</h1>
+          <p><strong style="color: var(--accent);">Niveau:</strong> Intermédiaire</p>
+          <p><strong style="color: var(--accent);">Objectif:</strong> Créer un système complet de e-commerce avec panier persistant</p>
+          <hr style="border-color: var(--border);">
+          <h2 style="color: var(--php);">📋 Liste des fichiers à créer</h2>
+          <ol style="color: var(--text);">
+            <li><strong>catalogue.php</strong> - Affichage des produits</li>
+            <li><strong>ajouter_panier.php</strong> - Ajout d'articles au panier</li>
+            <li><strong>panier.php</strong> - Affichage et gestion du panier</li>
+            <li><strong>supprimer_panier.php</strong> - Suppression d'articles</li>
+            <li><strong>valider_commande.php</strong> - Finalisation de la commande</li>
+          </ol>
+          <h3 style="color: var(--php2);">Concepts appris:</h3>
+          <ul style="color: var(--text);">
+            <li>Manipulation avancée des tableaux</li>
+            <li>Utilisation des sessions pour la persistance</li>
+            <li>Calculs et opérations mathématiques</li>
+            <li>Gestion des quantités et stocks</li>
+            <li>Redirections et flux utilisateur</li>
+          </ul>
+        </div>
+        <div id="panier-catalogue" class="tab-panel">
+          <h2 style="color: var(--php);">📦 Catalogue de Produits</h2>
+          <p><strong style="color: var(--accent);">Description:</strong> Page d'accueil affichant tous les produits disponibles avec possibilité d'ajout au panier.</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">PHP</span>
+            </div>
+            <pre style="color: var(--text);">&lt;?php
+/**
+ * FICHIER: catalogue.php
+ * ROLE: Afficher le catalogue des produits
+ */
+
+// Démarrer la session pour accéder au panier
+session_start();
+
+// ============================================
+// CATALOGUE DE PRODUITS
+// ============================================
+$produits = [
+    [
+        "id" => 1,
+        "nom" => "Ordinateur Portable",
+        "prix" => 899.99,
+        "stock" => 5,
+        "description" => "Ordinateur portable 15.6\" haute performance"
+    ],
+    [
+        "id" => 2,
+        "nom" => "Souris Gaming",
+        "prix" => 49.99,
+        "stock" => 12,
+        "description" => "Souris gaming RGB avec 7 boutons programmables"
+    ],
+    [
+        "id" => 3,
+        "nom" => "Clavier Mécanique",
+        "prix" => 129.99,
+        "stock" => 8,
+        "description" => "Clavier mécanique avec switches bleus"
+    ]
+];
+?&gt;
+
+&lt;!DOCTYPE html&gt;
+&lt;html lang="fr"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Catalogue - Boutique PHP&lt;/title&gt;
+    &lt;style&gt;
+        .produit { border: 1px solid #ddd; padding: 15px; margin: 10px; }
+        .prix { color: green; font-weight: bold; }
+        .stock { color: orange; }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;🛍️ Notre Catalogue&lt;/h1&gt;
+    
+    &lt;!-- Affichage du nombre d'articles dans le panier --&gt;
+    &lt;p&gt;
+        &lt;a href="panier.php"&gt;🛒 Panier&lt;/a&gt; 
+        (&lt;?php echo isset($_SESSION['panier']) ? count($_SESSION['panier']) : 0; ?&gt; articles)
+    &lt;/p&gt;
+
+    &lt;!-- BOUCLE POUR AFFICHER CHAQUE PRODUIT --&gt;
+    &lt;?php foreach ($produits as $produit): ?&gt;
+        &lt;div class="produit"&gt;
+            &lt;h3&gt;&lt;?php echo $produit['nom']; ?&gt;&lt;/h3&gt;
+            &lt;p&gt;&lt;?php echo $produit['description']; ?&gt;&lt;/p&gt;
+            &lt;p class="prix"&gt;&lt;?php echo number_format($produit['prix'], 2); ?&gt; €&lt;/p&gt;
+            &lt;p class="stock"&gt;Stock: &lt;?php echo $produit['stock']; ?&gt;&lt;/p&gt;
+            
+            &lt;!-- FORMULAIRE D'AJOUT AU PANIER --&gt;
+            &lt;form action="ajouter_panier.php" method="POST"&gt;
+                &lt;input type="hidden" name="id_produit" value="&lt;?php echo $produit['id']; ?&gt;"&gt;
+                &lt;label&gt;Quantité: &lt;/label&gt;
+                &lt;input type="number" name="quantite" value="1" min="1" max="&lt;?php echo $produit['stock']; ?&gt;"&gt;
+                &lt;button type="submit"&gt;Ajouter au panier&lt;/button&gt;
+            &lt;/form&gt;
+        &lt;/div&gt;
+    &lt;?php endforeach; ?&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+          </div>
+        </div>
+        <div id="panier-panier" class="tab-panel">
+          <h2 style="color: var(--php);">🛒 Gestion du Panier</h2>
+          <p><strong style="color: var(--accent);">Description:</strong> Scripts pour ajouter et gérer les articles dans le panier avec persistance via sessions.</p>
+          <h3 style="color: var(--php2);">1. ajouter_panier.php</h3>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">PHP</span>
+            </div>
+            <pre style="color: var(--text);">&lt;?php
+/**
+ * FICHIER: ajouter_panier.php
+ * ROLE: Ajouter un produit au panier
+ */
+
+session_start();
+
+// ============================================
+// VÉRIFICATION DES DONNÉES
+// ============================================
+if (!isset($_POST['id_produit']) || !isset($_POST['quantite'])) {
+    header("Location: catalogue.php");
+    exit();
+}
+
+$id_produit = (int)$_POST['id_produit'];
+$quantite = (int)$_POST['quantite'];
+
+// ============================================
+// INITIALISER LE PANIER SI NÉCESSAIRE
+// ============================================
+if (!isset($_SESSION['panier'])) {
+    $_SESSION['panier'] = [];
+}
+
+// ============================================
+// AJOUTER OU METTRE À JOUR LE PRODUIT
+// ============================================
+if (isset($_SESSION['panier'][$id_produit])) {
+    // Le produit existe déjà, on ajoute la quantité
+    $_SESSION['panier'][$id_produit] += $quantite;
+} else {
+    // Nouveau produit dans le panier
+    $_SESSION['panier'][$id_produit] = $quantite;
+}
+
+// ============================================
+// REDIRECTION VERS LE CATALOGUE
+// ============================================
+header("Location: catalogue.php?message=Produit ajouté au panier");
+exit();
+?&gt;</pre>
+          </div>
+          <h3 style="color: var(--php2);">2. panier.php - Affichage du panier</h3>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">PHP</span>
+            </div>
+            <pre style="color: var(--text);">&lt;?php
+/**
+ * FICHIER: panier.php
+ * ROLE: Afficher et gérer le contenu du panier
+ */
+
+session_start();
+
+// Catalogue des produits (même que catalogue.php)
+$produits = [
+    1 => ["nom" => "Ordinateur Portable", "prix" => 899.99, "stock" => 5],
+    2 => ["nom" => "Souris Gaming", "prix" => 49.99, "stock" => 12],
+    3 => ["nom" => "Clavier Mécanique", "prix" => 129.99, "stock" => 8]
+];
+
+$total = 0;
+?&gt;
+
+&lt;!DOCTYPE html&gt;
+&lt;html lang="fr"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Mon Panier&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;🛒 Mon Panier&lt;/h1&gt;
+    
+    &lt;a href="catalogue.php"&gt;← Continuer mes achats&lt;/a&gt;
+    
+    &lt;?php if (!isset($_SESSION['panier']) || empty($_SESSION['panier'])): ?&gt;
+        &lt;p&gt;Votre panier est vide.&lt;/p&gt;
+    &lt;?php else: ?&gt;
+        &lt;table border="1"&gt;
+            &lt;tr&gt;
+                &lt;th&gt;Produit&lt;/th&gt;
+                &lt;th&gt;Prix unitaire&lt;/th&gt;
+                &lt;th&gt;Quantité&lt;/th&gt;
+                &lt;th&gt;Total&lt;/th&gt;
+                &lt;th&gt;Actions&lt;/th&gt;
+            &lt;/tr&gt;
+            
+            &lt;?php foreach ($_SESSION['panier'] as $id => $quantite): ?&gt;
+                &lt;?php 
+                $produit = $produits[$id];
+                $sous_total = $produit['prix'] * $quantite;
+                $total += $sous_total;
+                ?&gt;
+                
+                &lt;tr&gt;
+                    &lt;td&gt;&lt;?php echo $produit['nom']; ?&gt;&lt;/td&gt;
+                    &lt;td&gt;&lt;?php echo number_format($produit['prix'], 2); ?&gt; €&lt;/td&gt;
+                    &lt;td&gt;&lt;?php echo $quantite; ?&gt;&lt;/td&gt;
+                    &lt;td&gt;&lt;?php echo number_format($sous_total, 2); ?&gt; €&lt;/td&gt;
+                    &lt;td&gt;
+                        &lt;a href="supprimer_panier.php?id=&lt;?php echo $id; ?&gt;"&gt;Supprimer&lt;/a&gt;
+                    &lt;/td&gt;
+                &lt;/tr&gt;
+            &lt;?php endforeach; ?&gt;
+            
+            &lt;tr&gt;
+                &lt;td colspan="3"&gt;&lt;strong&gt;TOTAL&lt;/strong&gt;&lt;/td&gt;
+                &lt;td colspan="2"&gt;&lt;strong&gt;&lt;?php echo number_format($total, 2); ?&gt; €&lt;/strong&gt;&lt;/td&gt;
+            &lt;/tr&gt;
+        &lt;/table&gt;
+        
+        &lt;br&gt;
+        &lt;a href="valider_commande.php"&gt;✅ Valider ma commande&lt;/a&gt;
+    &lt;?php endif; ?&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+          </div>
+        </div>
+        <div id="panier-session" class="tab-panel">
+          <h2 style="color: var(--php);">💾 Utilisation des Sessions</h2>
+          <p><strong style="color: var(--accent);">Description:</strong> Les sessions permettent de conserver les données du panier entre les pages.</p>
+          <h3 style="color: var(--php2);">supprimer_panier.php</h3>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">PHP</span>
+            </div>
+            <pre style="color: var(--text);">&lt;?php
+/**
+ * FICHIER: supprimer_panier.php
+ * ROLE: Supprimer un article du panier
+ */
+
+session_start();
+
+// Vérifier qu'un ID de produit est fourni
+if (!isset($_GET['id'])) {
+    header("Location: panier.php");
+    exit();
+}
+
+$id_supprimer = (int)$_GET['id'];
+
+// Supprimer le produit du panier
+if (isset($_SESSION['panier'][$id_supprimer])) {
+    unset($_SESSION['panier'][$id_supprimer]);
+}
+
+// Redirection vers le panier
+header("Location: panier.php?message=Produit supprimé");
+exit();
+?&gt;</pre>
+          </div>
+          <h3 style="color: var(--php2);">Pourquoi utiliser les sessions ?</h3>
+          <ul style="color: var(--text);">
+            <li><strong>Persistance:</strong> Les données survivent aux rechargements de page</li>
+            <li><strong>Utilisateur unique:</strong> Chaque visiteur a son propre panier</li>
+            <li><strong>Sécurité:</strong> Données stockées côté serveur</li>
+            <li><strong>Expiration:</strong> Automatique après inactivité</li>
+          </ul>
+        </div>
+        <div id="panier-commande" class="tab-panel">
+          <h2 style="color: var(--php);">✅ Validation de Commande</h2>
+          <p><strong style="color: var(--accent);">Description:</strong> Finalisation de la commande avec calcul des frais et confirmation.</p>
+          <h3 style="color: var(--php2);">valider_commande.php</h3>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">PHP</span>
+            </div>
+            <pre style="color: var(--text);">&lt;?php
+/**
+ * FICHIER: valider_commande.php
+ * ROLE: Traiter et confirmer la commande
+ */
+
+session_start();
+
+// Vérifier qu'il y a des articles dans le panier
+if (!isset($_SESSION['panier']) || empty($_SESSION['panier'])) {
+    header("Location: catalogue.php");
+    exit();
+}
+
+// Catalogue des produits
+$produits = [
+    1 => ["nom" => "Ordinateur Portable", "prix" => 899.99],
+    2 => ["nom" => "Souris Gaming", "prix" => 49.99],
+    3 => ["nom" => "Clavier Mécanique", "prix" => 129.99]
+];
+
+// Calcul du total
+$total = 0;
+foreach ($_SESSION['panier'] as $id => $quantite) {
+    $total += $produits[$id]['prix'] * $quantite;
+}
+
+// Frais de port (exemple simple)
+$frais_port = ($total > 500) ? 0 : 9.99;
+$total_final = $total + $frais_port;
+
+// Simuler l'enregistrement de la commande
+$numero_commande = "CMD" . date("YmdHis") . rand(100, 999);
+
+// Vider le panier après validation
+unset($_SESSION['panier']);
+?&gt;
+
+&lt;!DOCTYPE html&gt;
+&lt;html lang="fr"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Commande Validée&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;✅ Commande Validée !&lt;/h1&gt;
+    
+    &lt;p&gt;&lt;strong&gt;Numéro de commande:&lt;/strong&gt; &lt;?php echo $numero_commande; ?&gt;&lt;/p&gt;
+    &lt;p&gt;&lt;strong&gt;Montant total:&lt;/strong&gt; &lt;?php echo number_format($total_final, 2); ?&gt; €&lt;/p&gt;
+    
+    &lt;h2&gt;Détails de votre commande&lt;/h2&gt;
+    &lt;!-- Ici on pourrait afficher le détail des articles commandés --&gt;
+    
+    &lt;p&gt;Un email de confirmation vous a été envoyé.&lt;/p&gt;
+    
+    &lt;a href="catalogue.php"&gt;Continuer mes achats&lt;/a&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+          </div>
+        </div>
+        <div id="panier-exercices" class="tab-panel">
+          <h2 style="color: var(--php);">🎯 Exercices Pratiques</h2>
+          <h3 style="color: var(--php2);">Exercice 1: Ajouter une réduction</h3>
+          <p style="color: var(--text);"><strong>Objectif:</strong> Appliquer une réduction de 10% si le total dépasse 1000€</p>
+          <div class="code-block">
+            <pre style="color: var(--text);">if ($total > 1000) {
+    $reduction = $total * 0.1;
+    $total_final = $total - $reduction;
+    echo "Réduction appliquée: " . number_format($reduction, 2) . " €";
+}</pre>
+          </div>
+          <h3 style="color: var(--php2);">Exercice 2: Vérification du stock</h3>
+          <p style="color: var(--text);"><strong>Objectif:</strong> Empêcher l'ajout au panier si la quantité demandée dépasse le stock disponible</p>
+          <h3 style="color: var(--php2);">Exercice 3: Code promo</h3>
+          <p style="color: var(--text);"><strong>Objectif:</strong> Ajouter un champ pour saisir un code promo (ex: "PROMO10" = -10€)</p>
+          <h3 style="color: var(--php2);">Exercice 4: Historique des commandes</h3>
+          <p style="color: var(--text);"><strong>Objectif:</strong> Sauvegarder les commandes dans un tableau en session pour les afficher dans un historique</p>
+        </div>
+        <div id="panier-skills-ai" class="tab-panel">
+          <h2 style="color: var(--php);">🤖 Guide des Skills AI - Claude & ExplorIA</h2>
+          <p><strong style="color: var(--accent);">Description:</strong> Guide complet sur les compétences en Intelligence Artificielle avec Claude et ExplorIA</p>
+          <p style="color: var(--text);"><strong>📖 Ce guide couvre :</strong></p>
+          <ul style="color: var(--text);">
+            <li>Les fondamentaux de l'IA conversationnelle</li>
+            <li>Techniques avancées avec Claude</li>
+            <li>Intégration d'ExplorIA dans vos projets</li>
+            <li>Cas d'usage pratiques et exemples</li>
+            <li>Bonnes pratiques et optimisation</li>
+          </ul>
+          
+          <div style="margin: 2rem 0; padding: 1.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 12px;">
+            <h3 style="color: var(--php2);">📄 Guide PDF intégré</h3>
+            <p style="color: var(--muted); margin-bottom: 1rem;">Cliquez ci-dessous pour consulter le guide complet :</p>
+            <a href="file:///Users/admin/Downloads/Guide-Skills-Claude-ExplorIA%20(1).pdf" 
+               target="_blank" 
+               style="display: inline-block; background: var(--php); color: #fff; padding: 0.8rem 1.5rem; 
+                      border-radius: 8px; text-decoration: none; font-weight: 600; transition: opacity 0.2s;">
+              📖 Ouvrir le Guide Skills AI
+            </a>
+          </div>
+          
+          <div style="margin-top: 2rem;">
+            <h3 style="color: var(--php2);">🖥️ Aperçu intégré du PDF</h3>
+            <p style="color: var(--muted); margin-bottom: 1rem;">Visualisation directe du guide (nécessite un navigateur compatible) :</p>
+            <iframe src="file:///Users/admin/Downloads/Guide-Skills-Claude-ExplorIA%20(1).pdf" 
+                    width="100%" 
+                    height="600px" 
+                    style="border: 1px solid var(--border); border-radius: 8px;">
+              <p>Votre navigateur ne supporte pas l'affichage de PDF intégré. 
+              <a href="file:///Users/admin/Downloads/Guide-Skills-Claude-ExplorIA%20(1).pdf">Cliquez ici pour ouvrir le PDF</a></p>
+            </iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Tab switching function
+function switchPanierTab(tabName, btn = null) {
+  // Update sidebar active state
+  document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
+  const sidebarItems = {
+    'intro': 0,
+    'catalogue': 1,
+    'panier': 2,
+    'session': 3,
+    'commande': 4,
+    'exercices': 5,
+    'skills-ai': 6
+  };
+  if (sidebarItems[tabName] !== undefined) {
+    document.querySelectorAll('.sidebar-item')[sidebarItems[tabName]].classList.add('active');
+  }
+
+  // Update tab buttons
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  // Show selected tab
+  document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+  const targetPanel = document.getElementById('panier-' + tabName);
+  if (targetPanel) targetPanel.classList.add('active');
+}
+
+// Initialize the TD on page load
+document.addEventListener('DOMContentLoaded', function() {
+  showTDPanier();
+});
+
+// Print mode function - shows all content for printing
+function printMode() {
+  const container = document.getElementById('lessonContent');
+  container.innerHTML = `
+    <div class="lesson-card visible">
+      <div class="lesson-header">
+        <div class="lesson-icon">🛒</div>
+        <div>
+          <h2>TD Panier d'Achat - Version Complète pour Impression</h2>
+          <span class="tag">Pratique</span>
+        </div>
+      </div>
+      <div class="lesson-body">
+        <!-- INTRO -->
+        <div class="tab-panel active">
+          <h1 style="color: var(--php);">🛒 Système de Panier d'Achat PHP</h1>
+          <p><strong style="color: var(--accent);">Niveau:</strong> Intermédiaire</p>
+          <p><strong style="color: var(--accent);">Objectif:</strong> Créer un système complet de e-commerce avec panier persistant</p>
+          <hr style="border-color: var(--border);">
+          <h2 style="color: var(--php);">📋 Liste des fichiers à créer</h2>
+          <ol style="color: var(--text);">
+            <li><strong>catalogue.php</strong> - Affichage des produits</li>
+            <li><strong>ajouter_panier.php</strong> - Ajout d'articles au panier</li>
+            <li><strong>panier.php</strong> - Affichage et gestion du panier</li>
+            <li><strong>supprimer_panier.php</strong> - Suppression d'articles</li>
+            <li><strong>valider_commande.php</strong> - Finalisation de la commande</li>
+          </ol>
+          <h3 style="color: var(--php2);">Concepts appris:</h3>
+          <ul style="color: var(--text);">
+            <li>Manipulation avancée des tableaux</li>
+            <li>Utilisation des sessions pour la persistance</li>
+            <li>Calculs et opérations mathématiques</li>
+            <li>Gestion des quantités et stocks</li>
+            <li>Redirections et flux utilisateur</li>
+          </ul>
+        </div>
+
+        <!-- CATALOGUE -->
+        <div class="tab-panel active">
+          <h2 style="color: var(--php);">📦 Catalogue de Produits</h2>
+          <p><strong style="color: var(--accent);">Description:</strong> Page d'accueil affichant tous les produits disponibles avec possibilité d'ajout au panier.</p>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">PHP</span>
+            </div>
+            <pre style="color: var(--text);">&lt;?php
+/**
+ * FICHIER: catalogue.php
+ * ROLE: Afficher le catalogue des produits
+ */
+
+// Démarrer la session pour accéder au panier
+session_start();
+
+// ============================================
+// CATALOGUE DE PRODUITS
+// ============================================
+$produits = [
+    [
+        "id" => 1,
+        "nom" => "Ordinateur Portable",
+        "prix" => 899.99,
+        "stock" => 5,
+        "description" => "Ordinateur portable 15.6\" haute performance"
+    ],
+    [
+        "id" => 2,
+        "nom" => "Souris Gaming",
+        "prix" => 49.99,
+        "stock" => 12,
+        "description" => "Souris gaming RGB avec 7 boutons programmables"
+    ],
+    [
+        "id" => 3,
+        "nom" => "Clavier Mécanique",
+        "prix" => 129.99,
+        "stock" => 8,
+        "description" => "Clavier mécanique avec switches bleus"
+    ]
+];
+?&gt;
+
+&lt;!DOCTYPE html&gt;
+&lt;html lang="fr"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Catalogue - Boutique PHP&lt;/title&gt;
+    &lt;style&gt;
+        .produit { border: 1px solid #ddd; padding: 15px; margin: 10px; }
+        .prix { color: green; font-weight: bold; }
+        .stock { color: orange; }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;🛍️ Notre Catalogue&lt;/h1&gt;
+    
+    &lt;!-- Affichage du nombre d'articles dans le panier --&gt;
+    &lt;p&gt;
+        &lt;a href="panier.php"&gt;🛒 Panier&lt;/a&gt; 
+        (&lt;?php echo isset($_SESSION['panier']) ? count($_SESSION['panier']) : 0; ?&gt; articles)
+    &lt;/p&gt;
+
+    &lt;!-- BOUCLE POUR AFFICHER CHAQUE PRODUIT --&gt;
+    &lt;?php foreach ($produits as $produit): ?&gt;
+        &lt;div class="produit"&gt;
+            &lt;h3&gt;&lt;?php echo $produit['nom']; ?&gt;&lt;/h3&gt;
+            &lt;p&gt;&lt;?php echo $produit['description']; ?&gt;&lt;/p&gt;
+            &lt;p class="prix"&gt;&lt;?php echo number_format($produit['prix'], 2); ?&gt; €&lt;/p&gt;
+            &lt;p class="stock"&gt;Stock: &lt;?php echo $produit['stock']; ?&gt;&lt;/p&gt;
+            
+            &lt;!-- FORMULAIRE D'AJOUT AU PANIER --&gt;
+            &lt;form action="ajouter_panier.php" method="POST"&gt;
+                &lt;input type="hidden" name="id_produit" value="&lt;?php echo $produit['id']; ?&gt;"&gt;
+                &lt;label&gt;Quantité: &lt;/label&gt;
+                &lt;input type="number" name="quantite" value="1" min="1" max="&lt;?php echo $produit['stock']; ?&gt;"&gt;
+                &lt;button type="submit"&gt;Ajouter au panier&lt;/button&gt;
+            &lt;/form&gt;
+        &lt;/div&gt;
+    &lt;?php endforeach; ?&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+          </div>
+        </div>
+
+        <!-- GESTION PANIER -->
+        <div class="tab-panel active">
+          <h2 style="color: var(--php);">🛒 Gestion du Panier</h2>
+          <p><strong style="color: var(--accent);">Description:</strong> Scripts pour ajouter et gérer les articles dans le panier avec persistance via sessions.</p>
+          <h3 style="color: var(--php2);">1. ajouter_panier.php</h3>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">PHP</span>
+            </div>
+            <pre style="color: var(--text);">&lt;?php
+/**
+ * FICHIER: ajouter_panier.php
+ * ROLE: Ajouter un produit au panier
+ */
+
+session_start();
+
+// ============================================
+// VÉRIFICATION DES DONNÉES
+// ============================================
+if (!isset($_POST['id_produit']) || !isset($_POST['quantite'])) {
+    header("Location: catalogue.php");
+    exit();
+}
+
+$id_produit = (int)$_POST['id_produit'];
+$quantite = (int)$_POST['quantite'];
+
+// ============================================
+// INITIALISER LE PANIER SI NÉCESSAIRE
+// ============================================
+if (!isset($_SESSION['panier'])) {
+    $_SESSION['panier'] = [];
+}
+
+// ============================================
+// AJOUTER OU METTRE À JOUR LE PRODUIT
+// ============================================
+if (isset($_SESSION['panier'][$id_produit])) {
+    // Le produit existe déjà, on ajoute la quantité
+    $_SESSION['panier'][$id_produit] += $quantite;
+} else {
+    // Nouveau produit dans le panier
+    $_SESSION['panier'][$id_produit] = $quantite;
+}
+
+// ============================================
+// REDIRECTION VERS LE CATALOGUE
+// ============================================
+header("Location: catalogue.php?message=Produit ajouté au panier");
+exit();
+?&gt;</pre>
+          </div>
+          <h3 style="color: var(--php2);">2. panier.php - Affichage du panier</h3>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">PHP</span>
+            </div>
+            <pre style="color: var(--text);">&lt;?php
+/**
+ * FICHIER: panier.php
+ * ROLE: Afficher et gérer le contenu du panier
+ */
+
+session_start();
+
+// Catalogue des produits (même que catalogue.php)
+$produits = [
+    1 => ["nom" => "Ordinateur Portable", "prix" => 899.99, "stock" => 5],
+    2 => ["nom" => "Souris Gaming", "prix" => 49.99, "stock" => 12],
+    3 => ["nom" => "Clavier Mécanique", "prix" => 129.99, "stock" => 8]
+];
+
+$total = 0;
+?&gt;
+
+&lt;!DOCTYPE html&gt;
+&lt;html lang="fr"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Mon Panier&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;🛒 Mon Panier&lt;/h1&gt;
+    
+    &lt;a href="catalogue.php"&gt;← Continuer mes achats&lt;/a&gt;
+    
+    &lt;?php if (!isset($_SESSION['panier']) || empty($_SESSION['panier'])): ?&gt;
+        &lt;p&gt;Votre panier est vide.&lt;/p&gt;
+    &lt;?php else: ?&gt;
+        &lt;table border="1"&gt;
+            &lt;tr&gt;
+                &lt;th&gt;Produit&lt;/th&gt;
+                &lt;th&gt;Prix unitaire&lt;/th&gt;
+                &lt;th&gt;Quantité&lt;/th&gt;
+                &lt;th&gt;Total&lt;/th&gt;
+                &lt;th&gt;Actions&lt;/th&gt;
+            &lt;/tr&gt;
+            
+            &lt;?php foreach ($_SESSION['panier'] as $id => $quantite): ?&gt;
+                &lt;?php 
+                $produit = $produits[$id];
+                $sous_total = $produit['prix'] * $quantite;
+                $total += $sous_total;
+                ?&gt;
+                
+                &lt;tr&gt;
+                    &lt;td&gt;&lt;?php echo $produit['nom']; ?&gt;&lt;/td&gt;
+                    &lt;td&gt;&lt;?php echo number_format($produit['prix'], 2); ?&gt; €&lt;/td&gt;
+                    &lt;td&gt;&lt;?php echo $quantite; ?&gt;&lt;/td&gt;
+                    &lt;td&gt;&lt;?php echo number_format($sous_total, 2); ?&gt; €&lt;/td&gt;
+                    &lt;td&gt;
+                        &lt;a href="supprimer_panier.php?id=&lt;?php echo $id; ?&gt;"&gt;Supprimer&lt;/a&gt;
+                    &lt;/td&gt;
+                &lt;/tr&gt;
+            &lt;?php endforeach; ?&gt;
+            
+            &lt;tr&gt;
+                &lt;td colspan="3"&gt;&lt;strong&gt;TOTAL&lt;/strong&gt;&lt;/td&gt;
+                &lt;td colspan="2"&gt;&lt;strong&gt;&lt;?php echo number_format($total, 2); ?&gt; €&lt;/strong&gt;&lt;/td&gt;
+            &lt;/tr&gt;
+        &lt;/table&gt;
+        
+        &lt;br&gt;
+        &lt;a href="valider_commande.php"&gt;✅ Valider ma commande&lt;/a&gt;
+    &lt;?php endif; ?&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+          </div>
+        </div>
+
+        <!-- SESSIONS -->
+        <div class="tab-panel active">
+          <h2 style="color: var(--php);">💾 Utilisation des Sessions</h2>
+          <p><strong style="color: var(--accent);">Description:</strong> Les sessions permettent de conserver les données du panier entre les pages.</p>
+          <h3 style="color: var(--php2);">supprimer_panier.php</h3>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">PHP</span>
+            </div>
+            <pre style="color: var(--text);">&lt;?php
+/**
+ * FICHIER: supprimer_panier.php
+ * ROLE: Supprimer un article du panier
+ */
+
+session_start();
+
+// Vérifier qu'un ID de produit est fourni
+if (!isset($_GET['id'])) {
+    header("Location: panier.php");
+    exit();
+}
+
+$id_supprimer = (int)$_GET['id'];
+
+// Supprimer le produit du panier
+if (isset($_SESSION['panier'][$id_supprimer])) {
+    unset($_SESSION['panier'][$id_supprimer]);
+}
+
+// Redirection vers le panier
+header("Location: panier.php?message=Produit supprimé");
+exit();
+?&gt;</pre>
+          </div>
+          <h3 style="color: var(--php2);">Pourquoi utiliser les sessions ?</h3>
+          <ul style="color: var(--text);">
+            <li><strong>Persistance:</strong> Les données survivent aux rechargements de page</li>
+            <li><strong>Utilisateur unique:</strong> Chaque visiteur a son propre panier</li>
+            <li><strong>Sécurité:</strong> Données stockées côté serveur</li>
+            <li><strong>Expiration:</strong> Automatique après inactivité</li>
+          </ul>
+        </div>
+
+        <!-- VALIDATION COMMANDE -->
+        <div class="tab-panel active">
+          <h2 style="color: var(--php);">✅ Validation de Commande</h2>
+          <p><strong style="color: var(--accent);">Description:</strong> Finalisation de la commande avec calcul des frais et confirmation.</p>
+          <h3 style="color: var(--php2);">valider_commande.php</h3>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">PHP</span>
+            </div>
+            <pre style="color: var(--text);">&lt;?php
+/**
+ * FICHIER: valider_commande.php
+ * ROLE: Traiter et confirmer la commande
+ */
+
+session_start();
+
+// Vérifier qu'il y a des articles dans le panier
+if (!isset($_SESSION['panier']) || empty($_SESSION['panier'])) {
+    header("Location: catalogue.php");
+    exit();
+}
+
+// Catalogue des produits
+$produits = [
+    1 => ["nom" => "Ordinateur Portable", "prix" => 899.99],
+    2 => ["nom" => "Souris Gaming", "prix" => 49.99],
+    3 => ["nom" => "Clavier Mécanique", "prix" => 129.99]
+];
+
+// Calcul du total
+$total = 0;
+foreach ($_SESSION['panier'] as $id => $quantite) {
+    $total += $produits[$id]['prix'] * $quantite;
+}
+
+// Frais de port (exemple simple)
+$frais_port = ($total > 500) ? 0 : 9.99;
+$total_final = $total + $frais_port;
+
+// Simuler l'enregistrement de la commande
+$numero_commande = "CMD" . date("YmdHis") . rand(100, 999);
+
+// Vider le panier après validation
+unset($_SESSION['panier']);
+?&gt;
+
+&lt;!DOCTYPE html&gt;
+&lt;html lang="fr"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;Commande Validée&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;✅ Commande Validée !&lt;/h1&gt;
+    
+    &lt;p&gt;&lt;strong&gt;Numéro de commande:&lt;/strong&gt; &lt;?php echo $numero_commande; ?&gt;&lt;/p&gt;
+    &lt;p&gt;&lt;strong&gt;Montant total:&lt;/strong&gt; &lt;?php echo number_format($total_final, 2); ?&gt; €&lt;/p&gt;
+    
+    &lt;h2&gt;Détails de votre commande&lt;/h2&gt;
+    &lt;!-- Ici on pourrait afficher le détail des articles commandés --&gt;
+    
+    &lt;p&gt;Un email de confirmation vous a été envoyé.&lt;/p&gt;
+    
+    &lt;a href="catalogue.php"&gt;Continuer mes achats&lt;/a&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+          </div>
+        </div>
+
+        <!-- EXERCICES -->
+        <div class="tab-panel active">
+          <h2 style="color: var(--php);">🎯 Exercices Pratiques</h2>
+          <h3 style="color: var(--php2);">Exercice 1: Ajouter une réduction</h3>
+          <p style="color: var(--text);"><strong>Objectif:</strong> Appliquer une réduction de 10% si le total dépasse 1000€</p>
+          <div class="code-block">
+            <pre style="color: var(--text);">if ($total > 1000) {
+    $reduction = $total * 0.1;
+    $total_final = $total - $reduction;
+    echo "Réduction appliquée: " . number_format($reduction, 2) . " €";
+}</pre>
+          </div>
+          <h3 style="color: var(--php2);">Exercice 2: Vérification du stock</h3>
+          <p style="color: var(--text);"><strong>Objectif:</strong> Empêcher l'ajout au panier si la quantité demandée dépasse le stock disponible</p>
+          <h3 style="color: var(--php2);">Exercice 3: Code promo</h3>
+          <p style="color: var(--text);"><strong>Objectif:</strong> Ajouter un champ pour saisir un code promo (ex: "PROMO10" = -10€)</p>
+          <h3 style="color: var(--php2);">Exercice 4: Historique des commandes</h3>
+          <p style="color: var(--text);"><strong>Objectif:</strong> Sauvegarder les commandes dans un tableau en session pour les afficher dans un historique</p>
+        </div>
+
+        <!-- SKILLS AI -->
+        <div class="tab-panel active">
+          <h2 style="color: var(--php);">🤖 Guide des Skills AI - Claude & ExplorIA</h2>
+          <p><strong style="color: var(--accent);">Description:</strong> Guide complet sur les compétences en Intelligence Artificielle avec Claude et ExplorIA</p>
+          <p style="color: var(--text);"><strong>📖 Ce guide couvre :</strong></p>
+          <ul style="color: var(--text);">
+            <li>Les fondamentaux de l'IA conversationnelle</li>
+            <li>Techniques avancées avec Claude</li>
+            <li>Intégration d'ExplorIA dans vos projets</li>
+            <li>Cas d'usage pratiques et exemples</li>
+            <li>Bonnes pratiques et optimisation</li>
+          </ul>
+          
+          <div style="margin: 2rem 0; padding: 1.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 12px;">
+            <h3 style="color: var(--php2);">📄 Guide PDF intégré</h3>
+            <p style="color: var(--muted); margin-bottom: 1rem;">Cliquez ci-dessous pour consulter le guide complet :</p>
+            <a href="file:///Users/admin/Downloads/Guide-Skills-Claude-ExplorIA%20(1).pdf" 
+               target="_blank" 
+               style="display: inline-block; background: var(--php); color: #fff; padding: 0.8rem 1.5rem; 
+                      border-radius: 8px; text-decoration: none; font-weight: 600; transition: opacity 0.2s;">
+              📖 Ouvrir le Guide Skills AI
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+</script>
+</body>
+</html>

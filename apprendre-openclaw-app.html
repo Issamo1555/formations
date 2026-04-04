@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apprendre OpenClaw — Interactif</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #151820;
+    --card: #1c2030;
+    --border: #272d3f;
+    --php: #10b981;
+    --php2: #34d399;
+    --accent: #f59e0b;
+    --green: #22d3a0;
+    --red: #f87171;
+    --text: #e4e8f7;
+    --muted: #6b7694;
+    --code-bg: #0a0c10;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 2.5rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(13,15,20,0.85);
+    backdrop-filter: blur(12px);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo {
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--php); }
+  .logo em { color: var(--accent); font-style: normal; }
+
+  nav { display: flex; gap: 0.4rem; }
+  nav button {
+    background: none; border: 1px solid transparent;
+    color: var(--muted); padding: 0.4rem 1rem;
+    border-radius: 6px; cursor: pointer;
+    font-family: 'Syne', sans-serif; font-size: 0.85rem;
+    transition: all 0.2s;
+  }
+  nav button:hover { color: var(--text); border-color: var(--border); }
+  nav button.active { color: var(--php); border-color: var(--php); background: rgba(124,109,248,0.1); }
+
+  /* HERO */
+  .hero {
+    text-align: center;
+    padding: 4rem 2rem 2.5rem;
+    background: radial-gradient(ellipse 70% 40% at 50% 0%, rgba(124,109,248,0.18) 0%, transparent 70%);
+  }
+  .hero h1 {
+    font-size: clamp(2.2rem, 6vw, 4rem);
+    font-weight: 800;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #fff 30%, var(--php2) 70%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p { color: var(--muted); margin-top: 0.8rem; font-size: 1rem; }
+
+  .progress-bar-wrap {
+    max-width: 600px; margin: 1.5rem auto 0;
+    background: var(--surface); border-radius: 99px; height: 8px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%; background: linear-gradient(90deg, var(--php), var(--php2));
+    border-radius: 99px; transition: width 0.5s ease;
+    width: 0%;
+  }
+  .progress-label { color: var(--muted); font-size: 0.78rem; margin-top: 0.4rem; text-align: center; }
+
+  /* LAYOUT */
+  .app-body {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: calc(100vh - 200px);
+    max-width: 1200px; margin: 0 auto; padding: 1.5rem;
+    gap: 1.5rem;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1rem 0;
+    height: fit-content;
+    position: sticky; top: 80px;
+  }
+  .sidebar-title {
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 2px;
+    color: var(--muted); text-transform: uppercase;
+    padding: 0 1.2rem; margin-bottom: 0.8rem;
+  }
+  .sidebar-section { margin-bottom: 0.6rem; }
+  .sidebar-category {
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 1px;
+    color: var(--php); text-transform: uppercase;
+    padding: 0.4rem 1.2rem; margin-top: 0.4rem;
+  }
+  .sidebar-item {
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.45rem 1.2rem; cursor: pointer;
+    font-size: 0.83rem; color: var(--muted); border-left: 3px solid transparent;
+    transition: all 0.15s; border-radius: 0 6px 6px 0;
+  }
+  .sidebar-item:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+  .sidebar-item.active { color: var(--text); border-left-color: var(--php); background: rgba(124,109,248,0.1); }
+  .sidebar-item .check { width: 14px; height: 14px; border: 1.5px solid var(--border); border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .sidebar-item.done .check { background: var(--green); border-color: var(--green); }
+  .sidebar-item.done .check::after { content: '✓'; font-size: 9px; color: #000; font-weight: bold; }
+
+  /* MAIN */
+  main { min-width: 0; }
+
+  .lesson-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    display: none;
+  }
+  .lesson-card.visible { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .lesson-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-start; gap: 1rem;
+  }
+  .lesson-icon {
+    width: 44px; height: 44px; border-radius: 10px;
+    background: rgba(124,109,248,0.2); display: flex; align-items: center;
+    justify-content: center; font-size: 1.3rem; flex-shrink: 0;
+  }
+  .lesson-header h2 { font-size: 1.4rem; font-weight: 800; line-height: 1.2; }
+  .lesson-header .tag {
+    display: inline-block; margin-top: 0.3rem;
+    font-size: 0.7rem; font-weight: 600; letter-spacing: 1px;
+    background: rgba(124,109,248,0.15); color: var(--php);
+    padding: 2px 10px; border-radius: 99px; text-transform: uppercase;
+  }
+
+  .lesson-body { padding: 2rem; }
+  .lesson-body p { color: #bcc4de; line-height: 1.75; margin-bottom: 1rem; font-size: 0.93rem; }
+  .lesson-body h3 { font-size: 1rem; font-weight: 700; margin: 1.5rem 0 0.6rem; color: var(--php2); }
+  .lesson-body ul { list-style: none; padding: 0; margin-bottom: 1rem; }
+  .lesson-body ul li { color: #bcc4de; padding: 0.25rem 0; font-size: 0.9rem; display: flex; align-items: flex-start; gap: 0.5rem; }
+  .lesson-body ul li::before { content: '→'; color: var(--php); flex-shrink: 0; margin-top: 1px; }
+
+  /* CODE BLOCK */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin: 1rem 0;
+    overflow: hidden;
+  }
+  .code-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.03);
+  }
+  .code-lang { font-size: 0.72rem; color: var(--php); font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+  .copy-btn {
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    padding: 2px 10px; border-radius: 5px; cursor: pointer; font-size: 0.72rem;
+    font-family: 'Syne', sans-serif; transition: all 0.2s;
+  }
+  .copy-btn:hover { border-color: var(--php); color: var(--php); }
+  pre {
+    padding: 1.2rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    overflow-x: auto;
+    white-space: pre;
+    color: #c9d1f0;
+  }
+  .kw { color: #7c6df8; font-weight: 700; }
+  .fn { color: #f59e0b; }
+  .str { color: #22d3a0; }
+  .cmt { color: #4a5270; font-style: italic; }
+  .var { color: #f87171; }
+  .num { color: #fb923c; }
+
+  /* QUIZ */
+  .quiz-section {
+    margin-top: 2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+  .quiz-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; margin-bottom: 1rem; }
+  .quiz-question { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: var(--text); }
+  .quiz-options { display: grid; gap: 0.6rem; }
+  .quiz-option {
+    background: var(--card); border: 1.5px solid var(--border);
+    color: var(--text); padding: 0.7rem 1rem; border-radius: 8px;
+    cursor: pointer; font-family: 'Syne', sans-serif; font-size: 0.88rem;
+    text-align: left; transition: all 0.2s;
+  }
+  .quiz-option:hover:not(:disabled) { border-color: var(--php); background: rgba(124,109,248,0.08); }
+  .quiz-option.correct { border-color: var(--green); background: rgba(34,211,160,0.1); color: var(--green); }
+  .quiz-option.wrong { border-color: var(--red); background: rgba(248,113,113,0.1); color: var(--red); }
+  .quiz-feedback {
+    margin-top: 0.8rem; padding: 0.7rem 1rem;
+    border-radius: 8px; font-size: 0.88rem; display: none;
+  }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.ok { background: rgba(34,211,160,0.1); color: var(--green); border: 1px solid var(--green); }
+  .quiz-feedback.ko { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid var(--red); }
+
+  /* SANDBOX */
+  .sandbox-section {
+    margin-top: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .sandbox-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.8rem 1.2rem; border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+  }
+  .sandbox-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; }
+  .run-btn {
+    background: var(--php); color: #fff; border: none;
+    padding: 0.4rem 1.2rem; border-radius: 6px; cursor: pointer;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.82rem;
+    transition: opacity 0.2s;
+  }
+  .run-btn:hover { opacity: 0.85; }
+  textarea.code-editor {
+    width: 100%; background: var(--code-bg); color: #c9d1f0;
+    border: none; resize: vertical; padding: 1rem 1.2rem;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
+    line-height: 1.7; outline: none; min-height: 120px;
+  }
+  .sandbox-output {
+    padding: 0.8rem 1.2rem; border-top: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
+    color: var(--green); min-height: 40px; background: rgba(0,0,0,0.3);
+    white-space: pre-wrap;
+  }
+
+  /* NEXT / PREV */
+  .lesson-nav {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 2rem; padding: 1rem 0; border-top: 1px solid var(--border);
+  }
+  .nav-btn {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); padding: 0.6rem 1.4rem; border-radius: 8px;
+    cursor: pointer; font-family: 'Syne', sans-serif; font-weight: 600;
+    font-size: 0.85rem; transition: all 0.2s; display: flex; align-items: center; gap: 0.5rem;
+  }
+  .nav-btn:hover { border-color: var(--php); color: var(--php); }
+  .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .complete-btn {
+    background: var(--php); border: none; color: #fff; padding: 0.6rem 1.6rem;
+    border-radius: 8px; cursor: pointer; font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 0.85rem; transition: opacity 0.2s;
+  }
+  .complete-btn:hover { opacity: 0.85; }
+  .complete-btn.done-state { background: var(--green); }
+
+  /* TABS */
+  .tabs { display: flex; gap: 0.3rem; padding: 0 1.2rem; border-bottom: 1px solid var(--border); margin-bottom: 0; }
+  .tab-btn {
+    background: none; border: none; color: var(--muted);
+    padding: 0.6rem 1rem; cursor: pointer; font-family: 'Syne', sans-serif;
+    font-size: 0.83rem; border-bottom: 2px solid transparent; transition: all 0.2s;
+  }
+  .tab-btn.active { color: var(--php); border-bottom-color: var(--php); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* CHEATSHEET */
+  .cheat-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem; padding: 1.5rem;
+  }
+  .cheat-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    overflow: hidden;
+  }
+  .cheat-card-head {
+    padding: 0.6rem 1rem; background: rgba(124,109,248,0.1);
+    font-size: 0.78rem; font-weight: 700; color: var(--php); letter-spacing: 1px;
+  }
+  .cheat-card pre { padding: 0.8rem 1rem; font-size: 0.78rem; }
+
+  /* SEARCH */
+  .search-wrap { padding: 1.2rem; }
+  .search-input {
+    width: 100%; background: var(--card); border: 1px solid var(--border);
+    color: var(--text); padding: 0.7rem 1rem; border-radius: 8px;
+    font-family: 'Syne', sans-serif; font-size: 0.9rem; outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--php); }
+  .search-input::placeholder { color: var(--muted); }
+
+  @media (max-width: 720px) {
+    .app-body { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+    header { padding: 1rem; }
+    nav { display: none; }
+  }
+
+  /* ===== MODAL INSCRIPTION ===== */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 999;
+    background: rgba(0,0,0,0.82);
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(8px);
+    animation: fadeIn 0.3s ease;
+  }
+  .modal-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.5rem 2.5rem 2rem;
+    max-width: 460px; width: 90%;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(124,109,248,0.15);
+    text-align: center;
+    animation: slideUp 0.4s cubic-bezier(.22,.9,.36,1);
+  }
+  @keyframes slideUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:none; } }
+  .modal-icon { font-size: 3rem; margin-bottom: 1rem; }
+  .modal-box h2 { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.4rem; }
+  .modal-box p { color: var(--muted); font-size: 0.88rem; margin-bottom: 1.8rem; line-height: 1.6; }
+  .modal-field { margin-bottom: 1rem; text-align: left; }
+  .modal-field label { display: block; font-size: 0.78rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.4rem; }
+  .modal-field input {
+    width: 100%; background: var(--surface); border: 1.5px solid var(--border);
+    color: var(--text); padding: 0.75rem 1rem; border-radius: 10px;
+    font-family: 'Syne', sans-serif; font-size: 0.95rem; outline: none;
+    transition: border-color 0.2s;
+  }
+  .modal-field input:focus { border-color: var(--php); }
+  .modal-field input::placeholder { color: var(--muted); }
+  .modal-submit {
+    width: 100%; background: linear-gradient(135deg, var(--php), var(--php2));
+    border: none; color: #fff; padding: 0.85rem;
+    border-radius: 10px; cursor: pointer; font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 1rem; margin-top: 0.5rem;
+    transition: opacity 0.2s, transform 0.15s;
+    box-shadow: 0 4px 20px rgba(124,109,248,0.4);
+  }
+  .modal-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  /* ===== PROGRESS DETAIL ===== */
+  .progress-detail {
+    max-width: 800px; margin: 0 auto; padding: 0 2rem 2rem;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0.8rem;
+  }
+  .cat-progress-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 0.8rem 1rem;
+  }
+  .cat-progress-name { font-size: 0.72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
+  .cat-bar-wrap { background: var(--card); border-radius: 99px; height: 6px; overflow: hidden; }
+  .cat-bar-fill { height: 100%; border-radius: 99px; transition: width 0.5s ease; }
+  .cat-label { display: flex; justify-content: space-between; margin-top: 0.4rem; font-size: 0.72rem; color: var(--muted); }
+  .cat-label strong { color: var(--text); }
+
+  /* ===== HEADER STUDENT BADGE ===== */
+  .student-badge {
+    display: flex; align-items: center; gap: 0.5rem;
+    background: rgba(124,109,248,0.1); border: 1px solid rgba(124,109,248,0.25);
+    border-radius: 99px; padding: 0.3rem 0.8rem 0.3rem 0.4rem;
+    font-size: 0.82rem; cursor: pointer; transition: all 0.2s;
+  }
+  .student-badge:hover { background: rgba(124,109,248,0.18); }
+  .student-avatar {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--php), var(--php2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; font-weight: 800; color: #fff;
+  }
+  .header-right { display: flex; align-items: center; gap: 0.6rem; }
+  .header-progress-mini {
+    font-size: 0.75rem; color: var(--muted); display: flex; align-items: center; gap: 0.4rem;
+  }
+  .mini-ring {
+    width: 28px; height: 28px; position: relative;
+  }
+  .mini-ring svg { transform: rotate(-90deg); }
+  .mini-ring circle { fill: none; stroke-width: 3; }
+  .mini-ring .bg { stroke: var(--border); }
+  .mini-ring .fill { stroke: var(--php); stroke-linecap: round; transition: stroke-dashoffset 0.5s ease; }
+
+  /* ===== CERTIFICATE VIEW ===== */
+  #view-cert {
+    min-height: calc(100vh - 70px);
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(124,109,248,0.12) 0%, transparent 60%);
+    padding: 2rem 1rem 4rem;
+  }
+  .cert-intro {
+    text-align: center; max-width: 600px; margin: 0 auto 3rem;
+  }
+  .cert-intro h2 { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
+  .cert-intro p { color: var(--muted); }
+  .cert-locked {
+    text-align: center; max-width: 500px; margin: 4rem auto;
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 3rem 2rem;
+  }
+  .cert-locked .lock-icon { font-size: 3rem; margin-bottom: 1rem; }
+  .cert-locked h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.6rem; }
+  .cert-locked p { color: var(--muted); font-size: 0.88rem; line-height: 1.6; }
+  .cert-locked .progress-num { font-size: 2.5rem; font-weight: 800; color: var(--php); margin: 1rem 0; }
+
+  /* Certificate card */
+  .cert-wrapper {
+    max-width: 860px; margin: 0 auto;
+  }
+  .cert-actions {
+    display: flex; gap: 0.8rem; justify-content: center; margin-bottom: 2rem; flex-wrap: wrap;
+  }
+  .cert-action-btn {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    padding: 0.6rem 1.4rem; border-radius: 8px; cursor: pointer;
+    font-family: 'Syne', sans-serif; font-weight: 600; font-size: 0.85rem;
+    display: flex; align-items: center; gap: 0.5rem; transition: all 0.2s;
+  }
+  .cert-action-btn:hover { border-color: var(--php); color: var(--php); }
+  .cert-action-btn.primary {
+    background: linear-gradient(135deg, var(--php), var(--php2));
+    border: none; color: #fff;
+    box-shadow: 0 4px 16px rgba(124,109,248,0.35);
+  }
+  .cert-action-btn.primary:hover { opacity: 0.9; color: #fff; }
+
+  /* The actual certificate */
+  #certificateCanvas {
+    width: 100%; border-radius: 16px;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+    display: block;
+  }
+
+  /* Confetti */
+  .confetti-piece {
+    position: fixed; width: 8px; height: 8px; border-radius: 2px;
+    top: -10px; animation: confettiFall linear forwards;
+    pointer-events: none; z-index: 9999;
+  }
+  @keyframes confettiFall {
+    0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.5); }
+    50% { box-shadow: 0 0 0 6px rgba(245,158,11,0); }
+  }
+
+  @media print {
+    header, nav, .cert-actions, .cert-locked, .cert-intro p { display: none !important; }
+    body { background: white; }
+    #view-cert { padding: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== MODAL INSCRIPTION ===== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <div class="modal-icon">🎓</div>
+    <h2>Bienvenue dans la formation</h2>
+    <p>Entrez vos informations pour commencer votre parcours d'apprentissage OpenClaw. Votre certificat sera personnalisé avec votre nom.</p>
+    <div class="modal-field">
+      <label>Prénom</label>
+      <input type="text" id="inputPrenom" placeholder="ex: Alice" autocomplete="given-name">
+    </div>
+    <div class="modal-field">
+      <label>Nom de famille</label>
+      <input type="text" id="inputNom" placeholder="ex: Dupont" autocomplete="family-name">
+    </div>
+    <button class="modal-submit" onclick="startFormation()">🚀 Commencer la formation</button>
+  </div>
+</div>
+
+<header>
+  <div class="logo"><span>[</span>OpenClaw<span>]</span> <em>Apprendre</em></div>
+  <nav>
+    <button class="active" onclick="switchView('learn', this)">📚 Leçons</button>
+    <button onclick="switchView('cheat', this)">📋 Aide-mémoire</button>
+    <button onclick="switchView('quiz-all', this)">🎯 Quiz Rapide</button>
+    <button onclick="switchView('cert', this)" id="certNavBtn">🏆 Certificat</button>
+  </nav>
+  <div class="header-right">
+    <div class="mini-ring" id="miniRing" title="Progression globale">
+      <svg width="28" height="28" viewBox="0 0 28 28">
+        <circle class="bg" cx="14" cy="14" r="11" />
+        <circle class="fill" id="miniRingFill" cx="14" cy="14" r="11"
+          stroke-dasharray="69.1" stroke-dashoffset="69.1"/>
+      </svg>
+    </div>
+    <div class="student-badge" id="studentBadge" onclick="switchView('cert', document.querySelector('nav button:nth-child(4)'))">
+      <div class="student-avatar" id="studentAvatar">?</div>
+      <span id="studentName">Étudiant</span>
+    </div>
+  </div>
+</header>
+
+<!-- LEARN VIEW -->
+<div id="view-learn">
+  <div class="hero">
+    <h1>Maîtriser OpenClaw<br>Votre Assistant IA</h1>
+    <p>Cours interactifs · Exercices pratiques · Quiz intégrés</p>
+    <div class="progress-bar-wrap" style="max-width:700px;">
+      <div class="progress-bar-fill" id="mainProgress"></div>
+    </div>
+    <div class="progress-label" id="progressLabel">0 leçon complétée</div>
+  </div>
+  <div class="progress-detail" id="catProgressGrid"></div>
+
+  <div class="app-body">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main id="lessonContent"></main>
+  </div>
+</div>
+
+<!-- CHEAT VIEW -->
+<div id="view-cheat" style="display:none; max-width:1200px; margin:0 auto; padding:1.5rem;">
+  <h2 style="font-size:1.6rem;font-weight:800;margin-bottom:0.3rem;">Aide-mémoire OpenClaw</h2>
+  <p style="color:var(--muted);margin-bottom:1.5rem;">Les syntaxes essentielles en un coup d'œil</p>
+  <div class="search-wrap" style="padding:0 0 1rem;">
+    <input class="search-input" id="cheatSearch" placeholder="Rechercher une syntaxe..." oninput="filterCheat(this.value)">
+  </div>
+  <div class="cheat-grid" id="cheatGrid"></div>
+</div>
+
+<!-- QUIZ ALL VIEW -->
+<div id="view-quiz-all" style="display:none; max-width:700px; margin:0 auto; padding:2rem 1.5rem;">
+  <h2 style="font-size:1.6rem;font-weight:800;margin-bottom:0.3rem;">Quiz Rapide</h2>
+  <p style="color:var(--muted);margin-bottom:2rem;">Testez vos connaissances sur OpenClaw</p>
+  <div id="quickQuizContainer"></div>
+</div>
+
+<!-- CERTIFICATE VIEW -->
+<div id="view-cert" style="display:none;">
+  <div class="cert-intro">
+    <h2>🏆 Votre Certificat</h2>
+    <p>Complétez toutes les leçons pour débloquer et télécharger votre certificat officiel.</p>
+  </div>
+  <div id="certContent"></div>
+</div>
+
+<script>
+// ===== DATA =====
+const lessons = [
+  {
+    id: 'intro', icon: '🤖', category: 'Découverte', title: 'Qu\'est-ce que OpenClaw ?',
+    tag: 'Débutant',
+    content: `
+      <p><strong>OpenClaw</strong> est une intelligence artificielle personnelle qui fait réellement les choses sur n\'importe quelle plateforme.</p>
+      <h3>Caractéristiques clés</h3>
+      <ul>
+        <li><strong>Fonctionne sur votre machine</strong> : Un contrôle total de votre ordinateur.</li>
+        <li><strong>Intégration d\'applications</strong> : Contrôlez-le via Telegram, Slack, ou Discord.</li>
+        <li><strong>Accès complet au système & Navigateur</strong> : Il peut taper dans le terminal, surfer sur le web et cliquer à votre place.</li>
+      </ul>
+    `,
+    code: `# Installation typique via CLI
+curl -sSL https://openclaw.ai/install.sh | bash
+
+# Lancement
+openclaw start`,
+    sandbox: `> OpenClaw, lance-toi et dis-moi bonjour
+`,
+    quiz: {
+      question: 'Laquelle de ces affirmations sur OpenClaw est vraie ?',
+      options: ['Il ne fonctionne que dans un navigateur web', 'Il fonctionne sur votre propre machine et possède un accès système', 'C\'est uniquement un générateur d\'images', 'Il requiert Windows 11 obligatoirement'],
+      correct: 1,
+      explain: 'OpenClaw se distingue par son accès profond ("Full System Access") à votre machine pour accomplir de vraies tâches.'
+    }
+  },
+  {
+    id: 'memory', icon: '🧠', category: 'Découverte', title: 'Mémoire Persistante',
+    tag: 'Débutant',
+    content: `
+      <p>Contrairement aux agents classiques qui oublient tout à chaque nouvelle conversation, OpenClaw possède une <strong>Mémoire Persistante</strong>.</p>
+      <h3>Comment ça marche ?</h3>
+      <p>Il stocke le contexte, vos préférences et les informations clés des sessions passées (dans une base vectorielle ou un stockage local). Ainsi, il apprend à vous connaître avec le temps.</p>
+    `,
+    code: `// Exemple d'interaction
+USER: "Rappelle-toi que mon projet principal s'appelle Apollo"
+OPENCLAW: "Mémorisé. Le projet principal est Apollo."
+
+USER: "Ouvre mon projet principal"
+OPENCLAW: "Ouverture du dossier du projet Apollo..."`,
+    sandbox: `> OpenClaw, mémorise que je préfère le thème sombre.
+> Quel est mon thème préféré ?`,
+    quiz: {
+      question: 'Quel est l\'avantage principal de la mémoire persistante ?',
+      options: ['Elle accélère le processeur', 'L\'Agent retient vos préférences et historiques entre les sessions', 'Elle permet de jouer à des jeux vidéo', 'Elle empêche la suppression de fichiers'],
+      correct: 1,
+      explain: 'La mémoire persistante évite de devoir répéter sans cesse le même contexte à l\'IA.'
+    }
+  },
+  {
+    id: 'chat_apps', icon: '💬', category: 'Intégrations', title: 'Lien avec les Chat Apps',
+    tag: 'Intermédiaire',
+    content: `
+      <p>Vous n\'avez pas besoin d\'être devant votre terminal ! OpenClaw se connecte aux applications de messagerie (ex: Telegram, WhatsApp, Slack).</p>
+      <h3>Commandement à distance</h3>
+      <p>Vous pouvez lui envoyer un message sur Telegram depuis votre téléphone : <em>"Mets en pause le téléchargement sur mon PC"</em>, et il le fera sur votre ordinateur physique.</p>
+    `,
+    code: `# Relier OpenClaw à Telegram
+openclaw link telegram --token="VOTRE_TOKEN_BOT"
+
+[Telegram] USER: Ouvre Spotify sur mon Mac
+[Telegram] OPENCLAW: Spotify est maintenant ouvert.`,
+    sandbox: `> openclaw link slack --simulate
+`,
+    quiz: {
+      question: 'Pourquoi l\'intégration aux Chat Apps est-elle révolutionnaire pour un agent local ?',
+      options: ['Cela permet de chatter avec ses amis', 'Elle transforme votre téléphone en télécommande universelle pour votre PC via le langage naturel', 'Cela rend le réseau plus rapide', 'Cela permet d\'éviter les virus'],
+      correct: 1,
+      explain: 'Contrôler votre ordinateur distant via un simple message Telegram en langage naturel est l\'une de ses fonctionnalités phares.'
+    }
+  },
+  {
+    id: 'browser_ctrl', icon: '🌍', category: 'Fonctionnalités', title: 'Contrôle du Navigateur',
+    tag: 'Intermédiaire',
+    content: `
+      <p>OpenClaw ne se contente pas de faire des requêtes API sous le capot. Il possède un <strong>Browser Control</strong> (Navigation web automatisée).</p>
+      <h3>Computer Use</h3>
+      <p>Il peut ouvrir Chrome, lire le contenu, cliquer sur des boutons, remplir des formulaires ou extraire des informations d\'un site web qui n\'a pas d\'API.</p>
+    `,
+    code: `USER: "Va sur Amazon et cherche les claviers mécaniques les mieux notés."
+
+OPENCLAW:
+1. Ouverture du navigateur...
+2. Navigation vers Amazon.com...
+3. Recherche de "clavier mécanique"...
+4. Extraction du Top 3...`,
+    sandbox: `> OpenClaw, ouvre duckduckgo et cherche "OpenClaw AI"`,
+    quiz: {
+      question: 'Comment OpenClaw interagit-il avec un site web sans API ?',
+      options: ['Il pirate le site', 'Il contrôle un vrai navigateur pour cliquer et lire la page', 'Il abandonne la tâche', 'Il demande au concepteur du site'],
+      correct: 1,
+      explain: 'Le Browser Control (Puppeteer/Playwright ou Agentic Computer Use) lui permet d\'utiliser le web comme un humain.'
+    }
+  },
+  {
+    id: 'system_access', icon: '💻', category: 'Fonctionnalités', title: 'Full System Access',
+    tag: 'Avancé',
+    content: `
+      <p>OpenClaw agit comme un développeur sur votre OS. Il exécute des commandes CLI, gère les fichiers, démarre des serveurs.</p>
+      <h3>Permissions</h3>
+      <p>Ce niveau d\'accès est puissant mais nécessite un mode de confirmation (Human-in-the-loop) pour les commandes sensibles (ex: <code>rm -rf</code>).</p>
+    `,
+    code: `USER: "Trouve tous les fichiers PDF de plus de 50 Mo sur le bureau et déplace-les dans un dossier 'Archives'."
+
+OPENCLAW: "Exécution de la commande 'find ~/Desktop -name "*.pdf" -size +50M -exec mv {} ~/Desktop/Archives/ \;'... Fait !"`,
+    sandbox: `> Crée un dossier "ProjetIA" et ajoute un fichier README vide dedans.`,
+    quiz: {
+      question: 'Que faut-il surveiller lorsqu\'on donne un "Full System Access" à une IA ?',
+      options: ['La couleur du terminal', 'La sécurité et les validations avant les commandes destructrices', 'L\'heure à laquelle elle travaille', 'Rien, elle ne fait jamais d\'erreur'],
+      correct: 1,
+      explain: 'Il est essentiel d\'avoir une sécurité "Human-in-the-loop" pour empêcher l\'IA d\'effacer ou de modifier accidentellement des fichiers critiques.'
+    }
+  },
+  {
+    id: 'skills', icon: '🧩', category: 'Extensibilité', title: 'Skills & Plugins',
+    tag: 'Avancé',
+    content: `
+      <p>Comme toute bonne plateforme moderne, OpenClaw est extensible. Si une fonctionnalité manque, vous pouvez lui ajouter un <strong>Skill</strong> (Compétence).</p>
+      <h3>Création de Skills</h3>
+      <p>Les outils peuvent être écrits en Python ou en JavaScript, permettant à l\'agent d\'utiliser des bibliothèques externes ou des APIs privées.</p>
+    `,
+    code: `# Ajout d'une compétence existante
+openclaw install skill github-manager
+
+# Utilisation
+USER: "Ferme toutes les issues bloquées sur mon dépôt."`,
+    sandbox: `> openclaw list-skills
+> openclaw install skill weather`,
+    quiz: {
+      question: 'À quoi servent les "Skills" dans OpenClaw ?',
+      options: ['A décorer l\'interface', 'À étendre les capacités de l\'IA avec de nouvelles intégrations ou outils locaux', 'À accélérer le téléchargement', 'À jouer de la musique uniquement'],
+      correct: 1,
+      explain: 'Les Skills ou Plugins sont des morceaux de code qui fournissent de nouveaux "Outils" que l\'agent peut invoquer lors d\'une conversation.'
+    }
+  },
+  {
+    id: 'auto', icon: '⚡', category: 'Usage', title: 'Automatisations Locales',
+    tag: 'Intermédiaire',
+    content: `
+      <p>OpenClaw excelle pour automatiser les tâches chronophages de votre quotidien.</p>
+      <ul>
+        <li>Tri de vos e-mails locaux</li>
+        <li>Renommage en masse de photos</li>
+        <li>Résumé automatique de vos documents Word/PDF locaux</li>
+      </ul>
+    `,
+    code: `USER: "Lis le PDF 'Rapport_Finances.pdf' sur mon bureau et fais-moi un résumé en 3 points."
+OPENCLAW: "Outil PDFReader utilisé... Voici le résumé :
+1. Les revenus ont augmenté de 10%.
+2. Les coûts fixes sont stables.
+3. Recommandation d'investissement dans l'IA."`,
+    sandbox: `> Résume le contenu de dossier "Téléchargements" en m'indiquant les fichiers les plus lourds.`,
+    quiz: {
+      question: 'Quel type de tâche OpenClaw est-il parfaitement calibré pour accomplir localement ?',
+      options: ['Renommer ou trier des dizaines de fichiers selon leur contenu', 'Afficher des films 3D', 'Réparer le hardware', 'Nettoyer l\'écran fysisquement'],
+      correct: 0,
+      explain: 'Grâce à son accès système et sa compréhension du langage, l\'automatisation de l\'organisation des fichiers est l\'un de ses meilleurs atouts.'
+    }
+  },
+  {
+    id: 'privacy', icon: '🛡️', category: 'Sécurité', title: 'Confidentialité et Local-First',
+    tag: 'Débutant',
+    content: `
+      <p>Avec l\'IA, la confidentialité des données est primordiale.</p>
+      <h3>Local-First</h3>
+      <p>Parce qu\'OpenClaw s\'exécute sur votre machine, vos fichiers ne sont pas téléchargés sur un serveur distant à votre insu. Vous pouvez même le coupler à un modèle LLM local (ex: Ollama, Llama.cpp) pour une confidentialité totale, sans Internet.</p>
+    `,
+    code: `# Lancement avec un modèle strictement local
+openclaw start --model=ollama/llama3-8b
+
+OPENCLAW: "Prêt. Fonctionnement sans connexion Cloud."`,
+    sandbox: `> status 
+// Vérifiez les paramètres de confidentialité actuels`,
+    quiz: {
+      question: 'Comment peut-on garantir une confidentialité totale avec OpenClaw ?',
+      options: ['En éteignant l\'écran', 'En utilisant un Modèle LLM local (comme Ollama) au lieu d\'une API cloud (comme OpenAI)', 'En tapant les requêtes très vite', 'En écrivant en majuscules'],
+      correct: 1,
+      explain: 'L\'association d\'un Agent local (OpenClaw) et d\'un Modèle local (Ollama) garantit que strictement aucune donnée ne quitte votre ordinateur.'
+    }
+  },
+  {
+    id: 'dev', icon: '🛠️', category: 'Expert', title: 'Dev & API usage',
+    tag: 'Expert',
+    content: `
+      <p>Pour les développeurs, OpenClaw n\'est pas juste un chat. C\'est un moteur d\'exécution.</p>
+      <h3>Utilisation Headless</h3>
+      <p>Vous pouvez l\'appeler via une API REST locale ou au sein d\'un script Python pour déléguer des tâches complexes dans vos propres applications.</p>
+    `,
+    code: `import openclaw
+
+agent = openclaw.Agent()
+response = agent.run("Construis une app React simple avec un bouton bleu")
+print("L'agent a terminé:", response)`,
+    sandbox: `> generate_script("backup_bdd.sh") qui fait un dump postgres.`,
+    quiz: {
+      question: 'Que signifie une exécution "Headless" ?',
+      options: ['Sans tête', 'Exécution en arrière-plan (sans interface graphique/chat visible) activée par API', 'Sans connexion internet', 'Sans l\'utilisation de variables'],
+      correct: 1,
+      explain: '"Headless" signifie programmer et utiliser l\'agent en arrière-plan via du code ou des requêtes HTTP, sans passer par son interface de Chat.'
+    }
+  },
+  {
+    id: 'future', icon: '🚀', category: 'Conclusion', title: 'Le Futur des Agents Personnels',
+    tag: 'Expert',
+    content: `
+      <p>OpenClaw représente la première étape vers des systèmes d\'exploitation dirigés par l\'Interface Naturelle (Langage).</p>
+      <p>Bientôt, nous ne chercherons plus l\'application adaptée à notre besoin : l\'agent la manipulera ou la créera à la volée pour nous.</p>
+      <p>Félicitations, vous maîtrisez les concepts fondamentaux d\'OpenClaw !</p>
+    `,
+    code: `USER: "Merci pour ton aide aujourd'hui."
+OPENCLAW: "De rien ! Je passe en mode veille. En attente de nouvelles tâches."`,
+    sandbox: `> Écris un mot de conclusion motivant pour ma formation OpenClaw.`,
+    quiz: {
+      question: 'Quelle est la vision long-terme des agents comme OpenClaw ?',
+      options: ['Remplacer le clavier et la souris par des interfaces basées sur les intentions et le langage naturel', 'Supprimer tous les ordinateurs', 'Créer un internet privé', 'Limiter l\'utilisation de l\'IA'],
+      correct: 0,
+      explain: 'La vision est de transformer notre relation à l\'ordinateur : passer de l\'utilisation d\'outils (clics) à la délégation de tâches par intention (langage).'
+    }
+  }
+];
+const cheatData = [
+  { title: 'Installation', code: `curl -sSL https://openclaw.ai/install.sh | bash` },
+  { title: 'Démarrage Local', code: `openclaw start
+openclaw start --model ollama/llama3` },
+  { title: 'Commandes de base', code: `> Ouvre mon navigateur
+> Résume le fichier document.txt
+> Envoie un message à Alice sur Telegram` },
+  { title: 'Liaison Chat', code: `openclaw link telegram
+openclaw link slack` },
+  { title: 'Gestion des Skills', code: `openclaw list-skills
+openclaw install skill github` },
+  { title: 'Mise à jour Contextuelle', code: `> Oublie cette conversation
+> Mémorise que mon dossier de test est /tmp/test` }
+];
+const quickQuizzes = [
+  { q: 'C\'est quoi OpenClaw?', opts: ['Un langage de programmation', 'Un assistant IA personnel avec accès système/navigateur', 'Un éditeur de code', 'Un modèle LLM exclusif'], ans: 1 },
+  { q: 'Comment le lier à son téléphone ?', opts: ['Par Bluetooth', 'Par câble USB', 'Via l\'intégration Chat Apps (ex: Telegram/Slack)', 'Impossible'], ans: 2 },
+  { q: 'Qu\'est-ce que le mode Local-First assure ?', opts: ['Que l\'IA est plus intelligente', 'Que les données vocales sont sauvegardées', 'La plus haute confidentialité (les données ne quittent pas la machine)', 'L\'impression locale'], ans: 2 }
+];
+// ===== STATE =====
+let currentLesson = 0;
+let completed = new Set();
+let quizAnswered = {};
+let studentPrenom = '';
+let studentNom = '';
+
+// ===== MODAL =====
+function startFormation() {
+  const p = document.getElementById('inputPrenom').value.trim();
+  const n = document.getElementById('inputNom').value.trim();
+  if (!p || !n) {
+    document.getElementById('inputPrenom').style.borderColor = p ? '' : 'var(--red)';
+    document.getElementById('inputNom').style.borderColor = n ? '' : 'var(--red)';
+    return;
+  }
+  studentPrenom = p; studentNom = n;
+  document.getElementById('studentAvatar').textContent = (p[0]+n[0]).toUpperCase();
+  document.getElementById('studentName').textContent = p + ' ' + n;
+  document.getElementById('modalOverlay').style.display = 'none';
+  init();
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('modalOverlay').style.display !== 'none') startFormation();
+});
+
+// ===== INIT =====
+function init() {
+  buildSidebar(); showLesson(0); buildCheat(); buildQuickQuiz(); updateProgress();
+}
+
+// ===== SIDEBAR =====
+function buildSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  let html = '<div class="sidebar-title">Curriculum</div>';
+  let lastCat = '';
+  lessons.forEach((l, i) => {
+    if (l.category !== lastCat) { html += `<div class="sidebar-category">${l.category}</div>`; lastCat = l.category; }
+    const isDone = completed.has(l.id) ? 'done' : '';
+    const isActive = i === currentLesson ? 'active' : '';
+    html += `<div class="sidebar-item ${isDone} ${isActive}" id="si-${i}" onclick="showLesson(${i})"><span class="check"></span>${l.icon} ${l.title}</div>`;
+  });
+  sidebar.innerHTML = html;
+}
+
+// ===== LESSON =====
+function showLesson(idx) {
+  currentLesson = idx;
+  const l = lessons[idx];
+  const container = document.getElementById('lessonContent');
+  const isDone = completed.has(l.id);
+  container.innerHTML = `
+    <div class="lesson-card visible">
+      <div class="lesson-header">
+        <div class="lesson-icon">${l.icon}</div>
+        <div>
+          <h2>${l.title}</h2>
+          <span class="tag">${l.tag}</span>
+        </div>
+      </div>
+      <div style="border-bottom:1px solid var(--border)">
+        <div class="tabs" id="lessonTabs">
+          <button class="tab-btn active" onclick="switchTab('theory',this)">📖 Cours</button>
+          <button class="tab-btn" onclick="switchTab('code',this)">💻 Exemple</button>
+          <button class="tab-btn" onclick="switchTab('sandbox',this)">🧪 Exercice</button>
+          <button class="tab-btn" onclick="switchTab('quiz',this)">❓ Quiz</button>
+        </div>
+      </div>
+      <div class="lesson-body">
+        <div id="panel-theory" class="tab-panel active">${l.content}</div>
+        <div id="panel-code" class="tab-panel">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-lang">CLI</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copier</button>
+            </div>
+            <pre>${l.code}</pre>
+          </div>
+        </div>
+        <div id="panel-sandbox" class="tab-panel">
+          <div class="sandbox-section">
+            <div class="sandbox-header">
+              <span class="sandbox-title">🧪 Terminal OpenClaw Simulé</span>
+              <button class="run-btn" onclick="runCode()">▶ Exécuter</button>
+            </div>
+            <textarea class="code-editor" id="sandboxCode">${l.sandbox}</textarea>
+            <div class="sandbox-output" id="sandboxOutput">→ Cliquez sur Exécuter pour voir le résultat...</div>
+          </div>
+        </div>
+        <div id="panel-quiz" class="tab-panel">
+          <div class="quiz-section">
+            <div class="quiz-title">🎯 Quiz</div>
+            <div class="quiz-question">${l.quiz.question}</div>
+            <div class="quiz-options" id="quizOptions">
+              ${l.quiz.options.map((o, i) => `<button class="quiz-option" onclick="checkAnswer(${i}, ${l.quiz.correct}, '${escStr(l.quiz.explain)}')">${o}</button>`).join('')}
+            </div>
+            <div class="quiz-feedback" id="quizFeedback"></div>
+          </div>
+        </div>
+        <div class="lesson-nav">
+          <button class="nav-btn" onclick="showLesson(${idx-1})" ${idx===0?'disabled':''}>← Précédent</button>
+          <button class="complete-btn ${isDone?'done-state':''}" onclick="markDone('${l.id}')">
+            ${isDone ? '✓ Complété' : 'Marquer comme complété'}
+          </button>
+          <button class="nav-btn" onclick="showLesson(${idx+1})" ${idx===lessons.length-1?'disabled':''}>Suivant →</button>
+        </div>
+      </div>
+    </div>
+  `;
+  buildSidebar();
+  updateProgress();
+}
+
+function escStr(s){ return s.replace(/'/g,"&#39;"); }
+
+function switchTab(panel, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + panel).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ===== QUIZ =====
+function checkAnswer(idx, correct, explain) {
+  const opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(o => o.disabled = true);
+  opts[correct].classList.add('correct');
+  if (idx !== correct) opts[idx].classList.add('wrong');
+  const fb = document.getElementById('quizFeedback');
+  fb.className = 'quiz-feedback show ' + (idx === correct ? 'ok' : 'ko');
+  fb.textContent = idx === correct ? '✓ Correct ! ' + explain : '✗ ' + explain;
+}
+
+// ===== SANDBOX =====
+function runCode() {
+  const code = document.getElementById('sandboxCode').value;
+  const output = document.getElementById('sandboxOutput');
+  output.textContent = '';
+  try {
+    const result = simulateOpenClaw(code);
+    output.textContent = result || '(aucun affichage)';
+  } catch(e) {
+    output.style.color = 'var(--red)';
+    output.textContent = 'Erreur : ' + e.message;
+    output.style.color = 'var(--red)';
+    setTimeout(() => output.style.color = 'var(--green)', 1000);
+  }
+}
+
+function simulateOpenClaw(code) {
+  const req = code.trim().replace(/^>\s*/, '');
+  if(!req) return "(En attente de commande...)";
+  
+  if(req.toLowerCase().includes('bonjour')) return "🤖 OpenClaw Assistant: Bonjour ! Je suis en ligne sur votre système et prêt à exécuter des commandes.";
+  if(req.toLowerCase().includes('mémorise') || req.toLowerCase().includes('préfère')) return "🧠 OpenClaw: J'ai bien indexé cette information dans ma Mémoire Persistante.";
+  if(req.toLowerCase().includes('thème')) return "🧠 OpenClaw: D'après ma mémoire, vous préférez le thème sombre.";
+  if(req.toLowerCase().includes('slack') || req.toLowerCase().includes('telegram')) return "🔗 OpenClaw: Demande d'intégration Chat requise.\n[Simulation] Agent relé en mode écoute distante.";
+  if(req.toLowerCase().includes('duckduckgo') || req.toLowerCase().includes('ouvre')) return "🌍 OpenClaw: J'ouvre le navigateur Chromium invisible... Recherche en cours... Voici les 3 premiers résultats trouvés.";
+  if(req.toLowerCase().includes('dossier') || req.toLowerCase().includes('crée')) return "💻 OpenClaw: Exécution système -> `mkdir ProjetIA && touch ProjetIA/README.md`. Fait avec succès.";
+  if(req.toLowerCase().includes('skill')) return "🧩 OpenClaw: Outil 'weather' installé localement. Je peux maintenant vérifier la météo.";
+  if(req.toLowerCase().includes('résume') || req.toLowerCase().includes('pdf') || req.toLowerCase().includes('fichiers')) return "⚡ OpenClaw: Analyse du répertoire... Le plus lourd est 'film.mp4' (2Go).";
+  if(req.toLowerCase().includes('generate') || req.toLowerCase().includes('bash')) return "🛠️ OpenClaw: Script généré et sauvegardé. Exécutez ./backup_bdd.sh pour lancer le dump.";
+  
+  return "⚡ OpenClaw a analysé votre intention : [ " + req + " ]\n(Action simulée réussie dans l'environnement virtuel)";
+}
+
+function simulateOpenClawSub(code, vars, callFn, evalExpr) {
+  let out = '';
+  for (const line of code.split('\n')) {
+    const l = line.trim();
+    if (!l || l.startsWith('//')) continue;
+    if (/^echo\s+(.+);$/.test(l)) {
+      const val = evalExpr(l.match(/^echo\s+(.+);$/)[1]);
+      out += String(val===null?'':val===true?'1':val===false?'':val);
+    } else if (/^\$(\w+)\s*=\s*(.+);$/.test(l)) {
+      const m=l.match(/^\$(\w+)\s*=\s*(.+);$/); vars[m[1]]=evalExpr(m[2]);
+    }
+  }
+  return out;
+}
+
+// ===== COMPLETE =====
+function markDone(id) {
+  completed.add(id);
+  const btn = document.querySelector('.complete-btn');
+  if(btn){ btn.textContent='✓ Complété'; btn.classList.add('done-state'); }
+  buildSidebar(); updateProgress();
+  if (completed.size === lessons.length) {
+    setTimeout(() => launchConfetti(), 300);
+    setTimeout(() => showCompletionBanner(), 900);
+  }
+}
+
+function showCompletionBanner() {
+  // Mettre en avant le bouton certificat
+  const certBtn = document.getElementById('certNavBtn');
+  certBtn.style.cssText += 'background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#000;font-weight:800;border:none;animation:pulse 1.5s infinite;';
+  certBtn.textContent = '🏆 Certificat prêt !';
+
+  // Bannière en bas de l'écran
+  const existing = document.getElementById('completionBanner');
+  if (existing) existing.remove();
+  const banner = document.createElement('div');
+  banner.id = 'completionBanner';
+  banner.style.cssText = `
+    position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);z-index:9998;
+    background:linear-gradient(135deg,#0f2a1e,#1a3a28);
+    border:1px solid #22d3a0;color:#fff;
+    padding:1.1rem 2rem;border-radius:16px;font-weight:700;font-size:0.95rem;
+    box-shadow:0 8px 40px rgba(34,211,160,0.35),0 0 0 1px rgba(34,211,160,0.2);
+    display:flex;align-items:center;gap:1.2rem;min-width:340px;
+    animation:slideUp 0.5s cubic-bezier(.22,.9,.36,1);
+  `;
+  banner.innerHTML = `
+    <span style="font-size:1.8rem;">🎉</span>
+    <div>
+      <div style="font-size:1rem;font-weight:800;color:#22d3a0;">Félicitations, ${studentPrenom} !</div>
+      <div style="font-size:0.82rem;font-weight:400;color:rgba(200,230,220,0.8);margin-top:2px;">Formation PHP complétée — votre certificat est prêt</div>
+    </div>
+    <button onclick="switchView('cert',document.getElementById('certNavBtn'));document.getElementById('completionBanner').remove();"
+      style="background:#22d3a0;color:#000;border:none;padding:0.5rem 1.1rem;border-radius:8px;
+             cursor:pointer;font-family:'Syne',sans-serif;font-weight:800;font-size:0.82rem;white-space:nowrap;flex-shrink:0;">
+      Voir → 
+    </button>
+    <button onclick="this.parentElement.remove();"
+      style="background:none;border:none;color:rgba(200,230,220,0.5);cursor:pointer;font-size:1.1rem;line-height:1;padding:0 0.2rem;flex-shrink:0;">✕</button>
+  `;
+  document.body.appendChild(banner);
+}
+
+// ===== PROGRESS =====
+function updateProgress() {
+  const pct = Math.round((completed.size/lessons.length)*100);
+  const bar=document.getElementById('mainProgress'); if(bar) bar.style.width=pct+'%';
+  const lbl=document.getElementById('progressLabel'); if(lbl) lbl.textContent=completed.size+' / '+lessons.length+' leçon'+(completed.size>1?'s':'')+' complétée'+(completed.size>1?'s':'')+' — '+pct+'%';
+  const ring=document.getElementById('miniRingFill'); if(ring) ring.style.strokeDashoffset=(2*Math.PI*11)*(1-pct/100);
+  buildCatProgress();
+  const certBtn=document.getElementById('certNavBtn'); if(certBtn) certBtn.style.opacity=completed.size===lessons.length?'1':'0.5';
+}
+
+function buildCatProgress() {
+  const grid=document.getElementById('catProgressGrid'); if(!grid) return;
+  const cats={}; lessons.forEach(l=>{if(!cats[l.category])cats[l.category]={total:0,done:0};cats[l.category].total++;if(completed.has(l.id))cats[l.category].done++;});
+  const colors=['#7c6df8','#f59e0b','#22d3a0','#f87171','#38bdf8','#a78bfa','#fb923c']; let ci=0;
+  grid.innerHTML=Object.entries(cats).map(([cat,data])=>{
+    const p=Math.round((data.done/data.total)*100); const color=colors[ci++%colors.length];
+    return `<div class="cat-progress-card"><div class="cat-progress-name">${cat}</div><div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:${p}%;background:${color}"></div></div><div class="cat-label"><span>${data.done}/${data.total} leçons</span><strong>${p}%</strong></div></div>`;
+  }).join('');
+}
+
+// ===== CERTIFICATE =====
+function renderCertView() {
+  const container=document.getElementById('certContent');
+  const allDone=completed.size===lessons.length;
+  if(!allDone){
+    const pct=Math.round((completed.size/lessons.length)*100);
+    const rem=lessons.length-completed.size;
+    const cats={};
+    lessons.forEach(l=>{if(!cats[l.category])cats[l.category]={total:0,done:0,color:catColor(l.category)};cats[l.category].total++;if(completed.has(l.id))cats[l.category].done++;});
+    const catBars=Object.entries(cats).map(([name,c])=>{
+      const cp=Math.round(c.done/c.total*100);
+      return `<div style="margin-bottom:0.6rem;">
+        <div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:4px;"><span style="color:var(--muted)">${name}</span><span style="color:var(--text);font-weight:700;">${c.done}/${c.total}</span></div>
+        <div style="background:var(--border);border-radius:99px;height:5px;overflow:hidden;">
+          <div style="height:100%;width:${cp}%;background:${c.color};border-radius:99px;transition:width 0.5s;"></div>
+        </div>
+      </div>`;
+    }).join('');
+
+    container.innerHTML=`
+      <div class="cert-locked">
+        <div class="lock-icon">🔒</div>
+        <h3>Certificat verrouillé</h3>
+        <div class="progress-num">${pct}%</div>
+        <p>Il vous reste <strong>${rem} leçon${rem>1?'s':''}</strong> à compléter pour débloquer le certificat de <strong>${studentPrenom} ${studentNom}</strong>.</p>
+        <div style="text-align:left;margin:1.5rem 0 0;">
+          <div style="font-size:0.7rem;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:0.8rem;">Progression par module</div>
+          ${catBars}
+        </div>
+        <button onclick="switchView('learn',document.querySelector('nav button'))" style="margin-top:1rem;background:var(--php);border:none;color:#fff;padding:0.7rem 2rem;border-radius:8px;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem;width:100%;">
+          Reprendre la formation →
+        </button>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML=`
+    <div class="cert-wrapper">
+      <div style="text-align:center;margin-bottom:1.5rem;">
+        <div style="font-size:0.75rem;font-weight:700;letter-spacing:2px;color:var(--green);text-transform:uppercase;margin-bottom:0.4rem;">🎉 Formation complète — Félicitations ${studentPrenom} !</div>
+      </div>
+      <div class="cert-actions">
+        <button class="cert-action-btn" onclick="downloadCert()">⬇ Télécharger PNG</button>
+        <button class="cert-action-btn primary" onclick="printCert()">🖨 Imprimer / Exporter PDF</button>
+      </div>
+      <canvas id="certificateCanvas"></canvas>
+    </div>`;
+  setTimeout(drawCertificate, 120);
+}
+
+function catColor(cat){
+  return {'Introduction':'#7c6df8','Bases du langage':'#f59e0b','Web avec PHP':'#22d3a0','POO':'#f87171','Sécurité':'#60a5fa'}[cat]||'#a78bfa';
+}
+
+function drawCertificate(){
+  const canvas=document.getElementById('certificateCanvas'); if(!canvas)return;
+  const W=1200,H=850; canvas.width=W; canvas.height=H; canvas.style.width='100%';
+  const ctx=canvas.getContext('2d');
+
+  // ── Fond dégradé premium ──
+  const bg=ctx.createLinearGradient(0,0,W,H);
+  bg.addColorStop(0,'#08090f'); bg.addColorStop(0.5,'#0d1022'); bg.addColorStop(1,'#08090f');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+  // ── Grille de points décorative ──
+  ctx.fillStyle='rgba(124,109,248,0.05)';
+  for(let x=30;x<W;x+=45) for(let y=30;y<H;y+=45){
+    ctx.beginPath();ctx.arc(x,y,1.2,0,Math.PI*2);ctx.fill();
+  }
+
+  // ── Halos de lumière ──
+  [[180,180,280,'rgba(124,109,248,0.14)'],[W-180,H-180,240,'rgba(245,158,11,0.10)'],[W/2,H/2,400,'rgba(34,211,160,0.05)']].forEach(([gx,gy,gr,gc])=>{
+    const g=ctx.createRadialGradient(gx,gy,0,gx,gy,gr); g.addColorStop(0,gc);g.addColorStop(1,'transparent');
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(gx,gy,gr,0,Math.PI*2);ctx.fill();
+  });
+
+  // ── Bordures doubles ──
+  const border=(inset,lw,col)=>{ctx.strokeStyle=col;ctx.lineWidth=lw;rrect(ctx,inset,inset,W-inset*2,H-inset*2,16);ctx.stroke();};
+  border(20,3,'#f59e0b'); border(28,1,'rgba(245,158,11,0.28)');
+
+  // ── Coins Art Déco ──
+  [[24,24,40,0],[W-24,24,-40,0],[24,H-24,40,Math.PI],[W-24,H-24,-40,Math.PI]].forEach(([cx,cy,s])=>{
+    ctx.save();ctx.translate(cx,cy);ctx.strokeStyle='#f59e0b';ctx.lineWidth=2.5;
+    ctx.beginPath();ctx.moveTo(Math.sign(s)*Math.abs(s),0);ctx.lineTo(0,0);ctx.lineTo(0,Math.sign(cy<H/2?1:-1)*Math.abs(s));ctx.stroke();
+    ctx.restore();
+  });
+
+  // ── Lignes séparatrices dégradées ──
+  const hline=(y,alpha=0.35)=>{
+    const g=ctx.createLinearGradient(80,y,W-80,y);
+    g.addColorStop(0,'transparent');g.addColorStop(0.3,`rgba(245,158,11,${alpha})`);g.addColorStop(0.7,`rgba(124,109,248,${alpha})`);g.addColorStop(1,'transparent');
+    ctx.strokeStyle=g;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(80,y);ctx.lineTo(W-80,y);ctx.stroke();
+  };
+
+  // ── Badge PHP en haut ──
+  ctx.save();
+  ctx.shadowColor='#7c6df8';ctx.shadowBlur=30;
+  ctx.fillStyle='rgba(124,109,248,0.12)';ctx.strokeStyle='rgba(124,109,248,0.5)';ctx.lineWidth=1.5;
+  rrect(ctx,W/2-72,46,144,42,21);ctx.fill();ctx.stroke();
+  ctx.font='bold 17px "Courier New",monospace';ctx.fillStyle='#a78bfa';ctx.textAlign='center';ctx.fillText('OpenClaw Agent', W/2, 74);
+  ctx.restore();
+
+  // ── "CERTIFICAT DE RÉUSSITE" ──
+  ctx.save();
+  ctx.font='900 13px Arial,sans-serif';ctx.fillStyle='#f59e0b';ctx.textAlign='center';ctx.letterSpacing='8px';
+  ctx.fillText('CERTIFICAT  DE  RÉUSSITE',W/2,138);
+  ctx.restore();
+
+  hline(158,0.4);
+
+  // ── Étoiles décoratives ──
+  const star=(x,y,sz,col)=>{ctx.font=sz+'px serif';ctx.fillStyle=col;ctx.textAlign='center';ctx.fillText('★',x,y);};
+  star(W/2-170,155,18,'rgba(245,158,11,0.5)'); star(W/2+170,155,18,'rgba(245,158,11,0.5)');
+
+  // ── "Ce certificat est décerné à" ──
+  ctx.font='italic 19px Georgia,serif';ctx.fillStyle='rgba(160,170,210,0.7)';ctx.textAlign='center';
+  ctx.fillText('Ce certificat est décerné à', W/2, 215);
+
+  // ── NOM en grand ──
+  const fullName = studentPrenom + ' ' + studentNom.toUpperCase();
+  ctx.save();
+  ctx.shadowColor='rgba(245,158,11,0.5)';ctx.shadowBlur=35;
+  const nameGrad=ctx.createLinearGradient(W/2-380,0,W/2+380,0);
+  nameGrad.addColorStop(0,'#f59e0b');nameGrad.addColorStop(0.5,'#ffffff');nameGrad.addColorStop(1,'#f59e0b');
+  ctx.fillStyle=nameGrad;ctx.font='bold 62px Georgia,serif';ctx.textAlign='center';
+  ctx.fillText(fullName,W/2,305);
+  ctx.restore();
+
+  // Soulignement doré du nom
+  const nmW=Math.min(ctx.measureText(fullName).width*0.72,700);
+  const ulG=ctx.createLinearGradient(W/2-nmW/2,0,W/2+nmW/2,0);
+  ulG.addColorStop(0,'transparent');ulG.addColorStop(0.5,'rgba(245,158,11,0.7)');ulG.addColorStop(1,'transparent');
+  ctx.strokeStyle=ulG;ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(W/2-nmW/2,320);ctx.lineTo(W/2+nmW/2,320);ctx.stroke();
+
+  hline(348,0.35);
+
+  // ── Corps du texte ──
+  ctx.font='italic 19px Georgia,serif';ctx.fillStyle='rgba(160,170,210,0.75)';ctx.textAlign='center';
+  ctx.fillText('pour avoir suivi et complété avec succès la formation', W/2, 395);
+
+  ctx.save();
+  ctx.shadowColor='rgba(124,109,248,0.4)';ctx.shadowBlur=18;
+  const titleG=ctx.createLinearGradient(W/2-340,0,W/2+340,0);
+  titleG.addColorStop(0,'#7c6df8');titleG.addColorStop(0.5,'#c4b5fd');titleG.addColorStop(1,'#7c6df8');
+  ctx.fillStyle=titleG;ctx.font='bold 36px Arial,sans-serif';ctx.textAlign='center';
+  ctx.fillText("Maîtrise de l'IA OpenClaw", W/2, 445);
+  ctx.restore();
+
+  ctx.font='15px Arial,sans-serif';ctx.fillStyle='rgba(130,140,185,0.7)';ctx.textAlign='center';
+  ctx.fillText('Introduction · Variables & Constantes · Tableaux · Opérateurs · Conditions · Boucles · Fonctions · Formulaires · Cookies · Sessions · POO · Sécurité',W/2,482);
+
+  // ── 3 Badges de stats ──
+  const total=lessons.length; const done=completed.size; const pct=Math.round(done/total*100);
+  const stats=[{icon:'📚',val:String(total),sub:'Leçons complétées'},{icon:'🎯',val:pct+'%',sub:'Taux de réussite'},{icon:'🏆',val:'Expert',sub:'Niveau obtenu'}];
+  stats.forEach((s,si)=>{
+    const bx=[W/2-260,W/2,W/2+260][si], by=555;
+    ctx.save();
+    ctx.fillStyle='rgba(124,109,248,0.08)';ctx.strokeStyle='rgba(124,109,248,0.25)';ctx.lineWidth=1;
+    rrect(ctx,bx-75,by-44,150,88,12);ctx.fill();ctx.stroke();
+    ctx.restore();
+    ctx.font='24px serif';ctx.textAlign='center';ctx.fillText(s.icon,bx,by-14);
+    const vG=ctx.createLinearGradient(bx-30,0,bx+30,0);vG.addColorStop(0,'#7c6df8');vG.addColorStop(1,'#22d3a0');
+    ctx.save();ctx.shadowColor='rgba(124,109,248,0.3)';ctx.shadowBlur=8;ctx.fillStyle=vG;ctx.font='bold 26px Arial,sans-serif';ctx.textAlign='center';ctx.fillText(s.val,bx,by+18);ctx.restore();
+    ctx.font='12px Arial,sans-serif';ctx.fillStyle='rgba(130,140,185,0.7)';ctx.textAlign='center';ctx.fillText(s.sub,bx,by+40);
+  });
+
+  // Séparateurs entre badges
+  [W/2-152,W/2+152].forEach(sx=>{
+    ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(sx,520);ctx.lineTo(sx,640);ctx.stroke();
+  });
+
+  hline(662,0.3);
+
+  // ── Barre de progression ──
+  const barX=120,barY=688,barW=W-240,barH=8;
+  ctx.fillStyle='rgba(255,255,255,0.05)';rrect(ctx,barX,barY,barW,barH,4);ctx.fill();
+  const barG=ctx.createLinearGradient(barX,0,barX+barW,0);barG.addColorStop(0,'#7c6df8');barG.addColorStop(1,'#22d3a0');
+  ctx.fillStyle=barG;rrect(ctx,barX,barY,barW*(pct/100),barH,4);ctx.fill();
+  ctx.font='11px Arial,sans-serif';ctx.fillStyle='rgba(130,140,185,0.5)';
+  ctx.textAlign='left';ctx.fillText(done+'/'+total+' leçons complétées',barX,706);
+  ctx.textAlign='right';ctx.fillText(pct+'% de réussite',barX+barW,706);
+
+  // ── Pied : Date · N° Certificat · Signature ──
+  const dateStr=new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+  const certId='OCLW-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*90000)+10000);
+
+  const col3=(x,label,value,valueStyle)=>{
+    ctx.font='11px Arial,sans-serif';ctx.fillStyle='rgba(120,130,170,0.65)';ctx.textAlign='center';ctx.fillText(label,x,740);
+    ctx.font=valueStyle||'bold 16px Arial,sans-serif';ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(value,x,762);
+  };
+  col3(240,'DATE DE DÉLIVRANCE',dateStr);
+  ctx.font='bold 14px "Courier New",monospace';ctx.fillStyle='#7c6df8';ctx.textAlign='center';
+  ctx.font='11px Arial,sans-serif';ctx.fillStyle='rgba(120,130,170,0.65)';ctx.fillText('N° CERTIFICAT',W/2,740);
+  ctx.font='bold 15px "Courier New",monospace';ctx.fillStyle='#a78bfa';ctx.fillText(certId,W/2,762);
+  ctx.font='11px Arial,sans-serif';ctx.fillStyle='rgba(120,130,170,0.65)';ctx.textAlign='center';ctx.fillText('DÉLIVRÉ PAR',W-240,740);
+  ctx.font='italic bold 17px Georgia,serif';ctx.fillStyle='#f59e0b';ctx.fillText('Smartcodai',W-240,762);
+
+  // Séparateurs verticaux bas
+  [W/2-160,W/2+160].forEach(sx=>{ctx.strokeStyle='rgba(255,255,255,0.07)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(sx,728);ctx.lineTo(sx,775);ctx.stroke();});
+
+  // ── Trophée central ──
+  ctx.font='46px serif';ctx.textAlign='center';ctx.fillText('🏆',W/2,824);
+
+  // ── Filigrane légal ──
+  ctx.font='10px Arial,sans-serif';ctx.fillStyle='rgba(100,110,150,0.2)';ctx.textAlign='center';
+  ctx.fillText('Ce certificat atteste de la réussite de la formation OpenClaw complète · Smartcodai · '+new Date().getFullYear(),W/2,840);
+}
+function rrect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
+function downloadCert(){const canvas=document.getElementById('certificateCanvas');const link=document.createElement('a');link.download='certificat-openclaw-'+studentPrenom.toLowerCase()+'-'+studentNom.toLowerCase()+'.png';link.href=canvas.toDataURL('image/png');link.click();}
+function printCert(){window.print();}
+
+// ===== CONFETTI =====
+function launchConfetti(){
+  const colors=['#7c6df8','#f59e0b','#22d3a0','#f87171','#a78bfa','#38bdf8'];
+  for(let i=0;i<90;i++){const el=document.createElement('div');el.className='confetti-piece';el.style.left=Math.random()*100+'vw';el.style.background=colors[Math.floor(Math.random()*colors.length)];el.style.width=(Math.random()*10+5)+'px';el.style.height=(Math.random()*10+5)+'px';el.style.borderRadius=Math.random()>.5?'50%':'2px';el.style.animationDuration=(Math.random()*2.5+1.5)+'s';el.style.animationDelay=(Math.random()*1.2)+'s';document.body.appendChild(el);setTimeout(()=>el.remove(),5000);}
+}
+
+// ===== COPY =====
+function copyCode(btn){const pre=btn.closest('.code-block').querySelector('pre');navigator.clipboard.writeText(pre.innerText).then(()=>{btn.textContent='✓ Copié !';setTimeout(()=>btn.textContent='Copier',2000);});}
+
+// ===== CHEATSHEET =====
+function buildCheat(){document.getElementById('cheatGrid').innerHTML=cheatData.map(c=>`<div class="cheat-card" data-title="${c.title.toLowerCase()}"><div class="cheat-card-head">PHP · ${c.title}</div><pre>${c.code}</pre></div>`).join('');}
+function filterCheat(q){document.querySelectorAll('.cheat-card').forEach(c=>{c.style.display=c.dataset.title.includes(q.toLowerCase())?'':'none';});}
+
+// ===== QUICK QUIZ =====
+function buildQuickQuiz(){
+  document.getElementById('quickQuizContainer').innerHTML=quickQuizzes.map((q,qi)=>`<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.2rem;"><div style="font-size:0.7rem;color:var(--php);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:0.6rem;">Question ${qi+1}</div><div style="font-weight:600;font-size:1rem;margin-bottom:0.8rem;">${q.q}</div><div style="display:grid;gap:0.5rem;" id="qq-${qi}">${q.opts.map((o,oi)=>`<button class="quiz-option" onclick="quickCheck(${qi},${oi},${q.ans})">${o}</button>`).join('')}</div><div class="quiz-feedback" id="qqfb-${qi}"></div></div>`).join('');
+}
+function quickCheck(qi,chosen,correct){const c=document.getElementById('qq-'+qi);c.querySelectorAll('.quiz-option').forEach(b=>b.disabled=true);c.querySelectorAll('.quiz-option')[correct].classList.add('correct');if(chosen!==correct)c.querySelectorAll('.quiz-option')[chosen].classList.add('wrong');const fb=document.getElementById('qqfb-'+qi);fb.className='quiz-feedback show '+(chosen===correct?'ok':'ko');fb.textContent=chosen===correct?'✓ Bonne réponse !':'✗ Ce n\'est pas la bonne réponse.';}
+
+// ===== NAV =====
+function switchView(view,btn){
+  ['learn','cheat','quiz-all','cert'].forEach(v=>{const el=document.getElementById('view-'+v);if(el)el.style.display=v===view?'':'none';});
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  if(view==='cert') renderCertView();
+}
+</script>
+</body>
+</html>
