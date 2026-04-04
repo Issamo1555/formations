@@ -23,12 +23,28 @@
     --code-bg: #0a0c10;
   }
 
+  .light-mode {
+    --bg: #f7f9fc;
+    --surface: #ffffff;
+    --card: #eef2f8;
+    --border: #d9e1ee;
+    --php: #6366f1;
+    --php2: #8b5cf6;
+    --accent: #d97706;
+    --green: #059669;
+    --red: #dc2626;
+    --text: #1e1b4b;
+    --muted: #64748b;
+    --code-bg: #f8fafc;
+  }
+
   body {
     background: var(--bg);
     color: var(--text);
     font-family: 'Syne', sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
+    transition: background 0.3s ease, color 0.3s ease;
   }
 
   /* HEADER */
@@ -414,6 +430,19 @@
     font-size: 0.7rem; font-weight: 800; color: #fff;
   }
   .header-right { display: flex; align-items: center; gap: 0.6rem; }
+  .theme-toggle {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; width: 40px; height: 20px; cursor: pointer;
+    position: relative; transition: all 0.2s;
+  }
+  .theme-toggle:hover { border-color: var(--php); }
+  .theme-toggle::before {
+    content: ''; position: absolute; top: 2px; left: 2px;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--php); transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+  .light-mode .theme-toggle::before { transform: translateX(18px); background: var(--accent); }
   .header-progress-mini {
     font-size: 0.75rem; color: var(--muted); display: flex; align-items: center; gap: 0.4rem;
   }
@@ -424,6 +453,10 @@
   .mini-ring circle { fill: none; stroke-width: 3; }
   .mini-ring .bg { stroke: var(--border); }
   .mini-ring .fill { stroke: var(--php); stroke-linecap: round; transition: stroke-dashoffset 0.5s ease; }
+  .light-mode header { background: rgba(247,249,252,0.88); }
+  .light-mode .hero h1 { background: linear-gradient(135deg, #1e1b4b 25%, var(--php2) 80%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .light-mode .lesson-body p, .light-mode .lesson-body ul li { color: #475569; }
+  .light-mode pre { color: #334155; }
 
   /* ===== CERTIFICATE VIEW ===== */
   #view-cert {
@@ -532,6 +565,7 @@
           stroke-dasharray="69.1" stroke-dashoffset="69.1"/>
       </svg>
     </div>
+    <div class="theme-toggle" onclick="toggleTheme()" title="Basculer thème"></div>
     <div class="student-badge" id="studentBadge" onclick="switchView('cert', document.querySelector('nav button:nth-child(4)'))">
       <div class="student-avatar" id="studentAvatar">?</div>
       <span id="studentName">Étudiant</span>
@@ -2883,19 +2917,19 @@ function drawCertificate(){
   const W=1200,H=850; canvas.width=W; canvas.height=H; canvas.style.width='100%';
   const ctx=canvas.getContext('2d');
 
-  // ── Fond dégradé premium ──
+  // ── Fond blanc premium ──
   const bg=ctx.createLinearGradient(0,0,W,H);
-  bg.addColorStop(0,'#08090f'); bg.addColorStop(0.5,'#0d1022'); bg.addColorStop(1,'#08090f');
+  bg.addColorStop(0,'#ffffff'); bg.addColorStop(0.55,'#fffdf8'); bg.addColorStop(1,'#f8fafc');
   ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
 
   // ── Grille de points décorative ──
-  ctx.fillStyle='rgba(124,109,248,0.05)';
+  ctx.fillStyle='rgba(124,109,248,0.08)';
   for(let x=30;x<W;x+=45) for(let y=30;y<H;y+=45){
     ctx.beginPath();ctx.arc(x,y,1.2,0,Math.PI*2);ctx.fill();
   }
 
   // ── Halos de lumière ──
-  [[180,180,280,'rgba(124,109,248,0.14)'],[W-180,H-180,240,'rgba(245,158,11,0.10)'],[W/2,H/2,400,'rgba(34,211,160,0.05)']].forEach(([gx,gy,gr,gc])=>{
+  [[180,180,280,'rgba(124,109,248,0.09)'],[W-180,H-180,240,'rgba(245,158,11,0.08)'],[W/2,H/2,400,'rgba(34,211,160,0.04)']].forEach(([gx,gy,gr,gc])=>{
     const g=ctx.createRadialGradient(gx,gy,0,gx,gy,gr); g.addColorStop(0,gc);g.addColorStop(1,'transparent');
     ctx.fillStyle=g;ctx.beginPath();ctx.arc(gx,gy,gr,0,Math.PI*2);ctx.fill();
   });
@@ -2921,7 +2955,7 @@ function drawCertificate(){
   // ── Badge PHP en haut ──
   ctx.save();
   ctx.shadowColor='#7c6df8';ctx.shadowBlur=30;
-  ctx.fillStyle='rgba(124,109,248,0.12)';ctx.strokeStyle='rgba(124,109,248,0.5)';ctx.lineWidth=1.5;
+  ctx.fillStyle='rgba(124,109,248,0.08)';ctx.strokeStyle='rgba(124,109,248,0.35)';ctx.lineWidth=1.5;
   rrect(ctx,W/2-72,46,144,42,21);ctx.fill();ctx.stroke();
   ctx.font='bold 17px "Courier New",monospace';ctx.fillStyle='#a78bfa';ctx.textAlign='center';ctx.fillText('<?php  />', W/2, 74);
   ctx.restore();
@@ -2939,7 +2973,7 @@ function drawCertificate(){
   star(W/2-170,155,18,'rgba(245,158,11,0.5)'); star(W/2+170,155,18,'rgba(245,158,11,0.5)');
 
   // ── "Ce certificat est décerné à" ──
-  ctx.font='italic 19px Georgia,serif';ctx.fillStyle='rgba(160,170,210,0.7)';ctx.textAlign='center';
+  ctx.font='italic 19px Georgia,serif';ctx.fillStyle='rgba(71,85,105,0.82)';ctx.textAlign='center';
   ctx.fillText('Ce certificat est décerné à', W/2, 215);
 
   // ── NOM en grand ──
@@ -2962,7 +2996,7 @@ function drawCertificate(){
   hline(348,0.35);
 
   // ── Corps du texte ──
-  ctx.font='italic 19px Georgia,serif';ctx.fillStyle='rgba(160,170,210,0.75)';ctx.textAlign='center';
+  ctx.font='italic 19px Georgia,serif';ctx.fillStyle='rgba(71,85,105,0.85)';ctx.textAlign='center';
   ctx.fillText('pour avoir suivi et complété avec succès la formation', W/2, 395);
 
   ctx.save();
@@ -2973,7 +3007,7 @@ function drawCertificate(){
   ctx.fillText('Développement Web avec PHP', W/2, 445);
   ctx.restore();
 
-  ctx.font='15px Arial,sans-serif';ctx.fillStyle='rgba(130,140,185,0.7)';ctx.textAlign='center';
+  ctx.font='15px Arial,sans-serif';ctx.fillStyle='rgba(100,116,139,0.88)';ctx.textAlign='center';
   ctx.fillText('Introduction · Variables & Constantes · Tableaux · Opérateurs · Conditions · Boucles · Fonctions · Formulaires · Cookies · Sessions · POO · Sécurité',W/2,482);
 
   // ── 3 Badges de stats ──
@@ -2982,18 +3016,18 @@ function drawCertificate(){
   stats.forEach((s,si)=>{
     const bx=[W/2-260,W/2,W/2+260][si], by=555;
     ctx.save();
-    ctx.fillStyle='rgba(124,109,248,0.08)';ctx.strokeStyle='rgba(124,109,248,0.25)';ctx.lineWidth=1;
+    ctx.fillStyle='rgba(124,109,248,0.05)';ctx.strokeStyle='rgba(124,109,248,0.18)';ctx.lineWidth=1;
     rrect(ctx,bx-75,by-44,150,88,12);ctx.fill();ctx.stroke();
     ctx.restore();
     ctx.font='24px serif';ctx.textAlign='center';ctx.fillText(s.icon,bx,by-14);
     const vG=ctx.createLinearGradient(bx-30,0,bx+30,0);vG.addColorStop(0,'#7c6df8');vG.addColorStop(1,'#22d3a0');
     ctx.save();ctx.shadowColor='rgba(124,109,248,0.3)';ctx.shadowBlur=8;ctx.fillStyle=vG;ctx.font='bold 26px Arial,sans-serif';ctx.textAlign='center';ctx.fillText(s.val,bx,by+18);ctx.restore();
-    ctx.font='12px Arial,sans-serif';ctx.fillStyle='rgba(130,140,185,0.7)';ctx.textAlign='center';ctx.fillText(s.sub,bx,by+40);
+    ctx.font='12px Arial,sans-serif';ctx.fillStyle='rgba(100,116,139,0.82)';ctx.textAlign='center';ctx.fillText(s.sub,bx,by+40);
   });
 
   // Séparateurs entre badges
   [W/2-152,W/2+152].forEach(sx=>{
-    ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;
+    ctx.strokeStyle='rgba(148,163,184,0.28)';ctx.lineWidth=1;
     ctx.beginPath();ctx.moveTo(sx,520);ctx.lineTo(sx,640);ctx.stroke();
   });
 
@@ -3001,10 +3035,10 @@ function drawCertificate(){
 
   // ── Barre de progression ──
   const barX=120,barY=688,barW=W-240,barH=8;
-  ctx.fillStyle='rgba(255,255,255,0.05)';rrect(ctx,barX,barY,barW,barH,4);ctx.fill();
+  ctx.fillStyle='rgba(148,163,184,0.22)';rrect(ctx,barX,barY,barW,barH,4);ctx.fill();
   const barG=ctx.createLinearGradient(barX,0,barX+barW,0);barG.addColorStop(0,'#7c6df8');barG.addColorStop(1,'#22d3a0');
   ctx.fillStyle=barG;rrect(ctx,barX,barY,barW*(pct/100),barH,4);ctx.fill();
-  ctx.font='11px Arial,sans-serif';ctx.fillStyle='rgba(130,140,185,0.5)';
+  ctx.font='11px Arial,sans-serif';ctx.fillStyle='rgba(100,116,139,0.78)';
   ctx.textAlign='left';ctx.fillText(done+'/'+total+' leçons complétées',barX,706);
   ctx.textAlign='right';ctx.fillText(pct+'% de réussite',barX+barW,706);
 
@@ -3013,29 +3047,31 @@ function drawCertificate(){
   const certId='PHP-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*90000)+10000);
 
   const col3=(x,label,value,valueStyle)=>{
-    ctx.font='11px Arial,sans-serif';ctx.fillStyle='rgba(120,130,170,0.65)';ctx.textAlign='center';ctx.fillText(label,x,740);
-    ctx.font=valueStyle||'bold 16px Arial,sans-serif';ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(value,x,762);
+    ctx.font='11px Arial,sans-serif';ctx.fillStyle='rgba(100,116,139,0.82)';ctx.textAlign='center';ctx.fillText(label,x,740);
+    ctx.font=valueStyle||'bold 16px Arial,sans-serif';ctx.fillStyle='#0f172a';ctx.textAlign='center';ctx.fillText(value,x,762);
   };
   col3(240,'DATE DE DÉLIVRANCE',dateStr);
   ctx.font='bold 14px "Courier New",monospace';ctx.fillStyle='#7c6df8';ctx.textAlign='center';
-  ctx.font='11px Arial,sans-serif';ctx.fillStyle='rgba(120,130,170,0.65)';ctx.fillText('N° CERTIFICAT',W/2,740);
+  ctx.font='11px Arial,sans-serif';ctx.fillStyle='rgba(100,116,139,0.82)';ctx.fillText('N° CERTIFICAT',W/2,740);
   ctx.font='bold 15px "Courier New",monospace';ctx.fillStyle='#a78bfa';ctx.fillText(certId,W/2,762);
-  ctx.font='11px Arial,sans-serif';ctx.fillStyle='rgba(120,130,170,0.65)';ctx.textAlign='center';ctx.fillText('DÉLIVRÉ PAR',W-240,740);
+  ctx.font='11px Arial,sans-serif';ctx.fillStyle='rgba(100,116,139,0.82)';ctx.textAlign='center';ctx.fillText('DÉLIVRÉ PAR',W-240,740);
   ctx.font='italic bold 17px Georgia,serif';ctx.fillStyle='#f59e0b';ctx.fillText('Smartcodai',W-240,762);
 
   // Séparateurs verticaux bas
-  [W/2-160,W/2+160].forEach(sx=>{ctx.strokeStyle='rgba(255,255,255,0.07)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(sx,728);ctx.lineTo(sx,775);ctx.stroke();});
+  [W/2-160,W/2+160].forEach(sx=>{ctx.strokeStyle='rgba(148,163,184,0.28)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(sx,728);ctx.lineTo(sx,775);ctx.stroke();});
 
   // ── Trophée central ──
   ctx.font='46px serif';ctx.textAlign='center';ctx.fillText('🏆',W/2,824);
 
   // ── Filigrane légal ──
-  ctx.font='10px Arial,sans-serif';ctx.fillStyle='rgba(100,110,150,0.2)';ctx.textAlign='center';
+  ctx.font='10px Arial,sans-serif';ctx.fillStyle='rgba(100,116,139,0.35)';ctx.textAlign='center';
   ctx.fillText('Ce certificat atteste de la réussite de la formation PHP complète · Smartcodai · '+new Date().getFullYear(),W/2,840);
 }
 function rrect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
 function downloadCert(){const canvas=document.getElementById('certificateCanvas');const link=document.createElement('a');link.download='certificat-php-'+studentPrenom.toLowerCase()+'-'+studentNom.toLowerCase()+'.png';link.href=canvas.toDataURL('image/png');link.click();}
 function printCert(){window.print();}
+function toggleTheme(){const isLight=document.body.classList.toggle('light-mode');localStorage.setItem('smartcodai-theme',isLight?'light':'dark');}
+function loadTheme(){if(localStorage.getItem('smartcodai-theme')==='light'){document.body.classList.add('light-mode');}}
 
 // ===== CONFETTI =====
 function launchConfetti(){
@@ -3063,6 +3099,7 @@ function switchView(view,btn){
   if(btn)btn.classList.add('active');
   if(view==='cert') renderCertView();
 }
+document.addEventListener('DOMContentLoaded', loadTheme);
 </script>
 </body>
 </html>

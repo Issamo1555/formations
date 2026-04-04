@@ -6,45 +6,90 @@
     <title>Stratégie de Croissance - Smartcodai</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #333333;
+            --title: #0f172a;
+            --muted: #475569;
+            --line: #e2e8f0;
+            --accent: #10b981;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        body.dark-mode {
+            --bg: #08111d;
+            --surface: #101a2b;
+            --text: #e2e8f0;
+            --title: #f8fbff;
+            --muted: #b6c4d8;
+            --line: rgba(255,255,255,0.08);
+            --accent: #18d39e;
+            --shadow: 0 24px 60px rgba(2, 9, 20, 0.45);
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             line-height: 1.6;
-            color: #333;
+            color: var(--text);
             max-width: 800px;
             margin: 0 auto;
             padding: 2rem;
-            background-color: #f8fafc;
+            background-color: var(--bg);
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         .document-container {
-            background: white;
+            background: var(--surface);
             padding: 3rem 4rem;
             border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            border-top: 6px solid #10b981;
+            box-shadow: var(--shadow);
+            border-top: 6px solid var(--accent);
         }
         h1, h2, h3, h4 {
-            color: #0f172a;
+            color: var(--title);
             margin-top: 2rem;
             margin-bottom: 1rem;
             font-weight: 700;
         }
-        h1 { font-size: 2.25rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; }
-        h2 { font-size: 1.75rem; color: #10b981; }
+        h1 { font-size: 2.25rem; border-bottom: 2px solid var(--line); padding-bottom: 0.5rem; }
+        h2 { font-size: 1.75rem; color: var(--accent); }
         h3 { font-size: 1.25rem; }
-        p { margin-bottom: 1rem; color: #475569; }
-        ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; color: #475569; }
+        p { margin-bottom: 1rem; color: var(--muted); }
+        ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; color: var(--muted); }
         li { margin-bottom: 0.5rem; }
-        strong { color: #0f172a; }
-        hr { border: 0; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+        strong { color: var(--title); }
+        hr { border: 0; border-top: 1px solid var(--line); margin: 2rem 0; }
+        code { background: rgba(15, 23, 42, 0.08); padding: 0.1rem 0.35rem; border-radius: 6px; }
+        body.dark-mode code { background: rgba(255,255,255,0.08); }
+        .toolbar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 1rem;
+        }
+        .theme-toggle {
+            width: 46px;
+            height: 46px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: var(--surface);
+            color: var(--title);
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            font-size: 1rem;
+        }
         /* Print styles for PDF export */
         @media print {
             body { background: transparent; padding: 0; }
             .document-container { box-shadow: none; border: none; padding: 0; }
+            .toolbar { display: none; }
             @page { margin: 2cm; }
         }
     </style>
 </head>
 <body>
+    <div class="toolbar">
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Basculer le thème">☀️</button>
+    </div>
     <div class="document-container">
         <h1 id="strategie-de-croissance-business-development-smartcodai">🚀 Stratégie de Croissance &amp; Business Development : Smartcodai</h1>
 <p>En tant qu'expert en Growth Marketing et Business Development, voici une stratégie agressive, créative et moderne pour acquérir, retenir et monétiser les étudiants sur <strong>Smartcodai</strong>.</p>
@@ -122,5 +167,24 @@
 <li>Créer une nouvelle "Landing page" spéciale B2B pour vendre vos simulateurs en "marque blanche" à des professeurs d'université qui manquent de ressources techniques pour leurs TD (Travaux Dirigés).</li>
 </ol>
     </div>
+    <script>
+        const THEME_KEY = 'smartcodai-theme';
+        const themeToggle = document.getElementById('themeToggle');
+
+        function applyTheme(theme) {
+            document.body.classList.toggle('dark-mode', theme === 'dark');
+            themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+            themeToggle.setAttribute('aria-label', theme === 'dark' ? 'Activer le mode clair' : 'Activer le mode sombre');
+        }
+
+        function toggleTheme() {
+            const nextTheme = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
+            localStorage.setItem(THEME_KEY, nextTheme);
+            applyTheme(nextTheme);
+        }
+
+        applyTheme(localStorage.getItem(THEME_KEY) || 'light');
+        themeToggle.addEventListener('click', toggleTheme);
+    </script>
 </body>
 </html>

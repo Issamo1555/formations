@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smartcodai | Apprenez en pratiquant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #07111f;
+            --bg-soft: #0d182a;
+            --panel: rgba(12, 24, 42, 0.78);
+            --panel-strong: #101d31;
+            --line: rgba(255, 255, 255, 0.1);
+            --line-strong: rgba(255, 255, 255, 0.18);
+            --text: #f8fbff;
+            --muted: #9eb0c8;
+            --accent: #18d39e;
+            --accent-2: #46b3ff;
+            --accent-3: #ffc857;
+            --shadow: 0 30px 80px rgba(2, 9, 20, 0.45);
+            --nav-bg: rgba(7, 17, 31, 0.72);
+            --page-background:
+                radial-gradient(circle at top left, rgba(70, 179, 255, 0.18), transparent 32%),
+                radial-gradient(circle at 85% 15%, rgba(24, 211, 158, 0.16), transparent 24%),
+                radial-gradient(circle at 50% 55%, rgba(255, 200, 87, 0.08), transparent 28%),
+                linear-gradient(180deg, #08111d 0%, #07111f 45%, #091625 100%);
+        }
+
+        body.light-mode {
+            --bg: #eef5fb;
+            --bg-soft: #dce9f5;
+            --panel: rgba(255, 255, 255, 0.82);
+            --panel-strong: #ffffff;
+            --line: rgba(15, 23, 42, 0.12);
+            --line-strong: rgba(15, 23, 42, 0.22);
+            --text: #102033;
+            --muted: #5f728b;
+            --shadow: 0 24px 60px rgba(148, 163, 184, 0.22);
+            --nav-bg: rgba(238, 245, 251, 0.78);
+            --page-background:
+                radial-gradient(circle at top left, rgba(70, 179, 255, 0.16), transparent 30%),
+                radial-gradient(circle at 85% 15%, rgba(24, 211, 158, 0.12), transparent 22%),
+                radial-gradient(circle at 50% 55%, rgba(255, 200, 87, 0.1), transparent 30%),
+                linear-gradient(180deg, #f7fbff 0%, #eef5fb 48%, #e6f0f8 100%);
+            color-scheme: light;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            color: var(--text);
+            background: var(--page-background);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            color-scheme: dark;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Syne', sans-serif;
+            line-height: 1.05;
+            letter-spacing: -0.03em;
+        }
+
+        a { color: inherit; text-decoration: none; }
+
+        img { max-width: 100%; display: block; }
+
+        .container {
+            width: min(1180px, calc(100% - 2rem));
+            margin: 0 auto;
+        }
+
+        .page-shell {
+            position: relative;
+            isolation: isolate;
+        }
+
+        .page-shell::before,
+        .page-shell::after {
+            content: "";
+            position: fixed;
+            inset: auto;
+            border-radius: 999px;
+            filter: blur(100px);
+            opacity: 0.45;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        .page-shell::before {
+            width: 18rem;
+            height: 18rem;
+            top: 6rem;
+            left: -4rem;
+            background: rgba(70, 179, 255, 0.2);
+        }
+
+        .page-shell::after {
+            width: 26rem;
+            height: 26rem;
+            right: -10rem;
+            top: 22rem;
+            background: rgba(24, 211, 158, 0.18);
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.45rem 0.9rem;
+            border: 1px solid rgba(70, 179, 255, 0.24);
+            border-radius: 999px;
+            background: rgba(70, 179, 255, 0.08);
+            color: #cce7ff;
+            font-size: 0.84rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(16px);
+            background: var(--nav-bg);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .nav-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            min-height: 78px;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.9rem;
+            font-family: 'Syne', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 800;
+        }
+
+        .logo img {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .nav-links a {
+            transition: color 0.2s ease;
+        }
+
+        .nav-links a:hover { color: var(--text); }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .theme-toggle {
+            width: 46px;
+            height: 46px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--line-strong);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.55rem;
+            border-radius: 999px;
+            padding: 0.95rem 1.45rem;
+            font-weight: 800;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .btn:hover { transform: translateY(-2px); }
+        .btn:focus-visible,
+        .theme-toggle:focus-visible,
+        .nav-links a:focus-visible,
+        .course-card:focus-visible {
+            outline: 3px solid rgba(70, 179, 255, 0.28);
+            outline-offset: 3px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #8cf0c8);
+            color: #02150e;
+            box-shadow: 0 18px 36px rgba(24, 211, 158, 0.22);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text);
+            border-color: var(--line);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--line-strong);
+        }
+
+        .hero {
+            padding: 5rem 0 3.5rem;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .hero-copy h1 {
+            font-size: clamp(3rem, 7vw, 5.7rem);
+            margin: 1.4rem 0 1.1rem;
+            max-width: 11ch;
+        }
+
+        .hero-copy h1 span {
+            background: linear-gradient(135deg, #ffffff 0%, #8ee6ff 35%, #8cf0c8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        body.light-mode .hero-copy h1 span {
+            background: linear-gradient(135deg, #0f172a 0%, #0f5bd7 42%, #0ea57a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-copy p {
+            max-width: 58ch;
+            color: var(--muted);
+            font-size: 1.08rem;
+            margin-bottom: 2rem;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.75rem;
+        }
+
+        .hero-proof {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        .proof-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.55rem 0.9rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #dce8f8;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .hero-panel {
+            position: relative;
+        }
+
+        .mockup-frame {
+            position: relative;
+            padding: 1rem;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03));
+            box-shadow: var(--shadow);
+        }
+
+        .mockup-frame::before {
+            content: "";
+            position: absolute;
+            inset: 18px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(70, 179, 255, 0.12), rgba(24, 211, 158, 0.06));
+            z-index: 0;
+        }
+
+        .mockup-frame img {
+            position: relative;
+            z-index: 1;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .floating-card {
+            position: absolute;
+            padding: 1rem 1.1rem;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(8, 17, 31, 0.82);
+            backdrop-filter: blur(14px);
+            box-shadow: 0 20px 40px rgba(3, 10, 20, 0.35);
+        }
+
+        .floating-card strong {
+            display: block;
+            font-size: 1.35rem;
+            font-family: 'Syne', sans-serif;
+            margin-bottom: 0.1rem;
+        }
+
+        .floating-card span {
+            color: var(--muted);
+            font-size: 0.86rem;
+            font-weight: 600;
+        }
+
+        .floating-a {
+            left: -1.5rem;
+            bottom: 1.8rem;
+        }
+
+        .floating-b {
+            right: -1rem;
+            top: 2rem;
+        }
+
+        .metrics-band {
+            margin-top: 2.8rem;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        .metric {
+            padding: 1.2rem 1.15rem;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .metric strong {
+            display: block;
+            font-size: 1.7rem;
+            font-family: 'Syne', sans-serif;
+            margin-bottom: 0.2rem;
+        }
+
+        .metric span {
+            display: block;
+            color: var(--muted);
+            font-size: 0.92rem;
+            max-width: 18ch;
+        }
+
+        section {
+            padding: 5.5rem 0;
+        }
+
+        .section-header {
+            max-width: 720px;
+            margin: 0 auto 3rem;
+            text-align: center;
+        }
+
+        .section-header h2 {
+            font-size: clamp(2.1rem, 4vw, 3.4rem);
+            margin-bottom: 0.9rem;
+        }
+
+        .section-header p {
+            color: var(--muted);
+            font-size: 1.02rem;
+        }
+
+        .features {
+            position: relative;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.35rem;
+        }
+
+        .feature-card {
+            position: relative;
+            padding: 1.7rem;
+            border-radius: 24px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            overflow: hidden;
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .feature-card::after {
+            content: "";
+            position: absolute;
+            inset: auto -20% -35% auto;
+            width: 180px;
+            height: 180px;
+            border-radius: 999px;
+            background: rgba(70, 179, 255, 0.08);
+            filter: blur(30px);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(70, 179, 255, 0.24);
+            box-shadow: 0 18px 34px rgba(15, 23, 42, 0.12);
+        }
+
+        .feature-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .feature-icon {
+            width: 3.4rem;
+            height: 3.4rem;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            background: rgba(24, 211, 158, 0.12);
+            border: 1px solid rgba(24, 211, 158, 0.18);
+            font-size: 1.4rem;
+        }
+
+        .feature-index {
+            color: rgba(255, 255, 255, 0.32);
+            font-family: 'Syne', sans-serif;
+            font-size: 1.1rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 0.7rem;
+        }
+
+        .feature-card p {
+            color: var(--muted);
+            font-size: 0.96rem;
+        }
+
+        .workflow {
+            background: rgba(255, 255, 255, 0.025);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .workflow-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.25rem;
+        }
+
+        .step-card {
+            padding: 1.6rem;
+            border-radius: 22px;
+            background: var(--panel);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(14px);
+            transition: transform 0.25s ease, border-color 0.25s ease;
+        }
+
+        .step-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(24, 211, 158, 0.22);
+        }
+
+        .step-number {
+            width: 2.3rem;
+            height: 2.3rem;
+            border-radius: 999px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, var(--accent-2), var(--accent));
+            color: #03101d;
+            font-weight: 900;
+            margin-bottom: 1rem;
+        }
+
+        .step-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .step-card p {
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .catalog-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+            gap: 2rem;
+            align-items: start;
+        }
+
+        .course-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .course-card {
+            position: relative;
+            min-height: 220px;
+            border-radius: 24px;
+            padding: 1.5rem;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .course-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.18);
+        }
+
+        .course-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(135deg, var(--course-tint), transparent 55%);
+            opacity: 0.16;
+            pointer-events: none;
+        }
+
+        .course-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.35rem 0.7rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #e7f4ff;
+            font-size: 0.78rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .course-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .course-card h3 {
+            font-size: 1.35rem;
+            margin-bottom: 0.65rem;
+        }
+
+        .course-card p {
+            color: var(--muted);
+            font-size: 0.94rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .course-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            color: #d1def0;
+            font-size: 0.88rem;
+            font-weight: 700;
+        }
+
+        .catalog-preview {
+            position: sticky;
+            top: 108px;
+            padding: 1.3rem;
+            border-radius: 28px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.04));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow);
+        }
+
+        .catalog-preview img {
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 1rem;
+        }
+
+        .catalog-preview h3 {
+            font-size: 1.45rem;
+            margin-bottom: 0.55rem;
+        }
+
+        .catalog-preview p {
+            color: var(--muted);
+            margin-bottom: 1rem;
+        }
+
+        .mini-list {
+            display: grid;
+            gap: 0.7rem;
+        }
+
+        .mini-list div {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            color: #deebfb;
+            font-size: 0.93rem;
+            font-weight: 600;
+        }
+
+        .mini-list div::before {
+            content: "•";
+            color: var(--accent);
+            font-size: 1.2rem;
+        }
+
+        .certificate {
+            background: linear-gradient(180deg, rgba(255, 200, 87, 0.05), rgba(255, 255, 255, 0.02));
+        }
+
+        .cert-grid {
+            display: grid;
+            grid-template-columns: minmax(320px, 0.95fr) minmax(0, 1.05fr);
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .cert-visual {
+            position: relative;
+            padding: 1rem;
+            border-radius: 26px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow);
+        }
+
+        .cert-visual::after {
+            content: "";
+            position: absolute;
+            inset: auto 12% -18% 12%;
+            height: 120px;
+            background: rgba(255, 200, 87, 0.2);
+            filter: blur(45px);
+            z-index: 0;
+        }
+
+        .cert-visual img {
+            position: relative;
+            z-index: 1;
+            border-radius: 18px;
+            transform: rotate(-3deg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .cert-copy h2 {
+            font-size: clamp(2rem, 4vw, 3.25rem);
+            margin-bottom: 1rem;
+        }
+
+        .cert-copy p {
+            color: var(--muted);
+            font-size: 1.02rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .cert-points {
+            display: grid;
+            gap: 0.9rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .cert-point {
+            padding: 1rem 1.1rem;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .cert-point strong {
+            display: block;
+            margin-bottom: 0.25rem;
+            font-size: 1rem;
+        }
+
+        .cert-point span {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .cta {
+            padding-bottom: 6rem;
+        }
+
+        .cta-panel {
+            position: relative;
+            padding: 2.2rem;
+            border-radius: 32px;
+            background:
+                linear-gradient(135deg, rgba(70, 179, 255, 0.14), rgba(24, 211, 158, 0.1)),
+                rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+
+        .cta-panel::before {
+            content: "";
+            position: absolute;
+            width: 240px;
+            height: 240px;
+            border-radius: 999px;
+            background: rgba(24, 211, 158, 0.18);
+            right: -80px;
+            top: -80px;
+            filter: blur(40px);
+        }
+
+        .cta-grid {
+            position: relative;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 340px;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .cta-copy h2 {
+            font-size: clamp(2rem, 4vw, 3.4rem);
+            margin-bottom: 1rem;
+        }
+
+        .cta-copy p {
+            color: #d7e5f6;
+            max-width: 52ch;
+            margin-bottom: 1.4rem;
+        }
+
+        .cta-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.7rem;
+        }
+
+        .cta-tags span {
+            padding: 0.55rem 0.8rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.09);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.88rem;
+            font-weight: 700;
+        }
+
+        .pricing-card {
+            padding: 1.8rem;
+            border-radius: 24px;
+            background: rgba(6, 14, 26, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(16px);
+        }
+
+        .pricing-card .label {
+            display: inline-flex;
+            padding: 0.35rem 0.7rem;
+            border-radius: 999px;
+            background: rgba(24, 211, 158, 0.12);
+            color: #b8ffdf;
+            font-size: 0.78rem;
+            font-weight: 800;
+            margin-bottom: 0.9rem;
+        }
+
+        .price {
+            font-family: 'Syne', sans-serif;
+            font-size: 3.4rem;
+            line-height: 1;
+            margin-bottom: 0.45rem;
+        }
+
+        .price small {
+            font-family: 'Manrope', sans-serif;
+            font-size: 1rem;
+            color: var(--muted);
+        }
+
+        .pricing-card p {
+            color: var(--muted);
+            font-size: 0.94rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .pricing-list {
+            display: grid;
+            gap: 0.7rem;
+            margin-bottom: 1.35rem;
+        }
+
+        .pricing-list div {
+            color: #dce9f8;
+            font-size: 0.93rem;
+            font-weight: 600;
+        }
+
+        footer {
+            padding: 2rem 0 2.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            color: var(--muted);
+        }
+
+        .footer-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(22px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+
+        .reveal.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 1024px) {
+            .hero-grid,
+            .catalog-grid,
+            .cert-grid,
+            .cta-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .metrics-band,
+            .features-grid,
+            .workflow-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .catalog-preview {
+                position: static;
+            }
+
+            .floating-a,
+            .floating-b {
+                position: static;
+                margin-top: 1rem;
+                display: inline-block;
+            }
+
+            .hero-panel {
+                display: grid;
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .nav-links { display: none; }
+
+            .nav-actions .btn {
+                display: none;
+            }
+
+            .hero {
+                padding-top: 3.5rem;
+            }
+
+            .hero-copy h1 {
+                max-width: none;
+            }
+
+            .metrics-band,
+            .features-grid,
+            .workflow-grid,
+            .course-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-header {
+                text-align: left;
+                margin-left: 0;
+                margin-right: 0;
+            }
+
+            .cta-panel,
+            .pricing-card,
+            .mockup-frame,
+            .catalog-preview,
+            .cert-visual {
+                border-radius: 24px;
+            }
+
+            .footer-content {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-shell">
+        <nav>
+            <div class="container nav-content">
+                <div class="logo">
+                    <img src="assets/logo.png" alt="Logo Smartcodai">
+                    Smartcodai
+                </div>
+                <div class="nav-links">
+                    <a href="#plateforme">Plateforme</a>
+                    <a href="#parcours">Parcours</a>
+                    <a href="#certificat">Certification</a>
+                </div>
+                <div class="nav-actions">
+                    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Basculer le thème">☀️</button>
+                    <a href="dashboard.html" class="btn btn-primary">Commencer gratuitement</a>
+                </div>
+            </div>
+        </nav>
+
+        <main>
+            <section class="hero">
+                <div class="container">
+                    <div class="hero-grid">
+                        <div class="hero-copy reveal">
+                            <div class="eyebrow">Nouvelle session 2026 • Python, PHP, n8n et IA</div>
+                            <h1>Apprenez à coder <span>en produisant du concret</span>.</h1>
+                            <p>Smartcodai transforme chaque leçon en terrain de pratique. Vous codez, vous testez, vous validez vos acquis et vous avancez vers une certification sans installation complexe ni perte de temps.</p>
+                            <div class="hero-actions">
+                                <a href="dashboard.html" class="btn btn-primary">Créer mon compte gratuit</a>
+                                <a href="#parcours" class="btn btn-secondary">Voir les parcours</a>
+                            </div>
+                            <div class="hero-proof">
+                                <div class="proof-pill">100% dans le navigateur</div>
+                                <div class="proof-pill">Exercices interactifs</div>
+                                <div class="proof-pill">Certificat vérifiable</div>
+                            </div>
+                        </div>
+
+                        <div class="hero-panel reveal">
+                            <div class="mockup-frame">
+                                <img src="assets/dashboard-mockup.png" alt="Aperçu du tableau de bord Smartcodai">
+                            </div>
+                            <div class="floating-card floating-a">
+                                <strong>4 parcours</strong>
+                                <span>Pour évoluer du niveau débutant à autonome</span>
+                            </div>
+                            <div class="floating-card floating-b">
+                                <strong>Freemium</strong>
+                                <span>Premiers chapitres accessibles immédiatement</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metrics-band">
+                        <div class="metric reveal">
+                            <strong>4</strong>
+                            <span>cursus concrets orientés métiers et pratique</span>
+                        </div>
+                        <div class="metric reveal">
+                            <strong>0</strong>
+                            <span>installation locale requise pour démarrer</span>
+                        </div>
+                        <div class="metric reveal">
+                            <strong>1</strong>
+                            <span>dashboard unifié pour apprendre et progresser</span>
+                        </div>
+                        <div class="metric reveal">
+                            <strong>29€</strong>
+                            <span>pour débloquer la version complète et certifiante</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="plateforme" class="features">
+                <div class="container">
+                    <div class="section-header reveal">
+                        <div class="eyebrow">Pourquoi Smartcodai</div>
+                        <h2>Une landing page plus claire pour vendre une promesse plus forte</h2>
+                        <p>La plateforme est pensée pour rassurer rapidement, montrer la valeur du produit et pousser l'utilisateur vers une première action sans friction.</p>
+                    </div>
+
+                    <div class="features-grid">
+                        <article class="feature-card reveal">
+                            <div class="feature-top">
+                                <div class="feature-icon">⚡</div>
+                                <div class="feature-index">01</div>
+                            </div>
+                            <h3>Feedback immédiat</h3>
+                            <p>L'utilisateur comprend tout de suite qu'il ne regarde pas seulement une formation. Il manipule du code, observe le résultat et progresse activement.</p>
+                        </article>
+
+                        <article class="feature-card reveal">
+                            <div class="feature-top">
+                                <div class="feature-icon">🧩</div>
+                                <div class="feature-index">02</div>
+                            </div>
+                            <h3>Zéro complexité technique</h3>
+                            <p>Pas de stack locale à configurer, pas d'environnement cassé. Cette promesse réduit l'hésitation et améliore fortement le taux d'inscription.</p>
+                        </article>
+
+                        <article class="feature-card reveal">
+                            <div class="feature-top">
+                                <div class="feature-icon">🏁</div>
+                                <div class="feature-index">03</div>
+                            </div>
+                            <h3>Progression visible</h3>
+                            <p>Quiz, progression par module et certificat final créent une boucle de motivation lisible, utile autant pour apprendre que pour convertir.</p>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <section class="workflow">
+                <div class="container">
+                    <div class="section-header reveal">
+                        <div class="eyebrow">Comment ça marche</div>
+                        <h2>Une expérience pensée pour mettre l'élève en mouvement</h2>
+                        <p>Le parcours de conversion devient simple : découverte, essai immédiat, puis montée en valeur vers la certification complète.</p>
+                    </div>
+
+                    <div class="workflow-grid">
+                        <article class="step-card reveal">
+                            <div class="step-number">1</div>
+                            <h3>Découvrir</h3>
+                            <p>La page pose une promesse nette, montre l'interface réelle et explique le bénéfice métier sans perdre l'utilisateur dans du jargon.</p>
+                        </article>
+
+                        <article class="step-card reveal">
+                            <div class="step-number">2</div>
+                            <h3>Essayer</h3>
+                            <p>Le visiteur entre dans le dashboard ou un parcours gratuit en quelques secondes, ce qui transforme l'intérêt en usage concret.</p>
+                        </article>
+
+                        <article class="step-card reveal">
+                            <div class="step-number">3</div>
+                            <h3>Certifier</h3>
+                            <p>Une fois engagé, il peut débloquer la formation complète, terminer les modules et récupérer une preuve valorisable sur LinkedIn ou sur CV.</p>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <section id="parcours">
+                <div class="container">
+                    <div class="section-header reveal">
+                        <div class="eyebrow">Catalogue</div>
+                        <h2>Des parcours lisibles, orientés compétences et débouchés</h2>
+                        <p>Chaque offre doit aider le visiteur à se projeter vite. J'ai donc transformé la section en cartes plus nettes, plus premium et plus faciles à comparer.</p>
+                    </div>
+
+                    <div class="catalog-grid">
+                        <div class="course-grid">
+                            <a href="apprendre-php-app.html" class="course-card reveal" style="--course-tint: #8d7dff;">
+                                <div class="course-badge">Backend web</div>
+                                <div class="course-icon">🐘</div>
+                                <h3>Développement PHP</h3>
+                                <p>Variables, logique métier, POO, sécurité et base de données pour créer des applications web solides.</p>
+                                <div class="course-meta">
+                                    <span>12 modules</span>
+                                    <span>Projet pratique</span>
+                                </div>
+                            </a>
+
+                            <a href="apprendre-python-app.html" class="course-card reveal" style="--course-tint: #46b3ff;">
+                                <div class="course-badge">Programmation générale</div>
+                                <div class="course-icon">🐍</div>
+                                <h3>Python interactif</h3>
+                                <p>Un parcours progressif pour apprendre à écrire, tester et structurer du code utile dès les premières leçons.</p>
+                                <div class="course-meta">
+                                    <span>Progressif</span>
+                                    <span>Débutant friendly</span>
+                                </div>
+                            </a>
+
+                            <a href="apprendre-n8n-app.html" class="course-card reveal" style="--course-tint: #ff6c8d;">
+                                <div class="course-badge">Automatisation</div>
+                                <div class="course-icon">⚙️</div>
+                                <h3>Automatiser avec n8n</h3>
+                                <p>Webhooks, API et scénarios visuels pour automatiser des tâches métier sans développer une usine à gaz.</p>
+                                <div class="course-meta">
+                                    <span>Workflows réels</span>
+                                    <span>Cas d'usage business</span>
+                                </div>
+                            </a>
+
+                            <a href="apprendre-openclaw-app.html" class="course-card reveal" style="--course-tint: #18d39e;">
+                                <div class="course-badge">IA appliquée</div>
+                                <div class="course-icon">🤖</div>
+                                <h3>IA et OpenClaw</h3>
+                                <p>Agents personnels, mémoire vectorielle et automatisation intelligente pour apprendre à construire avec l'IA moderne.</p>
+                                <div class="course-meta">
+                                    <span>Très actuel</span>
+                                    <span>Orientation production</span>
+                                </div>
+                            </a>
+                        </div>
+
+                        <aside class="catalog-preview reveal">
+                            <img src="assets/modules-mockup.png" alt="Aperçu des modules Smartcodai">
+                            <h3>Une vue d'ensemble rassurante</h3>
+                            <p>Le mockup du catalogue complète le discours commercial et donne une perception plus tangible de la qualité produit.</p>
+                            <div class="mini-list">
+                                <div>Navigation claire par parcours</div>
+                                <div>Progression découpée par chapitres</div>
+                                <div>Parcours gratuits pour engager vite</div>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+            </section>
+
+            <section id="certificat" class="certificate">
+                <div class="container cert-grid">
+                    <div class="cert-visual reveal">
+                        <img src="assets/certificate-mockup.png" alt="Certificat Smartcodai">
+                    </div>
+
+                    <div class="cert-copy reveal">
+                        <div class="eyebrow">Certification</div>
+                        <h2>Un résultat valorisable, pas juste un cours terminé</h2>
+                        <p>La section certificat a été repositionnée comme une vraie preuve de transformation. Elle rassure les visiteurs qui cherchent un bénéfice concret à la fin du parcours.</p>
+
+                        <div class="cert-points">
+                            <div class="cert-point">
+                                <strong>Certificat téléchargeable en PDF</strong>
+                                <span>Un format propre, présentable et immédiatement exploitable pour le portfolio ou les candidatures.</span>
+                            </div>
+                            <div class="cert-point">
+                                <strong>Référence unique et vérifiable</strong>
+                                <span>Le numéro de série renforce la crédibilité de la preuve délivrée par la plateforme.</span>
+                            </div>
+                            <div class="cert-point">
+                                <strong>Utilisable sur LinkedIn et CV</strong>
+                                <span>La promesse devient professionnelle et aide l'utilisateur à se projeter dans un usage réel.</span>
+                            </div>
+                        </div>
+
+                        <a href="#" class="btn btn-secondary">Voir un exemple de certificat</a>
+                    </div>
+                </div>
+            </section>
+
+            <section class="cta">
+                <div class="container">
+                    <div class="cta-panel reveal">
+                        <div class="cta-grid">
+                            <div class="cta-copy">
+                                <div class="eyebrow">Passer à l'action</div>
+                                <h2>Une page plus premium, plus lisible et mieux pensée pour convertir</h2>
+                                <p>Le message est maintenant plus structuré, le hero inspire davantage confiance, et les blocs de valeur guident naturellement vers l'inscription gratuite puis l'offre certifiante.</p>
+                                <div class="cta-tags">
+                                    <span>Accès gratuit immédiat</span>
+                                    <span>Interface interactive</span>
+                                    <span>Upsell simple à 29€</span>
+                                </div>
+                            </div>
+
+                            <div class="pricing-card">
+                                <div class="label">Formule Freemium</div>
+                                <div class="price">0€ <small>pour commencer</small></div>
+                                <p>Testez les premiers chapitres, explorez la plateforme et décidez ensuite si vous voulez débloquer la version complète.</p>
+                                <div class="pricing-list">
+                                    <div>Chapitres 1 à 3 offerts</div>
+                                    <div>Accès au bac à sable interactif</div>
+                                    <div>Formation complète + certification à 29€</div>
+                                </div>
+                                <a href="dashboard.html" class="btn btn-primary" style="width: 100%;">Entrer dans la plateforme</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div class="container footer-content">
+                <div class="logo">
+                    <img src="assets/logo.png" alt="Logo Smartcodai">
+                    Smartcodai
+                </div>
+                <p>© 2026 Smartcodai Academy. Formation orientée pratique, progression et certification.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const THEME_KEY = 'smartcodai-theme';
+        const themeToggle = document.getElementById('themeToggle');
+        const revealItems = document.querySelectorAll('.reveal');
+
+        function applyTheme(theme) {
+            document.body.classList.toggle('light-mode', theme === 'light');
+            if (themeToggle) {
+                themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
+                themeToggle.setAttribute('aria-label', theme === 'light' ? 'Activer le mode sombre' : 'Activer le mode jour');
+            }
+        }
+
+        function toggleTheme() {
+            const nextTheme = document.body.classList.contains('light-mode') ? 'dark' : 'light';
+            localStorage.setItem(THEME_KEY, nextTheme);
+            applyTheme(nextTheme);
+        }
+
+        applyTheme(localStorage.getItem(THEME_KEY) || 'dark');
+        themeToggle?.addEventListener('click', toggleTheme);
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.14 });
+
+        revealItems.forEach((item) => observer.observe(item));
+    </script>
+</body>
+</html>

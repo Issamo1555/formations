@@ -23,12 +23,28 @@
     --code-bg: #0a0c10;
   }
 
+  .light-mode {
+    --bg: #f7f9fc;
+    --surface: #ffffff;
+    --card: #eef2f8;
+    --border: #d9e1ee;
+    --php: #6366f1;
+    --php2: #8b5cf6;
+    --accent: #d97706;
+    --green: #059669;
+    --red: #dc2626;
+    --text: #1e1b4b;
+    --muted: #64748b;
+    --code-bg: #f8fafc;
+  }
+
   body {
     background: var(--bg);
     color: var(--text);
     font-family: 'Syne', sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
+    transition: background 0.3s ease, color 0.3s ease;
   }
 
   /* HEADER */
@@ -60,6 +76,19 @@
   }
   nav button:hover { color: var(--text); border-color: var(--border); }
   nav button.active { color: var(--php); border-color: var(--php); background: rgba(124,109,248,0.1); }
+  .theme-toggle {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; width: 40px; height: 20px; cursor: pointer;
+    position: relative; transition: all 0.2s;
+  }
+  .theme-toggle:hover { border-color: var(--php); }
+  .theme-toggle::before {
+    content: ''; position: absolute; top: 2px; left: 2px;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--php); transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+  .light-mode .theme-toggle::before { transform: translateX(18px); background: var(--accent); }
 
   /* HERO */
   .hero {
@@ -76,6 +105,8 @@
     background-clip: text;
   }
   .hero p { color: var(--muted); margin-top: 0.8rem; font-size: 1rem; }
+  .light-mode header { background: rgba(247,249,252,0.88); }
+  .light-mode .hero h1 { background: linear-gradient(135deg, #1e1b4b 25%, var(--php2) 80%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 
   /* LAYOUT */
   .app-body {
@@ -235,6 +266,7 @@
   <nav>
     <button onclick="showTDPanier()">🛒 TD Panier</button>
     <button onclick="printMode()" style="background: #22d3a0; color: white;">🖨️ Mode Impression</button>
+    <div class="theme-toggle" onclick="toggleTheme()" title="Basculer thème"></div>
   </nav>
 </header>
 
@@ -740,10 +772,13 @@ function switchPanierTab(tabName, btn = null) {
 
 // Initialize the TD on page load
 document.addEventListener('DOMContentLoaded', function() {
+  loadTheme();
   showTDPanier();
 });
 
 // Print mode function - shows all content for printing
+function toggleTheme(){const isLight=document.body.classList.toggle('light-mode');localStorage.setItem('smartcodai-theme',isLight?'light':'dark');}
+function loadTheme(){if(localStorage.getItem('smartcodai-theme')==='light'){document.body.classList.add('light-mode');}}
 function printMode() {
   const container = document.getElementById('lessonContent');
   container.innerHTML = `
