@@ -2,6 +2,7 @@
 # ============================================
 # Smartcodai V2 - Hostinger VPS Deployment Script
 # ============================================
+# Repository: https://github.com/Issamo1555/formations
 # Run this script on your Hostinger VPS server
 # Usage: bash deploy-hostinger.sh
 
@@ -12,12 +13,13 @@ echo "======================================="
 
 # Configuration
 APP_DIR="/var/www/smartcodai"
-APP_USER="www-data"
+SUBDIR="V2 formation certif"
 APP_PORT=3000
 DB_NAME="smartcodai_v2"
 DB_USER="smartcodai"
-DB_PASS="Smartcodai2026!"
+DB_PASS="Smartcodai2026"
 DB_HOST="localhost"
+REPO="https://github.com/Issamo1555/formations.git"
 
 # Colors
 RED='\033[0;31m'
@@ -52,25 +54,18 @@ GRANT ALL PRIVILEGES ON DATABASE ${DB_NAME} TO ${DB_USER};
 EOF
 
 echo ""
-echo -e "${YELLOW}Step 5: Setting up application directory...${NC}"
-sudo mkdir -p ${APP_DIR}
-sudo chown ${APP_USER}:${APP_USER} ${APP_DIR}
-
-echo ""
-echo -e "${YELLOW}Step 6: Deploying application files...${NC}"
-# If using Git:
-# cd ${APP_DIR}
-# git clone https://github.com/YOUR_USERNAME/smartcodai-v2.git .
-# Or copy files via scp/rsync
-
-echo ""
-echo -e "${YELLOW}Step 7: Installing dependencies...${NC}"
+echo -e "${YELLOW}Step 5: Cloning repository...${NC}"
 cd ${APP_DIR}
+git clone ${REPO} .
+cd "${SUBDIR}"
+
+echo ""
+echo -e "${YELLOW}Step 6: Installing dependencies...${NC}"
 npm ci --production
 
 echo ""
-echo -e "${YELLOW}Step 8: Setting up environment variables...${NC}"
-cat > ${APP_DIR}/.env <<ENVEOF
+echo -e "${YELLOW}Step 7: Setting up environment variables...${NC}"
+cat > .env <<ENVEOF
 # Database
 DB_PROVIDER="postgresql"
 DATABASE_URL="postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:5432/${DB_NAME}?schema=public&sslmode=disable"
@@ -84,25 +79,25 @@ NODE_ENV="production"
 ENVEOF
 
 echo ""
-echo -e "${YELLOW}Step 9: Running database migrations...${NC}"
+echo -e "${YELLOW}Step 8: Running database migrations...${NC}"
 npx prisma generate
 npx prisma db push
 
 echo ""
-echo -e "${YELLOW}Step 10: Seeding database...${NC}"
+echo -e "${YELLOW}Step 9: Seeding database...${NC}"
 npm run db:seed:all
 npm run db:seed:blog
 
 echo ""
-echo -e "${YELLOW}Step 11: Building application...${NC}"
+echo -e "${YELLOW}Step 10: Building application...${NC}"
 npm run build
 
 echo ""
-echo -e "${YELLOW}Step 12: Installing PM2 process manager...${NC}"
+echo -e "${YELLOW}Step 11: Installing PM2 process manager...${NC}"
 sudo npm install -g pm2
 
 echo ""
-echo -e "${YELLOW}Step 13: Starting application with PM2...${NC}"
+echo -e "${YELLOW}Step 12: Starting application with PM2...${NC}"
 pm2 start npm --name "smartcodai-v2" -- start -- --port ${APP_PORT}
 pm2 save
 pm2 startup
