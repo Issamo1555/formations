@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install)",
+      "Bash(npx *)",
+      "Bash(npm run *)",
+      "Bash(curl *)",
+      "Bash(wget *)",
+      "Bash(pkill *)",
+      "Bash(sleep *)",
+      "Bash(brew *)",
+      "Bash(psql *)",
+      "Bash(docker *)",
+      "Bash(git add *)",
+      "Bash(git reset *)",
+      "Bash(git commit *)"
+    ]
+  },
+  "$version": 3
+}

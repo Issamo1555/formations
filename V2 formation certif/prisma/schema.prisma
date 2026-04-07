@@ -1,0 +1,169 @@
+// Smartcodai V2 - Database Schema
+// Dev: SQLite | Prod: PostgreSQL (use schema.production.prisma for prod)
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  passwordHash  String    @map("password_hash")
+  role          Role      @default(USER)
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  unlockedCourses UserCourse[]
+  certificates    Certificate[]
+  lessonProgress  LessonProgress[]
+  unlockedBy      UserCourse[]  @relation("UnlockedBy")
+  blogPosts       BlogPost[]
+
+  @@map("users")
+}
+
+model Course {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  titleFr      String   @map("title_fr")
+  titleEn      String   @map("title_en")
+  titleAr      String   @map("title_ar")
+  descFr       String   @map("desc_fr")
+  descEn       String   @map("desc_en")
+  descAr       String   @map("desc_ar")
+  icon         String
+  modulesCount Int      @map("modules_count") @default(0)
+  isPublished  Boolean  @default(true) @map("is_published")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  enrolledUsers    UserCourse[]
+  certificates     Certificate[]
+  lessons          Lesson[]
+
+  @@map("courses")
+}
+
+model UserCourse {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  courseId    String   @map("course_id")
+  unlockedAt  DateTime @default(now()) @map("unlocked_at")
+  unlockedBy  String?  @map("unlocked_by")
+  progressPct Float    @default(0) @map("progress_pct")
+  completedAt DateTime? @map("completed_at")
+
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  admin    User?  @relation("UnlockedBy", fields: [unlockedBy], references: [id])
+
+  @@unique([userId, courseId])
+  @@map("user_courses")
+}
+
+model Lesson {
+  id          String   @id @default(cuid())
+  courseId    String   @map("course_id")
+  order       Int
+  titleFr     String   @map("title_fr")
+  titleEn     String   @map("title_en")
+  titleAr     String   @map("title_ar")
+  contentFr   String   @map("content_fr")
+  contentEn   String   @map("content_en")
+  contentAr   String   @map("content_ar")
+  category    String
+  hasQuiz     Boolean  @default(false) @map("has_quiz")
+  quizQuestionFr  String?  @map("quiz_question_fr")
+  quizQuestionEn  String?  @map("quiz_question_en")
+  quizQuestionAr  String?  @map("quiz_question_ar")
+  quizOption1Fr   String?  @map("quiz_option_1_fr")
+  quizOption1En   String?  @map("quiz_option_1_en")
+  quizOption1Ar   String?  @map("quiz_option_1_ar")
+  quizOption2Fr   String?  @map("quiz_option_2_fr")
+  quizOption2En   String?  @map("quiz_option_2_en")
+  quizOption2Ar   String?  @map("quiz_option_2_ar")
+  quizOption3Fr   String?  @map("quiz_option_3_fr")
+  quizOption3En   String?  @map("quiz_option_3_en")
+  quizOption3Ar   String?  @map("quiz_option_3_ar")
+  quizOption4Fr   String?  @map("quiz_option_4_fr")
+  quizOption4En   String?  @map("quiz_option_4_en")
+  quizOption4Ar   String?  @map("quiz_option_4_ar")
+  quizCorrect     Int?     @map("quiz_correct")
+  quizExplainFr   String?  @map("quiz_explain_fr")
+  quizExplainEn   String?  @map("quiz_explain_en")
+  quizExplainAr   String?  @map("quiz_explain_ar")
+
+  course      Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  progress    LessonProgress[]
+
+  @@unique([courseId, order])
+  @@map("lessons")
+}
+
+model LessonProgress {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  courseId    String   @map("course_id")
+  lessonId    String   @map("lesson_id")
+  completed   Boolean  @default(false)
+  completedAt DateTime? @map("completed_at")
+  quizScore   Int?     @map("quiz_score")
+  quizAnswer  Int?     @map("quiz_answer")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+  @@map("lesson_progress")
+}
+
+model Certificate {
+  id              String    @id @default(cuid())
+  certReference   String    @unique @map("cert_reference")
+  userId          String    @map("user_id")
+  courseId        String    @map("course_id")
+  studentName     String    @map("student_name")
+  score           Float
+  issuedAt        DateTime  @default(now()) @map("issued_at")
+  isVerified      Boolean   @default(true) @map("is_verified")
+  verificationUrl String?   @map("verification_url")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@map("certificates")
+}
+
+model BlogPost {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  titleFr     String   @map("title_fr")
+  titleEn     String   @map("title_en")
+  titleAr     String   @map("title_ar")
+  contentFr   String   @map("content_fr")
+  contentEn   String   @map("content_en")
+  contentAr   String   @map("content_ar")
+  excerptFr   String?  @map("excerpt_fr")
+  excerptEn   String?  @map("excerpt_en")
+  excerptAr   String?  @map("excerpt_ar")
+  imageUrl    String?  @map("image_url")
+  category    String
+  isPublished Boolean  @default(false) @map("is_published")
+  authorId    String   @map("author_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([isPublished, createdAt])
+  @@map("blog_posts")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
