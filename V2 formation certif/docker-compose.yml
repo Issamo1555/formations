@@ -1,6 +1,16 @@
-version: '3.8'
+# ============================================================
+# Smartcodai V2 — Docker Compose (Production Ready)
+# ============================================================
+# Usage:
+#   docker compose up -d          # Démarrer
+#   docker compose logs -f app    # Voir les logs
+#   docker compose down           # Arrêter
+#   docker compose pull && docker compose up -d  # Mettre à jour
+# ============================================================
 
 services:
+
+  # ─── Base de données ───
   postgres:
     image: postgres:17-alpine
     container_name: smartcodai-postgres
@@ -9,10 +19,93 @@ services:
       POSTGRES_DB: smartcodai_v2
       POSTGRES_USER: smartcodai
       POSTGRES_PASSWORD: "Smartcodai2026"
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - smartcodai-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smartcodai -d smartcodai_v2"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  # ─── Application Next.js ───
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: smartcodai-app
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      - DATABASE_URL=postgresql://smartcodai:Smartcodai2026@postgres:5432/smartcodai_v2
+      - NODE_ENV=production
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-change-me-to-a-random-string}
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - smartcodai-net
+    expose:
+      - "3000"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    volumes:
+      - app_logs:/app/logs
+
+  # ─── Reverse Proxy Nginx ───
+  nginx:
+    image: nginx:alpine
+    container_name: smartcodai-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/html:/usr/share/nginx/html:ro
+      - certbot_conf:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    depends_on:
+      - app
+    networks:
+      - smartcodai-net
+
+  # ─── Certificats SSL (optionnel) ───
+  certbot:
+    image: certbot/certbot
+    container_name: smartcodai-certbot
+    restart: unless-stopped
+    volumes:
+      - certbot_www:/var/www/certbot
+      - certbot_conf:/etc/letsencrypt
+    entrypoint: >
+      /bin/sh -c "
+        trap exit TERM;
+        while :; do
+          certbot renew --webroot --webroot-path=/var/www/certbot --quiet;
+          sleep 12h;
+        done
+      "
+
+# ─── Réseaux ───
+networks:
+  smartcodai-net:
+    driver: bridge
+
+# ─── Volumes persistants ───
 volumes:
   postgres_data:
+    driver: local
+  app_logs:
+    driver: local
+  certbot_conf:
+    driver: local
+  certbot_www:
+    driver: local
