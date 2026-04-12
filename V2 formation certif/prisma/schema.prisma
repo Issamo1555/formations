@@ -68,6 +68,7 @@ model UserCourse {
 model Lesson {
   id          String   @id @default(cuid())
   courseId    String   @map("course_id")
+  slug        String?
   order       Int
   titleFr     String   @map("title_fr")
   titleEn     String   @map("title_en")
@@ -96,6 +97,14 @@ model Lesson {
   quizExplainFr   String?  @map("quiz_explain_fr")
   quizExplainEn   String?  @map("quiz_explain_en")
   quizExplainAr   String?  @map("quiz_explain_ar")
+
+  exampleFr       String?  @map("example_fr")
+  exampleEn       String?  @map("example_en")
+  exampleAr       String?  @map("example_ar")
+  
+  exerciseFr      String?  @map("exercise_fr")
+  exerciseEn      String?  @map("exercise_en")
+  exerciseAr      String?  @map("exercise_ar")
 
   course      Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
   progress    LessonProgress[]

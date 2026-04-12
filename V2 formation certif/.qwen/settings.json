@@ -13,7 +13,12 @@
       "Bash(docker *)",
       "Bash(git add *)",
       "Bash(git reset *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(lsof *)",
+      "WebFetch(localhost)",
+      "Bash(/usr/bin/head *)",
+      "Bash(git checkout *)"
     ]
   },
   "$version": 3

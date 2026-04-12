@@ -130,8 +130,6 @@ export default function CertificatePage() {
     const canvas = canvasRef.current;
     const W = 1200;
     const H = 850;
-    canvas.width = W;
-    canvas.height = H;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
@@ -140,9 +138,10 @@ export default function CertificatePage() {
     const dateStr = new Date().toLocaleDateString(locale === 'ar' ? 'ar-MA' : locale === 'en' ? 'en-US' : 'fr-FR', {
       day: 'numeric', month: 'long', year: 'numeric',
     });
-    const fullName = user.name;
+    const fullName = user?.name || "Etudiant";
 
-    // Background gradient
+    try {
+      // Background gradient
     const bg = ctx.createLinearGradient(0, 0, W, H);
     bg.addColorStop(0, '#fffef9');
     bg.addColorStop(0.55, '#ffffff');
@@ -318,27 +317,44 @@ export default function CertificatePage() {
     ctx.font = '8px Arial, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText(locale === 'ar' ? 'امسح للتحقق' : locale === 'en' ? 'Scan to verify' : 'Scannez pour verifier', 1100, 820);
-  }, [user, certRef, courseSlug, locale]);
+    } catch (e: any) {
+      console.error(e);
+      ctx.fillStyle = 'red';
+      ctx.fillRect(0, 0, 1200, 850);
+      ctx.fillStyle = 'white';
+      ctx.font = '24px Arial';
+      ctx.fillText("Erreur de rendu du certificat: " + e.message, 50, 100);
+    }
+  }, [user, certRef, courseSlug, locale, loading]);
 
   const handleDownload = async () => {
-    if (!canvasRef.current) return;
-    setDownloading(true);
-    const link = document.createElement('a');
-    link.download = `certificat-${courseSlug}-${user?.name?.toLowerCase().replace(/\s+/g, '-')}.png`;
-    link.href = canvasRef.current.toDataURL('image/png');
-    link.click();
-    setDownloading(false);
+    try {
+      if (!canvasRef.current) return;
+      setDownloading(true);
+      const link = document.createElement('a');
+      const safeName = typeof user?.name === 'string' ? user.name : 'etudiant';
+      link.download = `certificat-${courseSlug}-${safeName.toLowerCase().replace(/\\s+/g, '-')}.png`;
+      link.href = canvasRef.current.toDataURL('image/png');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (e: any) {
+      console.error(e);
+      alert("Erreur lors du téléchargement : " + e.message);
+    } finally {
+      setDownloading(false);
+    }
   };
 
   const handleShareLinkedin = () => {
-    const courseName = COURSE_NAMES[courseSlug]?.[locale] || COURSE_NAMES[courseSlug]?.fr || courseSlug;
-    const verifyUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/verify?cert=${encodeURIComponent(certRef)}`;
-    const text = locale === 'ar'
-      ? `لقد حصلت على شهادة "${courseName}" من Smartcodai Academy! المرجع: ${certRef}`
-      : locale === 'en'
-      ? `I just earned my "${courseName}" certificate from Smartcodai Academy! Reference: ${certRef}`
-      : `Je viens d'obtenir mon certificat "${courseName}" sur Smartcodai Academy! Reference: ${certRef}`;
-    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(verifyUrl)}`, '_blank');
+    try {
+      const courseName = COURSE_NAMES[courseSlug]?.[locale] || COURSE_NAMES[courseSlug]?.fr || courseSlug;
+      const verifyUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/verify?cert=${encodeURIComponent(certRef)}`;
+      window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(verifyUrl)}`, '_blank');
+    } catch (e: any) {
+      console.error(e);
+      alert("Erreur lors du partage : " + e.message);
+    }
   };
 
   if (loading) {
@@ -410,8 +426,8 @@ export default function CertificatePage() {
         </div>
 
         {/* Certificate canvas */}
-        <div className="bg-[var(--bg-panel)] border border-border rounded-2xl p-4 sm:p-6 shadow-card">
-          <canvas ref={canvasRef} className="w-full rounded-xl" style={{ maxHeight: '600px' }} />
+        <div className="bg-[var(--bg-panel)] border border-border rounded-2xl p-4 sm:p-6 shadow-card relative">
+          <canvas ref={canvasRef} width={1200} height={850} className="w-full rounded-xl bg-white shadow-inner" style={{ maxHeight: '600px' }} />
         </div>
 
         {/* Actions */}

@@ -7,40 +7,37 @@ import { useLocale } from '@/context/LocaleContext';
 import { useTheme } from '@/context/ThemeContext';
 import {
   Sun, Moon, Globe, Menu, X, ArrowLeft, ArrowRight,
-  CheckCircle, Circle, Lock, Award, LayoutDashboard
+  CheckCircle, Circle, Lock, Award, LayoutDashboard,
+  Terminal, HelpCircle, Trophy, Play, BookOpen, XCircle
 } from 'lucide-react';
 import { locales, localeNames } from '@/i18n';
 
 interface Lesson {
   id: string;
-  order: number;
   titleFr: string;
   titleEn: string;
   titleAr: string;
   contentFr: string;
   contentEn: string;
   contentAr: string;
-  category: string;
-  hasQuiz: boolean;
   quizQuestionFr: string | null;
   quizQuestionEn: string | null;
   quizQuestionAr: string | null;
-  quizOption1Fr: string | null;
-  quizOption1En: string | null;
-  quizOption1Ar: string | null;
-  quizOption2Fr: string | null;
-  quizOption2En: string | null;
-  quizOption2Ar: string | null;
-  quizOption3Fr: string | null;
-  quizOption3En: string | null;
-  quizOption3Ar: string | null;
-  quizOption4Fr: string | null;
-  quizOption4En: string | null;
-  quizOption4Ar: string | null;
-  quizCorrect: number | null;
+  quizOptionsFr: { text: string; isCorrect: boolean }[] | null;
+  quizOptionsEn: { text: string; isCorrect: boolean }[] | null;
+  quizOptionsAr: { text: string; isCorrect: boolean }[] | null;
   quizExplainFr: string | null;
   quizExplainEn: string | null;
   quizExplainAr: string | null;
+  exampleFr: string | null;
+  exampleEn: string | null;
+  exampleAr: string | null;
+  exerciseFr: string | null;
+  exerciseEn: string | null;
+  exerciseAr: string | null;
+  quizCorrect: number | null;
+  category: string;
+  hasQuiz: boolean;
 }
 
 interface Course {
@@ -76,6 +73,8 @@ export default function CoursePage() {
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [sandboxCode, setSandboxCode] = useState('');
   const [sandboxOutput, setSandboxOutput] = useState('');
+  const [isRunning, setIsRunning] = useState(false);
+  const [activeTab, setActiveTab] = useState<'theory' | 'example' | 'exercise' | 'quiz'>('theory');
 
   useEffect(() => {
     async function init() {
@@ -123,10 +122,11 @@ export default function CoursePage() {
     init();
   }, [slug, router]);
 
-  // Reset quiz state when lesson changes
+  // Reset quiz and tab state when lesson changes
   useEffect(() => {
     setQuizAnswer(null);
     setQuizSubmitted(false);
+    setActiveTab('theory');
   }, [currentLessonIndex]);
 
   const currentLesson = course?.lessons[currentLessonIndex];
@@ -198,8 +198,15 @@ export default function CoursePage() {
     return currentLesson.quizExplainFr || '';
   };
 
-  // Render content with code blocks
+  // Render content with code blocks and HTML support
   const renderContent = (content: string) => {
+    // Detect if content is HTML (contains HTML tags like <p>, <h3>, <ul>, etc.)
+    const isHtml = /<(p|h[1-6]|ul|ol|li|strong|em|br|div|span)[\s>]/i.test(content);
+
+    if (isHtml) {
+      return <div key="html-content" dangerouslySetInnerHTML={{ __html: content }} />;
+    }
+
     const lines = content.split('\n');
     const elements: React.ReactNode[] = [];
     let inCodeBlock = false;
@@ -268,46 +275,188 @@ export default function CoursePage() {
 
   // Sandbox functions
   const getDefaultSandbox = (lesson: Lesson) => {
+    if (lesson.exerciseFr) return lesson.exerciseFr.trim().replace(/\\n/g, '\n');
     const content = getContent(lesson);
     const codeMatch = content.match(/```(?:php|python|javascript|js)?\n([\s\S]*?)```/);
     if (codeMatch) return codeMatch[1].trim();
     return '';
   };
 
-  const runSandbox = () => {
-    // Simple JS evaluation for demo purposes
-    try {
-      // For PHP/Python lessons, show a simulated output
-      const isPHP = sandboxCode.includes('<?php') || sandboxCode.includes('echo') || sandboxCode.includes('$');
-      const isPython = sandboxCode.includes('print(') || sandboxCode.includes('def ') || sandboxCode.includes('#');
+  const runSandbox = async () => {
+    setIsRunning(true);
 
-      if (isPHP) {
-        // Simulate PHP output
-        const echoMatches = sandboxCode.match(/echo\s+["'](.+?)["']/g);
-        if (echoMatches) {
-          const output = echoMatches.map(m => m.replace(/echo\s+["']|["']/g, '')).join('\n');
-          setSandboxOutput(output);
-        } else {
-          setSandboxOutput('(Code PHP execute avec succes - resultat simule)');
+    // Detect language
+    let lang: 'python' | 'php' | 'javascript' = 'javascript';
+    if (sandboxCode.includes('<?php') || sandboxCode.includes('echo') || sandboxCode.includes('$')) {
+      lang = 'php';
+    } else if (sandboxCode.includes('print(') || sandboxCode.includes('def ') || sandboxCode.includes('import ')) {
+      lang = 'python';
+    }
+
+    try {
+      if (lang === 'php') {
+        // Try server-side execution first, fallback to transpiler
+        setSandboxOutput('⏳ Exécution PHP...');
+
+        try {
+          const response = await fetch('/api/execute', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: sandboxCode, language: 'php' }),
+          });
+
+          if (response.ok) {
+            const result = await response.json();
+            setSandboxOutput(result.output || '(aucun affichage)');
+          } else {
+            // Fallback to client-side transpiler
+            const result = transpilePHP(sandboxCode);
+            setSandboxOutput(result);
+          }
+        } catch {
+          // Server not available, use client-side transpiler
+          const result = transpilePHP(sandboxCode);
+          setSandboxOutput(result);
         }
-      } else if (isPython) {
-        // Simulate Python output
-        const printMatches = sandboxCode.match(/print\(["'](.+?)["']\)/g);
-        if (printMatches) {
-          const output = printMatches.map(m => m.replace(/print\(["']|["']\)/g, '')).join('\n');
-          setSandboxOutput(output);
-        } else {
-          setSandboxOutput('(Code Python execute avec succes - resultat simule)');
+      } else if (lang === 'python') {
+        // Use Pyodide
+        if ((window as any).loadPyodide === undefined) {
+          setSandboxOutput('⏳ Chargement de Pyodide...');
+          await new Promise<void>((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js';
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error('Impossible de charger Pyodide'));
+            document.head.appendChild(script);
+          });
+        }
+
+        setSandboxOutput('⏳ Initialisation de Python...');
+        const pyodide = await (window as any).loadPyodide({
+          indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/',
+        });
+
+        pyodide.runPython(`
+import sys
+from io import StringIO
+sys.stdout = StringIO()
+`);
+
+        try {
+          pyodide.runPython(sandboxCode);
+          const output = pyodide.runPython('sys.stdout.getvalue()');
+          setSandboxOutput(output || '(aucun affichage)');
+        } catch (pyError: any) {
+          setSandboxOutput(`❌ Erreur Python:\n${pyError.message}`);
         }
       } else {
-        // Try as JavaScript
-        const result = eval(sandboxCode);
-        setSandboxOutput(String(result));
+        // JavaScript
+        try {
+          const logs: string[] = [];
+          const mockConsole = {
+            log: (...args: any[]) => logs.push(args.map(a => typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)).join(' ')),
+            error: (...args: any[]) => logs.push('❌ ' + args.join(' ')),
+            warn: (...args: any[]) => logs.push('⚠️ ' + args.join(' ')),
+          };
+          const fn = new Function('console', sandboxCode);
+          fn(mockConsole);
+          setSandboxOutput(logs.join('\n') || '(aucun affichage)');
+        } catch (jsError: any) {
+          setSandboxOutput(`❌ Erreur JavaScript:\n${jsError.message}`);
+        }
       }
     } catch (e: any) {
-      setSandboxOutput(`Erreur: ${e.message}`);
+      setSandboxOutput(`❌ Erreur: ${e.message}`);
+    } finally {
+      setIsRunning(false);
     }
   };
+
+  // Client-side PHP transpiler (best-effort, for simple exercises)
+  function transpilePHP(code: string): string {
+    try {
+      let output = '';
+      const log = (val: any) => { output += String(val); };
+
+      let jsCode = code.replace(/^<\?php\s*/i, '').replace(/\?>\s*$/, '');
+      jsCode = jsCode.replace(/\s+/g, ' ').trim();
+
+      // Simple approach: handle basic echo/print with variables
+      // Extract variables and their values
+      const varMap = new Map<string, any>();
+
+      // Handle variable assignments: $var = value;
+      jsCode = jsCode.replace(/\$([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)\s*=\s*([^;]+);/g, (_, name, val) => {
+        // Clean up value
+        let jsVal = val.trim();
+        // Remove trailing " \n" or similar
+        jsVal = jsVal.replace(/\s*\.\s*"\s*\\n\s*"\s*$/g, '');
+        // PHP concatenation . -> JS +
+        jsVal = jsVal.replace(/\s*\.\s*/g, ' + ');
+        // PHP array() -> []
+        jsVal = jsVal.replace(/array\s*\(([^)]*)\)/g, '[$1]');
+        // Replace PHP variable references with JS references
+        jsVal = jsVal.replace(/\$([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)/g, (_: string, vName: string) => {
+          return `__v_${vName}__`;
+        });
+        varMap.set(name, jsVal);
+        return `varMap.set("${name}", ${jsVal});`;
+      });
+
+      // Handle echo statements
+      jsCode = jsCode.replace(/echo\s+([^;]+);/g, (_: string, expr: string) => {
+        // Clean expression
+        let jsExpr = expr.trim();
+        // Handle "\n" at end
+        jsExpr = jsExpr.replace(/\s*\.\s*"\s*\\n\s*"\s*$/g, '');
+        // PHP concatenation . -> JS +
+        jsExpr = jsExpr.replace(/\s*\.\s*/g, ' + ');
+        // Replace PHP variable references
+        jsExpr = jsExpr.replace(/\$([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)/g, (_: string, name: string) => {
+          if (varMap.has(name)) {
+            return `(${varMap.get(name)})`;
+          }
+          return `__v_${name}__`;
+        });
+        // Handle math expressions
+        if (jsExpr.includes('*') || jsExpr.includes('+') || jsExpr.includes('-')) {
+          jsExpr = jsExpr.replace(/\(([^)]+)\)/g, '($1)');
+        }
+        return `log(${jsExpr} + "\\n");`;
+      });
+
+      // Handle for loops (simple: for ($i = 1; $i <= N; $i++))
+      const forMatch = jsCode.match(/for\s*\(\s*\$([a-zA-Z]+)\s*=\s*(\d+)\s*;\s*\$([a-zA-Z]+)\s*([<>=!]+)\s*(\d+)\s*;\s*\$([a-zA-Z]+)\+\+\s*\)/);
+      if (forMatch) {
+        const [, varName, start, , op, end, incName] = forMatch;
+        const forBody = jsCode.match(/\{([\s\S]*?)\}/);
+        if (forBody) {
+          let body = forBody[1];
+          // Process echo inside loop
+          body = body.replace(/echo\s+([^;]+);/g, (_, expr) => {
+            let jsExpr = expr.trim();
+            jsExpr = jsExpr.replace(/\s*\.\s*/g, ' + ');
+            jsExpr = jsExpr.replace(/\s*\.\s*"\s*\\n\s*"\s*$/g, '');
+            // Replace $i with loop variable
+            jsExpr = jsExpr.replace(/\$i/g, varName);
+            // Replace math expressions
+            jsExpr = jsExpr.replace(/\$\w+\s*\*\s*\d+/g, (m: string) => {
+              const parts = m.replace(/\$/g, '').split('*');
+              return `(${parts[0].trim()} * ${parts[1].trim()})`;
+            });
+            return `log(${jsExpr} + "\\n");`;
+          });
+          eval(body);
+          return output || '(Code PHP exécuté avec succès)';
+        }
+      }
+
+      eval(jsCode);
+      return output || '(Code PHP exécuté avec succès - aucun affichage)';
+    } catch (e: any) {
+      return `❌ Erreur PHP: ${e.message}\n\nNote: Le transpileur client ne gère que le PHP basique.\nPour un vrai exécuteur PHP, un endpoint API backend est recommandé.`;
+    }
+  }
 
   // Reset sandbox when lesson changes
   useEffect(() => {
@@ -440,174 +589,318 @@ export default function CoursePage() {
         <div className="px-4 sm:px-8 lg:px-12 py-8 max-w-4xl">
           {currentLesson && (
             <>
-              <div className="mb-6">
-                <span className="badge bg-primary/10 text-primary border border-primary/20 text-xs">
-                  {currentLesson.category}
-                </span>
-                {currentLesson.hasQuiz && (
-                  <span className="badge bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs ml-2">
-                    {t('course.quiz')}
+              <div className="mb-6 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="badge bg-primary/10 text-primary border border-primary/20 text-xs text-nowrap">
+                    {currentLesson.category}
                   </span>
+                  {currentLesson.hasQuiz && (
+                    <span className="badge bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs text-nowrap">
+                      {t('course.quiz')}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Tabs Navigation */}
+              <div className="flex items-center gap-1 p-1 bg-white/5 border border-border rounded-xl mb-8 w-fit overflow-x-auto">
+                <button
+                  onClick={() => setActiveTab('theory')}
+                  className={`px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === 'theory' ? 'bg-primary text-white shadow-lg' : 'text-[var(--text-muted)] hover:text-white'}`}
+                >
+                  <BookOpen className="w-4 h-4" />
+                  {locale === 'ar' ? 'الدرس' : locale === 'en' ? 'Theory' : 'Cours'}
+                </button>
+                {currentLesson.exampleFr && (
+                  <button
+                    onClick={() => setActiveTab('example')}
+                    className={`px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === 'example' ? 'bg-primary text-white shadow-lg' : 'text-[var(--text-muted)] hover:text-white'}`}
+                  >
+                    <BookOpen className="w-4 h-4" />
+                    {locale === 'ar' ? 'مثال' : locale === 'en' ? 'Example' : 'Exemple'}
+                  </button>
+                )}
+                <button
+                  onClick={() => setActiveTab('exercise')}
+                  className={`px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === 'exercise' ? 'bg-primary text-white shadow-lg' : 'text-[var(--text-muted)] hover:text-white'}`}
+                >
+                  <Terminal className="w-4 h-4" />
+                  {locale === 'ar' ? 'تمرين' : locale === 'en' ? 'Exercise' : 'Exercice'}
+                </button>
+                {currentLesson.hasQuiz && (
+                  <button
+                    onClick={() => setActiveTab('quiz')}
+                    className={`px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === 'quiz' ? 'bg-primary text-white shadow-lg' : 'text-[var(--text-muted)] hover:text-white'}`}
+                  >
+                    <HelpCircle className="w-4 h-4" />
+                    Quiz
+                  </button>
                 )}
               </div>
 
-              {/* Render markdown-like content */}
-              <div className="space-y-4">
-                {renderContent(getContent(currentLesson))}
-              </div>
-
-              {/* Sandbox / Exercise Section */}
-              <div className="mt-8 bg-[var(--bg-elevated)] border border-border rounded-2xl overflow-hidden">
-                <div className="px-6 py-4 border-b border-border flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center">
-                      <span className="text-lg">💻</span>
-                    </div>
-                    <div>
-                      <h3 className="font-display font-bold text-sm">
-                        {locale === 'ar' ? ' Sandbox - Essayez le code' : locale === 'en' ? 'Sandbox - Try the code' : 'Bac a sable - Essayez le code'}
-                      </h3>
-                      <p className="text-xs text-[var(--text-muted)]">
-                        {locale === 'ar' ? 'Modifiez et executez le code' : locale === 'en' ? 'Modify and run the code' : 'Modifiez et executez le code'}
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setSandboxCode(getDefaultSandbox(currentLesson))}
-                    className="btn btn-ghost btn-sm"
-                  >
-                    {locale === 'ar' ? 'إعادة تعيين' : locale === 'en' ? 'Reset' : 'Reinitialiser'}
-                  </button>
-                </div>
-                <div className="p-4">
-                  <textarea
-                    value={sandboxCode}
-                    onChange={(e) => setSandboxCode(e.target.value)}
-                    className="w-full h-48 bg-[var(--bg-base)] border border-border rounded-xl p-4 font-mono text-sm text-[var(--text-main)] resize-none focus:outline-none focus:border-primary"
-                    spellCheck={false}
-                  />
-                  <div className="mt-3 flex items-center justify-between">
-                    <span className="text-xs text-[var(--text-muted)]">
-                      {locale === 'ar' ? 'النتيجة:' : locale === 'en' ? 'Output:' : 'Resultat :'}
-                    </span>
-                    <button
-                      onClick={runSandbox}
-                      className="btn btn-primary btn-sm"
+              {/* Tab Content */}
+              {activeTab === 'theory' && (
+                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  {renderContent(getContent(currentLesson))}
+                  <div className="pt-8 flex justify-end">
+                    <button 
+                      onClick={() => setActiveTab(currentLesson.exampleFr ? 'example' : 'exercise')}
+                      className="btn btn-primary flex items-center gap-2"
                     >
-                      ▶ {locale === 'ar' ? 'تشغيل' : locale === 'en' ? 'Run' : 'Executer'}
+                      {currentLesson.exampleFr 
+                        ? (locale === 'ar' ? 'انتقل إلى المثال' : locale === 'en' ? 'Go to Example' : 'Passer à l\'exemple')
+                        : (locale === 'ar' ? 'الذهاب إلى التمرين' : locale === 'en' ? 'Go to Exercise' : 'Passer à l\'exercice')
+                      }
+                      <ArrowRight className={`w-4 h-4 ${dir === 'rtl' ? 'rotate-180' : ''}`} />
                     </button>
                   </div>
-                  {sandboxOutput && (
-                    <div className="mt-3 bg-[var(--bg-base)] border border-border rounded-xl p-4 font-mono text-sm whitespace-pre-wrap" style={{ color: 'var(--text-muted)' }}>
-                      {sandboxOutput}
+                </div>
+              )}
+
+              {activeTab === 'example' && (
+                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className="bg-[var(--bg-elevated)] border border-border rounded-2xl p-6">
+                    <div className="flex items-center gap-3 mb-4 text-primary">
+                      <BookOpen className="w-5 h-5" />
+                      <h3 className="font-display font-bold">{locale === 'ar' ? 'مثال توضيحي' : locale === 'en' ? 'Illustrative Example' : 'Exemple d\'illustration'}</h3>
+                    </div>
+                    {renderContent(`\`\`\`php\n${currentLesson.exampleFr || ''}\n\`\`\``)}
+                  </div>
+                  <div className="pt-8 flex justify-between">
+                    <button onClick={() => setActiveTab('theory')} className="btn btn-ghost flex items-center gap-2">
+                       <ArrowLeft className={`w-4 h-4 ${dir === 'rtl' ? 'rotate-180' : ''}`} />
+                       {locale === 'ar' ? 'العودة للدرس' : locale === 'en' ? 'Back to Theory' : 'Retour au cours'}
+                    </button>
+                    <button onClick={() => setActiveTab('exercise')} className="btn btn-primary flex items-center gap-2">
+                       {locale === 'ar' ? 'انتقل إلى التمرين' : locale === 'en' ? 'Go to Exercise' : 'Passer à l\'exercice'}
+                       <ArrowRight className={`w-4 h-4 ${dir === 'rtl' ? 'rotate-180' : ''}`} />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'exercise' && (
+                <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  {/* Instructions Area */}
+                  {(currentLesson.exerciseFr || currentLesson.contentFr.includes('Exercice')) && (
+                    <div className="mb-6 bg-primary/5 border border-primary/20 rounded-2xl p-6">
+                      <div className="flex items-center gap-3 mb-3 text-primary">
+                        <Trophy className="w-5 h-5" />
+                        <h3 className="font-display font-bold">🎯 {locale === 'ar' ? 'هدف التمرين' : locale === 'en' ? 'Exercise Objective' : 'Objectif de l\'exercice'}</h3>
+                      </div>
+                      <div className="text-sm text-[var(--text-muted)] leading-relaxed">
+                        {currentLesson.exerciseFr?.split('\n').filter((l: string) => l.startsWith('//')).map((l: string) => l.replace(/^\/\/\s*/, '')).join('\n') || 
+                         'Consultez les commentaires dans le code ci-dessous pour les instructions.'}
+                      </div>
                     </div>
                   )}
-                </div>
-              </div>
 
-              {/* Quiz Section */}
-              {currentLesson.hasQuiz && currentLesson.quizCorrect !== null && (
-                <div className="mt-8 bg-[var(--bg-elevated)] border border-border rounded-2xl p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-8 h-8 rounded-lg bg-amber-500/15 flex items-center justify-center">
-                      <span className="text-lg">❓</span>
+                  {/* Sandbox / Exercise Section */}
+                  <div className="bg-[var(--bg-elevated)] border border-border rounded-2xl overflow-hidden shadow-xl">
+                    <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-white/[0.02]">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center text-primary">
+                          <Terminal className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h3 className="font-display font-bold text-base">
+                            {locale === 'ar' ? 'تمرين عملي' : locale === 'en' ? 'Practical Exercise' : 'Exercice Pratique'}
+                          </h3>
+                          <p className="text-xs text-[var(--text-muted)]">
+                            {locale === 'ar' ? 'قم بتعديل وتشغيل الكود' : locale === 'en' ? 'Modify and execute the code' : 'Modifiez et exécutez le code'}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setSandboxCode(getDefaultSandbox(currentLesson));
+                          setIsRunning(false);
+                        }}
+                        className="btn btn-ghost btn-sm text-xs"
+                      >
+                        {locale === 'ar' ? 'إعادة تعيين' : locale === 'en' ? 'Reset' : 'Réinitialiser'}
+                      </button>
                     </div>
-                    <h3 className="font-display font-bold">{t('course.quiz')}</h3>
-                  </div>
-
-                  <p className="text-sm font-medium mb-4">{getQuizQuestion()}</p>
-
-                  <div className="space-y-2 mb-4">
-                    {getQuizOptions().map((option, i) => {
-                      const isCorrect = i === currentLesson.quizCorrect;
-                      const isSelected = quizAnswer === i;
-                      let optionStyle = 'bg-white/5 border-border hover:bg-white/10';
-
-                      if (quizSubmitted) {
-                        if (isCorrect) {
-                          optionStyle = 'bg-primary/15 border-primary/40 text-primary';
-                        } else if (isSelected && !isCorrect) {
-                          optionStyle = 'bg-red-500/15 border-red-500/40 text-red-400';
-                        }
-                      } else if (isSelected) {
-                        optionStyle = 'bg-primary/10 border-primary/30';
-                      }
-
-                      return (
+                    <div className="p-4 bg-[#0d1117]">
+                      <textarea
+                        value={sandboxCode}
+                        onChange={(e) => setSandboxCode(e.target.value)}
+                        className="w-full h-64 bg-transparent border-none p-4 font-mono text-sm text-gray-300 resize-none focus:outline-none"
+                        spellCheck={false}
+                        placeholder="// Écrivez votre code PHP ici..."
+                      />
+                      <div className="mt-3 flex items-center justify-between border-t border-white/5 pt-4">
+                        <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+                          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                          {locale === 'ar' ? 'جاهز للتنفيذ' : locale === 'en' ? 'Ready to execute' : 'Prêt pour l\'exécution'}
+                        </div>
                         <button
-                          key={i}
-                          onClick={() => !quizSubmitted && setQuizAnswer(i)}
-                          disabled={quizSubmitted}
-                          className={`w-full text-left px-4 py-3 rounded-xl border text-sm transition-all ${optionStyle} ${
-                            quizSubmitted ? 'cursor-default' : 'cursor-pointer'
-                          }`}
+                          onClick={runSandbox}
+                          disabled={isRunning}
+                          className="btn btn-primary px-6 flex items-center gap-2 group shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          <div className="flex items-center gap-3">
-                            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                              quizSubmitted && isCorrect
-                                ? 'border-primary bg-primary text-gray-900'
-                                : quizSubmitted && isSelected && !isCorrect
-                                ? 'border-red-400 bg-red-400 text-white'
-                                : isSelected
-                                ? 'border-primary'
-                                : 'border-border'
-                            }`}>
-                              {quizSubmitted && isCorrect && <span className="text-xs">✓</span>}
-                              {quizSubmitted && isSelected && !isCorrect && <span className="text-xs">✗</span>}
-                              {!quizSubmitted && (
-                                <span className="text-xs text-[var(--text-muted)]">{String.fromCharCode(65 + i)}</span>
-                              )}
-                            </div>
-                            <span>{option}</span>
-                          </div>
+                          {isRunning ? (
+                            <>
+                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              {locale === 'ar' ? 'جاري التنفيذ...' : locale === 'en' ? 'Running...' : 'Exécution...'}
+                            </>
+                          ) : (
+                            <>
+                              <Play className="w-4 h-4 fill-current group-hover:scale-110 transition-transform" />
+                              {locale === 'ar' ? 'تشغيل' : locale === 'en' ? 'Run' : 'Exécuter'}
+                            </>
+                          )}
                         </button>
-                      );
-                    })}
+                      </div>
+                    </div>
+                    {sandboxOutput && (
+                      <div className="border-t border-border bg-black/40 p-0">
+                        <div className="px-4 py-2 bg-white/5 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider border-b border-border">
+                          {locale === 'ar' ? 'النتيجة' : locale === 'en' ? 'Output' : 'Résultat'}
+                        </div>
+                        <pre className="p-6 font-mono text-sm text-green-400 overflow-x-auto min-h-[100px] whitespace-pre-wrap">
+                          {sandboxOutput}
+                        </pre>
+                      </div>
+                    )}
                   </div>
 
-                  {!quizSubmitted ? (
-                    <button
-                      onClick={async () => {
-                        if (quizAnswer !== null) {
-                          setQuizSubmitted(true);
-                          // Save quiz result to DB
-                          if (course && currentLesson) {
-                            try {
-                              await fetch('/api/progress', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                  lessonId: currentLesson.id,
-                                  courseId: course.id,
-                                  quizAnswer,
-                                  quizCorrect: currentLesson.quizCorrect,
-                                }),
-                              });
-                            } catch (e) {
-                              console.error('Failed to save quiz:', e);
+                  <div className="mt-8 flex justify-between">
+                    <button 
+                      onClick={() => setActiveTab('theory')}
+                      className="btn btn-ghost flex items-center gap-2"
+                    >
+                      <ArrowLeft className={`w-4 h-4 ${dir === 'rtl' ? 'rotate-180' : ''}`} />
+                      {locale === 'ar' ? 'العودة للدرس' : locale === 'en' ? 'Back to Theory' : 'Retour au cours'}
+                    </button>
+                    {currentLesson.hasQuiz && (
+                      <button 
+                        onClick={() => setActiveTab('quiz')}
+                        className="btn btn-primary flex items-center gap-2"
+                      >
+                        {locale === 'ar' ? 'انتقل إلى الاختبار' : locale === 'en' ? 'Go to Quiz' : 'Passer au Quiz'}
+                        <ArrowRight className={`w-4 h-4 ${dir === 'rtl' ? 'rotate-180' : ''}`} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'quiz' && currentLesson.hasQuiz && (
+                <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className="bg-[var(--bg-elevated)] border border-border rounded-2xl p-6 shadow-xl">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-10 h-10 rounded-xl bg-amber-500/15 flex items-center justify-center text-amber-500 font-bold">
+                        ?
+                      </div>
+                      <h3 className="font-display font-bold text-lg">{t('course.quiz')}</h3>
+                    </div>
+
+                    <div className="bg-white/5 border border-border rounded-xl p-6 mb-6">
+                      <p className="text-base font-medium">{getQuizQuestion()}</p>
+                    </div>
+
+                    <div className="space-y-3 mb-8">
+                      {getQuizOptions().map((option, i) => {
+                        const isCorrect = i === currentLesson.quizCorrect;
+                        const isSelected = quizAnswer === i;
+                        let optionStyle = 'bg-white/5 border-border hover:bg-white/10 hover:border-primary/30 text-[var(--text-muted)]';
+
+                        if (quizSubmitted) {
+                          if (isCorrect) {
+                            optionStyle = 'bg-primary/20 border-primary shadow-[0_0_15px_rgba(var(--primary-rgb),0.2)] text-primary font-bold';
+                          } else if (isSelected && !isCorrect) {
+                            optionStyle = 'bg-red-500/20 border-red-500 text-red-400';
+                          }
+                        } else if (isSelected) {
+                          optionStyle = 'bg-primary/10 border-primary text-primary';
+                        }
+
+                        return (
+                          <button
+                            key={i}
+                            disabled={quizSubmitted}
+                            onClick={() => setQuizAnswer(i)}
+                            className={`w-full text-left px-5 py-4 rounded-xl border transition-all duration-200 flex items-center gap-4 group ${optionStyle}`}
+                          >
+                            <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold transition-all ${
+                              isSelected ? 'border-primary bg-primary text-white shadow-md' : 'border-border group-hover:border-primary/50'
+                            }`}>
+                              {String.fromCharCode(65 + i)}
+                            </div>
+                            <span className="flex-1">{option}</span>
+                            {quizSubmitted && isCorrect && <CheckCircle className="w-5 h-5 text-primary" />}
+                            {quizSubmitted && isSelected && !isCorrect && <XCircle className="w-5 h-5 text-red-400" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {quizSubmitted ? (
+                      <div className={`p-6 rounded-2xl border animate-in zoom-in-95 duration-300 ${
+                        quizAnswer === currentLesson.quizCorrect ? 'bg-primary/10 border-primary/30' : 'bg-red-500/10 border-red-500/30'
+                      }`}>
+                        <div className="flex items-start gap-4">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                            quizAnswer === currentLesson.quizCorrect ? 'bg-primary/20 text-primary' : 'bg-red-500/20 text-red-400'
+                          }`}>
+                            {quizAnswer === currentLesson.quizCorrect ? '🏆' : '❌'}
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-bold mb-1">
+                              {quizAnswer === currentLesson.quizCorrect ? 'Bravo !' : 'Oups...'}
+                            </h4>
+                            <p className="text-sm text-[var(--text-muted)] leading-relaxed">
+                              {getQuizExplain()}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        disabled={quizAnswer === null}
+                        onClick={async () => {
+                          if (quizAnswer !== null) {
+                            setQuizSubmitted(true);
+                            // Save progress
+                            if (quizAnswer === currentLesson.quizCorrect) {
+                              markComplete();
+                            }
+                            // API call
+                             if (course && currentLesson) {
+                              try {
+                                await fetch('/api/progress', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                    lessonId: currentLesson.id,
+                                    courseId: course.id,
+                                    quizAnswer,
+                                    quizCorrect: currentLesson.quizCorrect,
+                                  }),
+                                });
+                              } catch (e) {
+                                console.error('Failed to save quiz:', e);
+                              }
                             }
                           }
-                        }
-                      }}
-                      disabled={quizAnswer === null}
-                      className="btn btn-primary btn-sm disabled:opacity-30"
+                        }}
+                        className="btn btn-primary w-full py-4 rounded-xl shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] disabled:opacity-50 disabled:shadow-none transition-all"
+                      >
+                        {locale === 'ar' ? 'تحقق من الإجابة' : locale === 'en' ? 'Verify Answer' : 'Vérifier la réponse'}
+                      </button>
+                    )}
+                  </div>
+                  
+                  <div className="mt-8 flex justify-start">
+                    <button 
+                      onClick={() => setActiveTab('exercise')}
+                      className="btn btn-ghost flex items-center gap-2"
                     >
-                      {t('course.submit')}
+                      <ArrowLeft className={`w-4 h-4 ${dir === 'rtl' ? 'rotate-180' : ''}`} />
+                      {locale === 'ar' ? 'العودة للتمرين' : locale === 'en' ? 'Back to Exercise' : 'Retour à l\'exercice'}
                     </button>
-                  ) : (
-                    <div className={`p-4 rounded-xl ${
-                      quizAnswer === currentLesson.quizCorrect
-                        ? 'bg-primary/10 border border-primary/25'
-                        : 'bg-red-500/10 border border-red-500/25'
-                    }`}>
-                      <div className="font-semibold text-sm mb-1">
-                        {quizAnswer === currentLesson.quizCorrect
-                          ? `✅ ${t('course.correct')}`
-                          : `❌ ${t('course.incorrect')}`}
-                      </div>
-                      <p className="text-xs text-[var(--text-muted)]">{getQuizExplain()}</p>
-                    </div>
-                  )}
+                  </div>
                 </div>
               )}
 
