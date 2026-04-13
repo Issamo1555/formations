@@ -55,9 +55,10 @@ COPY --from=builder /app/public ./public/
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/scripts ./scripts/
+COPY --from=builder /app/prisma/schema.prod.prisma ./prisma/schema.prod.prisma
 
-# Installer tsx pour les seeds (devDependency nécessaire au runtime)
-COPY --from=builder /app/node_modules/tsx ./node_modules/tsx
+# Installer Prisma CLI (pour db push au démarrage)
+RUN npm install -g prisma@6.19.3
 
 # Logs directory pour le volume
 RUN mkdir -p /app/logs && chown -R nextjs:nodejs /app/logs
