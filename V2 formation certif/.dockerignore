@@ -13,7 +13,6 @@ node_modules
 .DS_Store
 docker-compose.yml
 Dockerfile
-docker-entrypoint.sh
 nginx.conf
 nginx/
 scripts/
