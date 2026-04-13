@@ -20,7 +20,7 @@ done
 
 # Pousser le schéma Prisma
 echo "📦 Push du schéma Prisma..."
-npx prisma db push --accept-data-loss 2>&1 || echo "⚠️ Prisma db push a échoué (peut-être déjà à jour)"
+npx prisma db push --schema=prisma/schema.prod.prisma --accept-data-loss 2>&1 || echo "⚠️ Prisma db push a échoué (peut-être déjà à jour)"
 
 # Seeder la base (uniquement si vide)
 echo "🌱 Vérification du seed..."

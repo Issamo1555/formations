@@ -35,7 +35,7 @@ RUN npm ci --ignore-scripts
 COPY . .
 
 # Générer Prisma client + build
-RUN npx prisma generate
+RUN npx prisma generate --schema=prisma/schema.prod.prisma
 RUN npm run build
 
 # ─── Production ───
