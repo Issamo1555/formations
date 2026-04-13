@@ -1,12 +1,11 @@
 // Smartcodai V2 - Database Schema
-// Dev: SQLite | Prod: PostgreSQL (use schema.production.prisma for prod)
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = env("DB_PROVIDER")
+  url      = env("DATABASE_URL")
 }
 
 model User {

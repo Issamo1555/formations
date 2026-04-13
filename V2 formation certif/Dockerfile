@@ -56,6 +56,9 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/scripts ./scripts/
 
+# Installer tsx pour les seeds (devDependency nécessaire au runtime)
+COPY --from=builder /app/node_modules/tsx ./node_modules/tsx
+
 # Logs directory pour le volume
 RUN mkdir -p /app/logs && chown -R nextjs:nodejs /app/logs
 
