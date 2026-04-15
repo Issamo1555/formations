@@ -263,11 +263,8 @@ export default function DashboardPage() {
         </div>
       </aside>
 
-      {/* Main */}
-      <main 
-        className="flex-1 min-w-0 md:ml-64"
-        style={{ marginLeft: typeof window !== 'undefined' && window.innerWidth >= 768 ? '256px' : '0' }}
-      >
+      {/* Main Container */}
+      <main className="flex-1 min-w-0 md:ml-64">
         <header className="sticky top-0 z-30 backdrop-blur-xl border-b" style={{ backgroundColor: 'var(--bg-base)', borderColor: 'var(--border-light)' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-6">
             <div className="flex items-center gap-3">
