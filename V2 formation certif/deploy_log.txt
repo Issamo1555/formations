@@ -1,0 +1,14 @@
+spawn ssh -o StrictHostKeyChecking=no -N -L 5432:127.0.0.1:5432 root@62.72.19.56
+root@62.72.19.56's password: 
+
+> smartcodai-v2@2.0.0 db:push:prod
+> prisma db push --schema=prisma/schema.prod.prisma
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prod.prisma
+Datasource "db": PostgreSQL database "smartcodai", schema "public" at "127.0.0.1:5432"
+Error: P1017
+
+Server has closed the connection.
+
+run_deploy.sh: line 11: kill: (17506) - No such process

@@ -3,10 +3,13 @@ import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 
 export async function POST(req: NextRequest) {
+  console.log(">>> [DEBUG] Login attempt started");
   try {
     const { email, password } = await req.json();
+    console.log(">>> [AUTH-STEP-1] Tentative de login pour :", email);
 
     if (!email || !password) {
+      console.log(">>> [DEBUG] Missing email or password");
       return NextResponse.json(
         { error: 'Email et mot de passe requis.' },
         { status: 400 }
@@ -55,10 +58,10 @@ export async function POST(req: NextRequest) {
     });
 
     return response;
-  } catch (error) {
-    console.error('Login error:', error);
+  } catch (error: any) {
+    console.error('>>> [DEBUG] Login error DETAILED:', error);
     return NextResponse.json(
-      { error: 'Une erreur est survenue.' },
+      { error: `Une erreur est survenue: ${error?.message || 'Unknown'}` },
       { status: 500 }
     );
   }

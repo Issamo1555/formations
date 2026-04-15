@@ -57,8 +57,8 @@ COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/scripts ./scripts/
 COPY --from=builder /app/prisma/schema.prod.prisma ./prisma/schema.prod.prisma
 
-# Installer Prisma CLI (pour db push au démarrage)
-RUN npm install -g prisma@6.19.3
+# Installer Prisma CLI et tsx pour les scripts de démarrage
+RUN npm install -g prisma@6.2.0 tsx
 
 # Logs directory pour le volume
 RUN mkdir -p /app/logs && chown -R nextjs:nodejs /app/logs

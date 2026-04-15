@@ -18,7 +18,15 @@
       "Bash(lsof *)",
       "WebFetch(localhost)",
       "Bash(/usr/bin/head *)",
-      "Bash(git checkout *)"
+      "Bash(git checkout *)",
+      "Bash(mkdir *)",
+      "Bash(git merge *)",
+      "Bash(git stash)",
+      "Bash(git stash *)",
+      "Bash(echo *)",
+      "Bash(ls *)",
+      "Bash(sqlite3 *)",
+      "Bash(find *)"
     ]
   },
   "$version": 3
