@@ -138,7 +138,15 @@ export default function DashboardPage() {
         className={`fixed md:sticky top-0 left-0 h-screen w-64 border-r flex flex-col flex-shrink-0 z-50 transition-transform duration-300 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
-        style={{ backgroundColor: 'var(--bg-panel)', borderColor: 'var(--border-light)', flexShrink: 0 }}
+        style={{ 
+          backgroundColor: 'var(--bg-panel)', 
+          borderColor: 'var(--border-light)', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          width: '256px', 
+          minWidth: '256px',
+          flexShrink: 0 
+        }}
       >
         <div className="p-5">
           <div className="flex items-center justify-between">
@@ -158,7 +166,10 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <nav className="flex-1 px-3 space-y-1 flex flex-col overflow-y-auto">
+        <nav 
+          className="flex-1 px-3 space-y-1 flex flex-col overflow-y-auto"
+          style={{ display: 'flex', flexDirection: 'column' }}
+        >
           <div className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest px-3 pt-4">
             {t('nav.dashboard')}
           </div>
@@ -253,9 +264,12 @@ export default function DashboardPage() {
       </aside>
 
       {/* Main */}
-      <main className="flex-1 min-w-0 md:ml-64">
+      <main 
+        className="flex-1 min-w-0 md:ml-64"
+        style={{ marginLeft: typeof window !== 'undefined' && window.innerWidth >= 768 ? '256px' : '0' }}
+      >
         <header className="sticky top-0 z-30 backdrop-blur-xl border-b" style={{ backgroundColor: 'var(--bg-base)', borderColor: 'var(--border-light)' }}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-4">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-6">
             <div className="flex items-center gap-3">
               <button
                 className="md:hidden w-10 h-10 rounded-xl border flex items-center justify-center"
