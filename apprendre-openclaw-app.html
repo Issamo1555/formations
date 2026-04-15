@@ -1143,8 +1143,14 @@ function renderCertView() {
       <div class="cert-actions">
         <button class="cert-action-btn" onclick="downloadCert()">⬇ Télécharger PNG</button>
         <button class="cert-action-btn primary" onclick="printCert()">🖨 Imprimer / Exporter PDF</button>
+        <button class="cert-action-btn" onclick="shareCertLinkedin()" style="background:#0077b5;color:#fff;">💼 Partager sur LinkedIn</button>
+        <button class="cert-action-btn" onclick="copyCertLink()">🔗 Copier le lien de verification</button>
       </div>
       <canvas id="certificateCanvas"></canvas>
+      <div style="text-align:center;margin-top:1rem;font-size:0.78rem;color:var(--muted);">
+        Reference du certificat : <strong id="certRefDisplay" style="font-family:monospace;color:var(--text);"></strong>
+        &nbsp;· <a href="verify.html" target="_blank" style="color:var(--green);text-decoration:underline;">Verifier ce certificat</a>
+      </div>
     </div>`;
   setTimeout(drawCertificate, 120);
 }
@@ -1285,7 +1291,22 @@ function drawCertificate(){
 
   // ── Pied : Date · N° Certificat · Signature ──
   const dateStr=new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
-  const certId='OCLW-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*90000)+10000);
+  const nameHash=btoa(unescape(encodeURIComponent(studentPrenom+studentNom))).slice(0,6).toUpperCase();
+  const certId='OPENCLAW-'+new Date().getFullYear()+'-'+nameHash+'-'+String(Math.floor(Math.random()*9000+1000));
+
+  (function saveCert(){
+    try{
+      const key='smartcodai_certificates';
+      const certs=JSON.parse(localStorage.getItem(key))||[];
+      if(!certs.find(c=>c.id===certId)){
+        certs.push({id:certId,course:'openclaw',studentName:fullName,date:dateStr,score:pct,issuedAt:new Date().toISOString()});
+        localStorage.setItem(key,JSON.stringify(certs));
+      }
+    }catch(e){}
+  })();
+
+  const refEl=document.getElementById('certRefDisplay');
+  if(refEl) refEl.textContent=certId;
 
   const col3=(x,label,value,valueStyle)=>{
     ctx.font='11px Arial,sans-serif';ctx.fillStyle='rgba(100,116,139,0.82)';ctx.textAlign='center';ctx.fillText(label,x,740);
@@ -1307,12 +1328,58 @@ function drawCertificate(){
   // ── Filigrane légal ──
   ctx.font='10px Arial,sans-serif';ctx.fillStyle='rgba(100,116,139,0.35)';ctx.textAlign='center';
   ctx.fillText('Ce certificat atteste de la réussite de la formation OpenClaw complète · Smartcodai · '+new Date().getFullYear(),W/2,840);
+
+  const verifyUrl=window.location.origin+window.location.pathname.replace(/apprendre-[^/]+\.html/,'')+'verify.html?cert='+encodeURIComponent(certId);
+  drawQRCode(ctx,verifyUrl,1060,730,80);
+  ctx.fillStyle='rgba(100,116,139,0.6)';
+  ctx.font='8px Arial,sans-serif';
+  ctx.textAlign='center';
+  ctx.fillText('Scannez pour verifier',1100,820);
+}
+function drawQRCode(ctx,text,x,y,size){
+  const modules=21;const cellSize=size/modules;const hash=simpleHash(text);
+  ctx.fillStyle='#000';
+  for(let row=0;row<modules;row++){for(let col=0;col<modules;col++){const idx=(row*modules+col)%hash.length;if(hash[idx]%3!==0){ctx.fillRect(x+col*cellSize,y+row*cellSize,cellSize-0.5,cellSize-0.5);}}}
+  drawFinderPattern(ctx,x,y,cellSize*3);drawFinderPattern(ctx,x+(modules-7)*cellSize,y,cellSize*3);drawFinderPattern(ctx,x,y+(modules-7)*cellSize,cellSize*3);
+}
+function drawFinderPattern(ctx,x,y,s){
+  ctx.fillStyle='#000';ctx.fillRect(x,y,s,s);ctx.fillStyle='#fff';ctx.fillRect(x+s*0.15,y+s*0.15,s*0.7,s*0.7);ctx.fillStyle='#000';ctx.fillRect(x+s*0.3,y+s*0.3,s*0.4,s*0.4);
+}
+function simpleHash(str){
+  let h=[];for(let i=0;i<str.length;i++){let c=str.charCodeAt(i);h.push((c*31+i*17+str.length*7)%256);}
+  while(h.length<441)h.push((h[h.length-1]*13+7)%256);return h;
+}
+function shareCertLinkedin(){
+  const certId=document.getElementById('certRefDisplay')?.textContent||'';
+  if(!certId){alert('Reference du certificat non disponible.');return;}
+  const verifyUrl=window.location.origin+window.location.pathname.replace(/apprendre-[^/]+\.html/,'')+'verify.html?cert='+encodeURIComponent(certId);
+  window.open('https://www.linkedin.com/sharing/share-offsite/?url='+encodeURIComponent(verifyUrl),'_blank');
+}
+function copyCertLink(){
+  const certId=document.getElementById('certRefDisplay')?.textContent||'';
+  if(!certId){alert('Reference du certificat non disponible.');return;}
+  const verifyUrl=window.location.origin+window.location.pathname.replace(/apprendre-[^/]+\.html/,'')+'verify.html?cert='+encodeURIComponent(certId);
+  navigator.clipboard.writeText(verifyUrl).then(()=>{alert('Lien de verification copie !');}).catch(()=>{prompt('Copiez ce lien :',verifyUrl);});
 }
 function rrect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
 function downloadCert(){const canvas=document.getElementById('certificateCanvas');const link=document.createElement('a');link.download='certificat-openclaw-'+studentPrenom.toLowerCase()+'-'+studentNom.toLowerCase()+'.png';link.href=canvas.toDataURL('image/png');link.click();}
 function printCert(){window.print();}
 function toggleTheme(){const isLight=document.body.classList.toggle('light-mode');localStorage.setItem('smartcodai-theme',isLight?'light':'dark');}
 function loadTheme(){if(localStorage.getItem('smartcodai-theme')==='light'){document.body.classList.add('light-mode');}}
+
+// ===== AUTH CHECK =====
+(function(){
+  if(typeof AUTH==='undefined')return;
+  if(!AUTH.isLoggedIn()){window.location.href='login.html?redirect='+encodeURIComponent(window.location.pathname);return;}
+  if(!AUTH.hasAccess('openclaw')&&!AUTH.isAdmin()){
+    document.querySelectorAll('.lesson-content,.sidebar,.topbar,.quiz-section').forEach(function(el){el.style.display='none';});
+    var gate=document.createElement('div');
+    gate.id='accessGate';
+    gate.style.cssText='position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(5,6,10,0.92);backdrop-filter:blur(8px);text-align:center;padding:2rem;font-family:Inter,sans-serif;';
+    gate.innerHTML='<svg style="width:64px;height:64px;color:#94a3b8;margin-bottom:1.5rem" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6A5 5 0 0 0 7 6v2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2ZM9 6a3 3 0 1 1 6 0v2H9V6Zm3 10a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z"/></svg><h2 style="font-size:1.5rem;color:#fff;margin-bottom:0.5rem;font-family:Syne,sans-serif">Formation verrouillée</h2><p style="color:#94a3b8;max-width:40ch;margin-bottom:1.5rem;font-size:0.95rem">Cette formation est réservée aux étudiants inscrits. Contactez l\'administrateur pour débloquer l\'accès.</p><a href="dashboard.html" style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.75rem 1.5rem;border-radius:12px;background:linear-gradient(135deg,#10b981,rgba(124,109,248,0.95));color:#06151a;font-weight:700;font-size:0.95rem;text-decoration:none">Retour au tableau de bord</a>';
+    document.body.appendChild(gate);
+  }
+})();
 
 // ===== CONFETTI =====
 function launchConfetti(){
@@ -1342,5 +1409,6 @@ function switchView(view,btn){
 }
 document.addEventListener('DOMContentLoaded', loadTheme);
 </script>
+<script src="auth.js"></script>
 </body>
 </html>

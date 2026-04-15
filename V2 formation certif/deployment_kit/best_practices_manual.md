@@ -34,4 +34,22 @@ Ce manuel définit les standards de qualité pour tous les projets Smartcodai. S
 - Cette méthode évite d'oublier des fichiers ou d'envoyer des dossiers volumineux (comme `node_modules`).
 
 ---
+
+## 🎨 Consistance Design & UX
+*   **Règle** : Le design en Production doit être identique au Local.
+*   **Risque** : Purge CSS incorrecte ou cache serveur désynchronisé.
+*   **Action** : Consulter et appliquer la check-list du fichier [ux_deployment_consistency.md](file:///Users/admin/Desktop/formation%20certif/V2%20formation%20certif/deployment_kit/ux_deployment_consistency.md).
+
+> [!TIP]
+> En cas de "mélange" visuel sur le serveur, forcer un build Docker avec `--no-cache`.
+
+## 🧪 Standards de Test (Qualité)
+
+### Règle : Nettoyage Prioritaire (Zero Residue)
+*   **Action** : Systématiquement vider les champs `login` et `password` avant toute saisie.
+*   **Pourquoi** : Garantir l'intégrité des données de test et éviter les erreurs d'authentification "fantômes".
+*   **Exécution** : Obligatoire pour **chaque test**, qu'il soit manuel ou automatisé.
+
+> [!NOTE]
+> Reportez-vous au fichier [testing_best_practices.md](file:///Users/admin/Desktop/formation%20certif/V2%20formation%20certif/deployment_kit/testing_best_practices.md) pour les détails techniques.
 *Ce document fait foi pour tout nouveau projet sur le VPS.*
