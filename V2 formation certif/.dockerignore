@@ -1,25 +1,47 @@
 # ============================================================
-# Smartcodai V2 — .dockerignore
+# Smartcodai V2 — Turbo .dockerignore (Optimisé pour Mac)
 # ============================================================
-node_modules
-.next
+
+# Dépendances locales (TRÈS IMPORTANT de les ignorer pour la vitesse)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Builds locaux (Ignorer pour ne pas polluer l'image Docker)
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+
+# Git
 .git
 .gitignore
-*.md
-.env.local
-.env.development.local
-.vscode
-.idea
+
+# OS & IDE
 .DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker / Config (Déjà sur l'hôte, inutile dans l'image builder)
 docker-compose.yml
-Dockerfile
+Dockerfile*
 nginx.conf
-nginx/
+.dockerignore
 DEPLOY*.md
 deploy*.sh
-vercel.json
-postcss.config.js
-tailwind.config.js
-tsconfig.tsbuildinfo
+run_deploy.sh
+deployment_kit/
+
+# Fichiers de données locales
 prisma/dev.db
 prisma/dev.db-journal
+logs/
+*.log
+
+# On ne garde QUE ce qui est nécessaire pour le build
+# (Le reste est géré par les étapes COPY du Dockerfile)

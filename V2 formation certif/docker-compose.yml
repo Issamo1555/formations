@@ -48,6 +48,8 @@ services:
         condition: service_healthy
     networks:
       - smartcodai-net
+    ports:
+      - "3000:3000"
     expose:
       - "3000"
     healthcheck:
@@ -58,6 +60,14 @@ services:
       start_period: 40s
     volumes:
       - app_logs:/app/logs
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.2'
+          memory: 256M
 
   # ─── Reverse Proxy Nginx ───
   nginx:
