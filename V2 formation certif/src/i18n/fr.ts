@@ -60,6 +60,7 @@ export const fr = {
       createAccount: 'Creer un compte',
       backHome: 'Retour a l\'accueil',
       error: 'Email ou mot de passe incorrect.',
+      orContinueWith: 'Ou continuer avec',
     },
     register: {
       title: 'Creer un compte',
