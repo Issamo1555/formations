@@ -94,11 +94,12 @@ export async function GET(req: NextRequest) {
 
     if (!user) {
       // Créer un nouvel étudiant
+      const isAdmin = email === 'admin@smartcodai.com' || email === 'issamo1555@gmail.com';
       user = await prisma.user.create({
         data: {
           email,
           name: name || email.split('@')[0],
-          role: 'USER',
+          role: isAdmin ? 'ADMIN' : 'USER',
           image: picture || null,
         },
       });

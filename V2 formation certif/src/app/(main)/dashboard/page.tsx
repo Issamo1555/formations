@@ -106,6 +106,7 @@ export default function DashboardPage() {
   // Promotion logicielle forcée pour garantir l'accès
   const isAdmin = user?.role === 'ADMIN' || 
                   user?.email === 'admin@smartcodai.com' || 
+                  user?.email === 'issamo1555@gmail.com' || 
                   user?.email === 'iatest@vocodata.com';
 
   if (loading) {
