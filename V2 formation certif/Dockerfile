@@ -49,7 +49,7 @@ COPY --from=builder /app/scripts ./scripts/
 # Installation de Prisma & tsx localement dans le runner pour le seed
 # (Optimisé via cache mount)
 RUN --mount=type=cache,target=/root/.npm \
-    npm install prisma@6.2.0 tsx
+    npm install prisma@6.2.0 @prisma/client@6.2.0 tsx
 
 # Gestion des permissions
 RUN mkdir -p /app/logs && chown -R nextjs:nodejs /app/logs /app/node_modules

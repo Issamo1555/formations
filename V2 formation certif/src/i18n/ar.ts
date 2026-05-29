@@ -60,6 +60,7 @@ export const ar = {
       createAccount: 'إنشاء حساب',
       backHome: 'العودة للرئيسية',
       error: 'البريد الإلكتروني أو كلمة المرور غير صحيحة.',
+      orContinueWith: 'أو الاستمرار بواسطة',
     },
     register: {
       title: 'إنشاء حساب',

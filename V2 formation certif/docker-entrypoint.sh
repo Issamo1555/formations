@@ -24,7 +24,7 @@ echo "📦 Push du schéma Prisma..."
 
 # Seeder la base (uniquement si vide)
 echo "🌱 Vérification du seed..."
-LESSON_COUNT=$(./node_modules/.bin/tsx -e "
+LESSON_COUNT=$(npx tsx -e "
   import { PrismaClient } from '@prisma/client';
   const p = new PrismaClient();
   (async () => {
@@ -41,10 +41,10 @@ LESSON_COUNT=$(./node_modules/.bin/tsx -e "
 
 if [ "$LESSON_COUNT" = "0" ] || [ "$LESSON_COUNT" = "" ]; then
   echo "📚 Seed de la base de données..."
-  ./node_modules/.bin/tsx prisma/seed.ts 2>&1 || echo "⚠️ seed.ts échoué"
-  ./node_modules/.bin/tsx prisma/seed-lessons.ts 2>&1 || echo "⚠️ seed-lessons.ts échoué"
-  ./node_modules/.bin/tsx prisma/seed-quizzes.ts 2>&1 || echo "⚠️ seed-quizzes.ts échoué"
-  ./node_modules/.bin/tsx prisma/seed-exercises.ts 2>&1 || echo "⚠️ seed-exercises.ts échoué"
+  npx tsx prisma/seed.ts 2>&1 || echo "⚠️ seed.ts échoué"
+  npx tsx prisma/seed-lessons.ts 2>&1 || echo "⚠️ seed-lessons.ts échoué"
+  npx tsx prisma/seed-quizzes.ts 2>&1 || echo "⚠️ seed-quizzes.ts échoué"
+  npx tsx prisma/seed-exercises.ts 2>&1 || echo "⚠️ seed-exercises.ts échoué"
   echo "✅ Seed terminé !"
 else
   echo "✅ Base déjà seedée ($LESSON_COUNT leçons trouvées)"
