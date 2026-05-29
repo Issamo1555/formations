@@ -56,7 +56,7 @@ export const authConfig = {
       clientId: process.env.AZURE_AD_CLIENT_ID,
       clientSecret: process.env.AZURE_AD_CLIENT_SECRET,
       tenantId: process.env.AZURE_AD_TENANT_ID,
-    }),
+    } as any),
     Credentials({
       async authorize(credentials) {
         // Validation basique (la vraie validation a lieu dans auth.ts avec Prisma)
