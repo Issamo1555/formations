@@ -21,7 +21,7 @@ COPY package.json package-lock.json ./
 
 # Étape Turbo : npm ci avec cache mount (persiste entre les builds)
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci --include=dev --ignore-scripts
+    npm ci --include=dev --ignore-scripts --legacy-peer-deps
 
 # Copie du reste du code
 COPY . .
