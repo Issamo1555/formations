@@ -27,8 +27,8 @@ RUN --mount=type=cache,target=/root/.npm \
 COPY . .
 
 # Génération Prisma et Build Next.js avec cache d'étape
-RUN npx prisma generate --schema=prisma/schema.prod.prisma && \
-    --mount=type=cache,target=/app/.next/cache \
+RUN --mount=type=cache,target=/app/.next/cache \
+    npx prisma generate --schema=prisma/schema.prod.prisma && \
     npm run build
 
 # ─── Runner Stage ───
