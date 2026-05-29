@@ -8,356 +8,1332 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-base: #05060A; 
+            --bg-base: #05060A;
             --bg-panel: #0D101C;
-            --primary: #10b981; 
+            --bg-elevated: #11162A;
+            --primary: #10b981;
             --primary-hover: #059669;
-            --secondary: #7c6df8; 
+            --secondary: #7c6df8;
+            --accent-blue: #0056d2;
+            --accent-blue-hover: #0041a8;
             --text-main: #FFFFFF;
-            --text-muted: #94a3b8;
-            --border-light: rgba(255, 255, 255, 0.08);
-            --page-glow: radial-gradient(circle at top right, rgba(124, 109, 248, 0.12), transparent 28%);
-            
+            --text-muted: rgba(226, 232, 240, 0.72);
+            --text-secondary: rgba(226, 232, 240, 0.88);
+            --border-light: rgba(255, 255, 255, 0.10);
+            --ring: rgba(16, 185, 129, 0.30);
+            --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.45);
+            --shadow-card: 0 16px 38px rgba(0, 0, 0, 0.36);
+            --shadow-elevated: 0 24px 56px rgba(0, 0, 0, 0.52);
+            --page-glow: radial-gradient(circle at 18% 6%, rgba(124, 109, 248, 0.12), transparent 34%),
+                         radial-gradient(circle at 92% 18%, rgba(16, 185, 129, 0.10), transparent 36%);
+            --page-grid: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.04) 1px, transparent 0);
+
             --php: #7c6df8;
             --python: #3b82f6;
             --n8n: #f43f5e;
             --openclaw: #10b981;
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --radius-2xl: 24px;
         }
 
         body.light-mode {
-            --bg-base: #eef4fb;
+            --bg-base: #f5f7fa;
             --bg-panel: #ffffff;
-            --text-main: #102033;
-            --text-muted: #64748b;
-            --border-light: rgba(15, 23, 42, 0.1);
-            --page-glow: radial-gradient(circle at top right, rgba(124, 109, 248, 0.08), transparent 30%);
+            --bg-elevated: #f8fafc;
+            --text-main: #0b1324;
+            --text-muted: rgba(15, 23, 42, 0.62);
+            --text-secondary: rgba(15, 23, 42, 0.78);
+            --border-light: rgba(15, 23, 42, 0.10);
+            --ring: rgba(5, 150, 105, 0.25);
+            --shadow-soft: 0 12px 32px rgba(2, 6, 23, 0.08);
+            --shadow-card: 0 10px 28px rgba(2, 6, 23, 0.08);
+            --shadow-elevated: 0 18px 48px rgba(2, 6, 23, 0.12);
+            --page-glow: radial-gradient(circle at 18% 6%, rgba(124, 109, 248, 0.06), transparent 35%),
+                         radial-gradient(circle at 92% 18%, rgba(16, 185, 129, 0.06), transparent 38%);
+            --page-grid: radial-gradient(circle at 1px 1px, rgba(2, 6, 23, 0.04) 1px, transparent 0);
             color-scheme: light;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background-color: var(--bg-base);
-            background-image: var(--page-glow);
+            background-image: var(--page-glow), var(--page-grid);
+            background-size: auto, 24px 24px;
             color: var(--text-main);
             display: flex;
             min-height: 100vh;
             color-scheme: dark;
             transition: background-color 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        h1, h2, h3, h4 { font-family: 'Syne', sans-serif; }
+        h1, h2, h3, h4 { font-family: 'Syne', sans-serif; letter-spacing: -0.02em; }
         a { text-decoration: none; color: inherit; }
+
+        .skip-link {
+            position: absolute;
+            left: 12px;
+            top: 12px;
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            background: var(--bg-panel);
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-soft);
+            transform: translateY(-200%);
+            transition: transform 0.2s ease;
+            z-index: 50;
+        }
+        .skip-link:focus { transform: translateY(0); }
+
+        .icon {
+            width: 18px;
+            height: 18px;
+            display: inline-block;
+            flex: 0 0 auto;
+            color: currentColor;
+        }
+        .course-icon .icon {
+            width: 28px;
+            height: 28px;
+        }
 
         /* Sidebar */
         .sidebar {
-            width: 260px;
+            width: 272px;
             background: var(--bg-panel);
             border-right: 1px solid var(--border-light);
             display: flex;
             flex-direction: column;
-            padding: 2rem 1.5rem;
+            padding: 2rem 1.25rem;
             position: fixed;
             height: 100vh;
+            z-index: 30;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease;
         }
 
         .logo {
-            display: flex; align-items: center; gap: 0.8rem; 
-            font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; 
-            margin-bottom: 3rem;
+            display: flex; align-items: center; gap: 0.75rem;
+            font-family: 'Syne', sans-serif; font-size: 1.35rem; font-weight: 800;
+            margin-bottom: 2.5rem;
         }
-        .logo img { height: 32px; width: 32px; }
+        .logo img { height: 34px; width: 34px; border-radius: 8px; }
 
         .sidebar-head {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 0.8rem;
-            margin-bottom: 3rem;
+            gap: 0.75rem;
+            margin-bottom: 2.5rem;
         }
 
         .sidebar-head .logo { margin-bottom: 0; }
 
+        .sidebar-close {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-light);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-main);
+            cursor: pointer;
+            transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+        }
+        .sidebar-close:hover {
+            transform: translateY(-2px);
+            border-color: rgba(16, 185, 129, 0.35);
+            background: rgba(16, 185, 129, 0.08);
+        }
+
         .nav-menu {
-            display: flex; flex-direction: column; gap: 0.5rem; flex: 1;
+            display: flex; flex-direction: column; gap: 0.25rem; flex: 1;
         }
         .nav-item {
-            padding: 0.8rem 1rem;
-            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
             color: var(--text-muted);
             font-weight: 500;
             display: flex;
             align-items: center;
             gap: 12px;
-            transition: 0.2s;
+            transition: all 0.2s ease;
+            font-size: 0.92rem;
         }
-        .nav-item:hover { background: rgba(255,255,255,0.05); color: var(--text-main); }
-        .nav-item.active { background: rgba(16, 185, 129, 0.1); color: var(--primary); font-weight: 600; }
-
-        .theme-toggle {
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
-            border: 1px solid var(--border-light);
-            background: rgba(255, 255, 255, 0.04);
-            color: var(--text-main);
-            cursor: pointer;
-            font-size: 1rem;
-            transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+        .nav-item:hover { background: rgba(255,255,255,0.06); color: var(--text-main); }
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(124, 109, 248, 0.08));
+            color: var(--primary);
+            font-weight: 600;
+            box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.15);
         }
 
-        .theme-toggle:hover {
-            transform: translateY(-2px);
-            border-color: rgba(16, 185, 129, 0.35);
-            background: rgba(16, 185, 129, 0.08);
+        .nav-label {
+            font-size: 0.72rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: rgba(148, 163, 184, 0.60);
+            padding: 1rem 1rem 0.4rem;
+            margin-top: 0.5rem;
+            font-weight: 600;
         }
-        
+
         .user-profile {
             margin-top: auto;
             display: flex; align-items: center; gap: 12px;
-            padding: 1rem; border-top: 1px solid var(--border-light);
+            padding: 1rem;
+            border-top: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            background: rgba(255, 255, 255, 0.02);
         }
         .avatar {
-            width: 40px; height: 40px; border-radius: 50%;
+            width: 42px; height: 42px; border-radius: 50%;
             background: linear-gradient(135deg, var(--secondary), var(--primary));
             display: flex; align-items: center; justify-content: center;
             font-weight: bold; font-family: 'Syne', sans-serif;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 12px rgba(124, 109, 248, 0.3);
         }
         .user-info { display: flex; flex-direction: column; }
-        .user-name { font-weight: 600; font-size: 0.95rem; }
-        .user-status { font-size: 0.8rem; color: var(--primary); }
+        .user-name { font-weight: 600; font-size: 0.9rem; }
+        .user-status { font-size: 0.78rem; color: var(--primary); font-weight: 500; }
+
+        .scrim {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+            z-index: 20;
+        }
+        .scrim.is-open {
+            opacity: 1;
+            pointer-events: auto;
+        }
 
         /* Main Content */
         .main-content {
             flex: 1;
-            margin-left: 260px;
-            padding: 3rem 4rem;
+            margin-left: 272px;
+            padding: 1.5rem 3rem 3rem;
+            max-width: 1400px;
         }
 
-        .header-section { margin-bottom: 3rem; }
-        .header-section h1 { font-size: 2.2rem; margin-bottom: 0.5rem; }
-        .header-section p { color: var(--text-muted); font-size: 1.1rem; }
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            padding: 1rem 0;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .topbar::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(5,6,10,0.82), rgba(5,6,10,0));
+            pointer-events: none;
+            opacity: 1;
+        }
+        body.light-mode .topbar::before {
+            background: linear-gradient(to bottom, rgba(245,247,250,0.90), rgba(245,247,250,0));
+        }
+        .topbar-inner {
+            position: relative;
+            display: grid;
+            grid-template-columns: 1fr minmax(260px, 560px) auto;
+            gap: 1rem;
+            align-items: center;
+        }
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            min-width: 0;
+        }
+        #menuToggle { display: none; }
+        .page-title {
+            font-size: 1rem;
+            letter-spacing: 0.01em;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 500;
+        }
+        body.light-mode .page-title { color: rgba(15,23,42,0.72); }
+
+        .icon-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-light);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-main);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .icon-btn:hover {
+            transform: translateY(-2px);
+            border-color: rgba(16, 185, 129, 0.35);
+            background: rgba(16, 185, 129, 0.10);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+        }
+
+        .search {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-light);
+            background: rgba(255, 255, 255, 0.04);
+            transition: all 0.2s ease;
+        }
+        .search:focus-within {
+            border-color: rgba(16, 185, 129, 0.4);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+        }
+        body.light-mode .search { background: rgba(255, 255, 255, 0.85); }
+        .search input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: var(--text-main);
+            font-size: 0.92rem;
+        }
+        .search input::placeholder { color: rgba(148, 163, 184, 0.70); }
+        body.light-mode .search input::placeholder { color: rgba(15, 23, 42, 0.40); }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        /* Hero Section - Coursera Style */
+        .hero {
+            margin-top: 0.75rem;
+            background: linear-gradient(135deg, rgba(0, 86, 210, 0.15) 0%, rgba(124, 109, 248, 0.12) 40%, rgba(16, 185, 129, 0.10) 100%);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-2xl);
+            padding: 2.5rem 2.5rem 2.25rem;
+            box-shadow: var(--shadow-soft);
+            overflow: hidden;
+            position: relative;
+        }
+        body.light-mode .hero {
+            background: linear-gradient(135deg, rgba(0, 86, 210, 0.06) 0%, rgba(124, 109, 248, 0.05) 40%, rgba(16, 185, 129, 0.04) 100%);
+            border-color: rgba(15, 23, 42, 0.08);
+        }
+        .hero::before {
+            content: "";
+            position: absolute;
+            right: -120px;
+            top: -100px;
+            width: 420px;
+            height: 420px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.18), transparent 65%);
+            pointer-events: none;
+        }
+        .hero::after {
+            content: "";
+            position: absolute;
+            left: 30%;
+            bottom: -160px;
+            width: 380px;
+            height: 380px;
+            background: radial-gradient(circle, rgba(124, 109, 248, 0.14), transparent 60%);
+            pointer-events: none;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0.85rem;
+            border-radius: 999px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(124, 109, 248, 0.12));
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            color: var(--primary);
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            margin-bottom: 1.25rem;
+            position: relative;
+            z-index: 1;
+        }
+        .hero h1 {
+            font-size: clamp(1.85rem, 2.6vw, 2.6rem);
+            line-height: 1.15;
+            margin-bottom: 0.75rem;
+            position: relative;
+            z-index: 1;
+            max-width: 70ch;
+        }
+        .hero p {
+            color: var(--text-muted);
+            font-size: 1.08rem;
+            line-height: 1.65;
+            max-width: 64ch;
+            position: relative;
+            z-index: 1;
+        }
+        .hero-actions {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 0.85rem;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Value Props Section - Coursera Style */
+        .value-props {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.25rem;
+            margin: 2rem 0 2.5rem;
+        }
+        .value-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-xl);
+            padding: 1.75rem 1.5rem;
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .value-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(16, 185, 129, 0.25);
+            box-shadow: var(--shadow-card);
+        }
+        .value-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        .value-card:hover::before { opacity: 1; }
+        .value-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-lg);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(124, 109, 248, 0.10));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.15rem;
+        }
+        .value-icon .icon { width: 26px; height: 26px; color: var(--primary); }
+        .value-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+        .value-card p {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            line-height: 1.6;
+        }
 
         /* Stats Grid */
         .stats-grid {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 3rem;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.25rem;
+            margin: 0 0 2.5rem;
         }
         .stat-card {
-            background: var(--bg-panel); border: 1px solid var(--border-light); border-radius: 16px;
-            padding: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem;
-            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
         }
-        .stat-card:hover { transform: translateY(-4px); border-color: rgba(16, 185, 129, 0.25); box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08); }
-        .stat-value { font-size: 2.5rem; font-family: 'Syne', sans-serif; font-weight: 800; color: var(--text-main); }
-        .stat-label { color: var(--text-muted); font-size: 0.9rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
-        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(16, 185, 129, 0.25);
+            box-shadow: var(--shadow-card);
+        }
+        .stat-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.6rem;
+        }
+        .stat-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.35rem 0.65rem;
+            border-radius: 999px;
+            border: 1px solid var(--border-light);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+        body.light-mode .stat-chip { color: rgba(15,23,42,0.72); background: rgba(15, 23, 42, 0.03); }
+        .stat-value {
+            font-size: 2.4rem;
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            color: var(--text-main);
+            line-height: 1.05;
+            background: linear-gradient(135deg, var(--text-main), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .progress {
+            height: 8px;
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.16);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        body.light-mode .progress { background: rgba(15, 23, 42, 0.08); border-color: rgba(15, 23, 42, 0.06); }
+        .progress > span {
+            display: block;
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 999px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         /* Courses Grid */
-        .section-title { font-size: 1.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-light); padding-bottom: 1rem; }
-        
+        .section-title {
+            font-size: 1.5rem;
+            margin: 2.5rem 0 1.25rem;
+            border-bottom: 1px solid var(--border-light);
+            padding-bottom: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+        .section-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
         .courses-grid {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.75rem;
         }
-        
+
         .course-card {
-            background: var(--bg-panel); border: 1px solid var(--border-light); border-radius: 16px;
-            padding: 2rem; display: flex; flex-direction: column; transition: 0.3s;
-            position: relative; overflow: hidden;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-xl);
+            padding: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
-        .course-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        
+        .course-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(16, 185, 129, 0.25);
+            box-shadow: var(--shadow-elevated);
+        }
+
         .card-glow {
-            position: absolute; top: 0; right: 0; width: 150px; height: 150px; filter: blur(60px); opacity: 0.1; z-index: 0;
+            position: absolute;
+            top: -40px;
+            right: -40px;
+            width: 180px;
+            height: 180px;
+            filter: blur(70px);
+            opacity: 0.08;
+            z-index: 0;
             border-radius: 50%;
+            transition: opacity 0.3s ease;
         }
+        .course-card:hover .card-glow { opacity: 0.15; }
         .course-card > * { z-index: 1; position: relative; }
 
-        .course-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
+        .course-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.25rem;
+        }
         .course-icon {
-            width: 54px; height: 54px; border-radius: 14px;
-            display: flex; align-items: center; justify-content: center; font-size: 1.8rem;
-            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            width: 56px;
+            height: 56px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+            border: 1px solid rgba(255,255,255,0.10);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.22);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
         }
-        .course-status { font-size: 0.75rem; padding: 0.3rem 0.8rem; border-radius: 99px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-        
+        .course-card:hover .course-icon {
+            transform: scale(1.05);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.28);
+        }
+        .course-status {
+            font-size: 0.72rem;
+            padding: 0.3rem 0.75rem;
+            border-radius: 999px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
         /* Status Colors */
-        .status-new { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
-        .status-progress { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); }
-        
-        .course-title { font-size: 1.3rem; margin-bottom: 0.5rem; }
-        .course-desc { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem; flex: 1; }
-        
-        .course-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-light); padding-top: 1.5rem; }
-        .course-meta { display: flex; gap: 1rem; color: var(--text-muted); font-size: 0.85rem; font-weight: 500; }
-        
-        .btn-start {
-            background: #ffffff; color: #000; padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 600; font-size: 0.9rem; transition: 0.2s;
+        .status-new {
+            background: rgba(16, 185, 129, 0.12);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.25);
         }
-        .btn-start:hover { background: #e2e8f0; }
-        body.light-mode .btn-start { background: linear-gradient(135deg, var(--primary), #6ee7b7); color: #052e1a; }
-        body.light-mode .btn-start:hover { background: linear-gradient(135deg, #059669, #34d399); color: #ffffff; }
-        .theme-toggle:focus-visible,
-        .btn-start:focus-visible,
-        .nav-item:focus-visible {
-            outline: 3px solid rgba(16, 185, 129, 0.25);
+        .status-progress {
+            background: rgba(59, 130, 246, 0.12);
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.25);
+        }
+
+        .course-title {
+            font-size: 1.25rem;
+            margin-bottom: 0.55rem;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+        .course-desc {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            flex: 1;
+        }
+
+        .course-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border-light);
+            padding-top: 1.25rem;
+            gap: 1rem;
+        }
+        .course-meta {
+            display: flex;
+            gap: 1rem;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            font-weight: 500;
+        }
+        .course-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .course-progress {
+            margin-top: 1rem;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 0.75rem;
+            align-items: center;
+        }
+        .course-progress .progress { height: 8px; }
+        .course-progress .pct {
+            color: var(--text-muted);
+            font-weight: 700;
+            font-size: 0.82rem;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.55rem;
+            padding: 0.75rem 1.2rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+            letter-spacing: 0.01em;
+        }
+        .btn:hover { transform: translateY(-2px); }
+        .btn:active { transform: translateY(-1px); }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), rgba(124, 109, 248, 0.95));
+            color: #06151a;
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-hover), rgba(124, 109, 248, 0.90));
+            color: #ffffff;
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.32);
+        }
+        body.light-mode .btn-primary { color: #052e1a; }
+        .btn-ghost {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: var(--border-light);
+            color: var(--text-main);
+        }
+        body.light-mode .btn-ghost { background: rgba(15, 23, 42, 0.04); color: rgba(15, 23, 42, 0.82); }
+        .btn-ghost:hover {
+            background: rgba(16, 185, 129, 0.10);
+            border-color: rgba(16, 185, 129, 0.25);
+        }
+        .btn-large {
+            padding: 0.85rem 1.5rem;
+            font-size: 0.95rem;
+            border-radius: var(--radius-lg);
+        }
+
+        /* Locked course overlay */
+        .course-card.locked {
+            opacity: 0.65;
+            pointer-events: auto;
+        }
+        .course-card.locked .course-body {
+            filter: blur(1px);
+            pointer-events: none;
+            user-select: none;
+        }
+        .course-card.locked .course-footer {
+            filter: blur(1px);
+            pointer-events: none;
+            user-select: none;
+        }
+        .lock-overlay {
+            display: none;
+            position: absolute;
+            inset: 0;
+            z-index: 5;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            background: rgba(5, 6, 10, 0.55);
+            backdrop-filter: blur(2px);
+            border-radius: var(--radius-xl);
+        }
+        body.light-mode .lock-overlay {
+            background: rgba(245, 247, 250, 0.65);
+        }
+        .course-card.locked .lock-overlay {
+            display: flex;
+        }
+        .lock-overlay .lock-icon {
+            width: 48px;
+            height: 48px;
+            color: var(--text-muted);
+        }
+        .lock-overlay .lock-text {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .lock-overlay .lock-cta {
+            font-size: 0.78rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .icon-btn:focus-visible,
+        .btn:focus-visible,
+        .nav-item:focus-visible,
+        .sidebar-close:focus-visible,
+        .search input:focus-visible {
+            outline: 3px solid var(--ring);
             outline-offset: 3px;
         }
 
         /* Responsive */
+        @media (max-width: 1100px) {
+            .value-props { grid-template-columns: 1fr; }
+        }
         @media (max-width: 1000px) {
             .courses-grid { grid-template-columns: 1fr; }
             .stats-grid { grid-template-columns: 1fr; }
         }
-        @media (max-width: 768px) {
-            body { flex-direction: column; }
-            .sidebar { width: 100%; height: auto; position: static; border-right: none; border-bottom: 1px solid var(--border-light); padding: 1rem; flex-direction: row; align-items: center; justify-content: space-between; }
-            .nav-menu, .user-profile { display: none; }
-            .logo { margin-bottom: 0; }
-            .sidebar-head { margin-bottom: 0; }
-            .main-content { margin-left: 0; padding: 2rem 1.5rem; }
+        @media (max-width: 920px) {
+            #menuToggle { display: inline-flex; }
+            .sidebar {
+                transform: translateX(-106%);
+                transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: var(--shadow-soft);
+            }
+            .sidebar.is-open { transform: translateX(0); }
+            .sidebar-close { display: inline-flex; align-items: center; justify-content: center; }
+            .main-content { margin-left: 0; padding: 1.25rem 1.25rem 2.75rem; }
+            .topbar-inner { grid-template-columns: 1fr; }
+            .topbar::before { border-bottom: 1px solid rgba(255,255,255,0.06); }
+            .hero { padding: 2rem 1.5rem; }
+        }
+
+        @media (max-width: 640px) {
+            .value-props { grid-template-columns: 1fr; gap: 1rem; }
+            .stats-grid { grid-template-columns: 1fr; gap: 1rem; }
+            .hero h1 { font-size: 1.6rem; }
+            .hero p { font-size: 0.95rem; }
+            .hero-actions { flex-direction: column; }
+            .hero-actions .btn { width: 100%; }
+        }
+
+        @media (max-width: 520px) {
+            .hero { padding: 1.5rem 1.25rem; border-radius: var(--radius-lg); }
+            .course-card { padding: 1.5rem 1.25rem; }
+            .course-footer { flex-direction: column; align-items: stretch; gap: 0.85rem; }
+            .course-meta { justify-content: space-between; }
+            .section-title { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
         }
     </style>
 </head>
 <body>
 
+    <a class="skip-link" href="#main">Aller au contenu</a>
+
+    <div class="scrim" id="scrim" hidden></div>
+
     <!-- Sidebar -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar" aria-label="Navigation principale">
         <div class="sidebar-head">
             <div class="logo">
                 <img src="assets/logo.png" alt="Logo">
                 Smartcodai
             </div>
-            <button class="theme-toggle" id="themeToggle" type="button" aria-label="Basculer le thème">☀️</button>
+            <button class="sidebar-close" id="sidebarClose" type="button" aria-label="Fermer le menu">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill="currentColor" d="M18.3 5.7a1 1 0 0 0-1.4 0L12 10.6 7.1 5.7a1 1 0 1 0-1.4 1.4l4.9 4.9-4.9 4.9a1 1 0 1 0 1.4 1.4l4.9-4.9 4.9 4.9a1 1 0 0 0 1.4-1.4l-4.9-4.9 4.9-4.9a1 1 0 0 0 0-1.4Z"/>
+                </svg>
+            </button>
         </div>
         
         <nav class="nav-menu">
-            <a href="#" class="nav-item active">
-                <span>📚</span> Mon Espace
+            <div class="nav-label">Plateforme</div>
+            <a href="#cursus" class="nav-item active">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill="currentColor" d="M4 5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Zm4 1a1 1 0 0 0 0 2h6a1 1 0 1 0 0-2H8Zm0 4a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2H8Zm0 4a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2H8Z"/>
+                </svg>
+                Mon espace
             </a>
-            <a href="#" class="nav-item">
-                <span>🏆</span> Mes Certificats
+            <a href="#certificats" class="nav-item">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill="currentColor" d="M12 2a6 6 0 0 1 6 6v3.1a5 5 0 0 1-2 9.7V22l-4-2-4 2v-1.2a5 5 0 0 1-2-9.7V8a6 6 0 0 1 6-6Zm4 18.3V19a5 5 0 0 1-8 0v1.3l4-2 4 2ZM12 4a4 4 0 0 0-4 4v2.6a5 5 0 0 1 8 0V8a4 4 0 0 0-4-4Zm0 8a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/>
+                </svg>
+                Mes certificats
             </a>
-            <a href="#" class="nav-item">
-                <span>⚙️</span> Paramètres
+            <a href="#parametres" class="nav-item">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill="currentColor" d="M19.4 13a7.9 7.9 0 0 0 0-2l2-1.6a1 1 0 0 0 .2-1.3l-2-3.4a1 1 0 0 0-1.2-.4l-2.3 1a8.3 8.3 0 0 0-1.7-1l-.3-2.5A1 1 0 0 0 13 1h-4a1 1 0 0 0-1 .8L7.7 4.3c-.6.3-1.1.6-1.7 1l-2.3-1a1 1 0 0 0-1.2.4l-2 3.4a1 1 0 0 0 .2 1.3L2.6 11a7.9 7.9 0 0 0 0 2L.7 14.6a1 1 0 0 0-.2 1.3l2 3.4a1 1 0 0 0 1.2.4l2.3-1c.5.4 1.1.7 1.7 1l.3 2.5a1 1 0 0 0 1 .8h4a1 1 0 0 0 1-.8l.3-2.5c.6-.3 1.2-.6 1.7-1l2.3 1a1 1 0 0 0 1.2-.4l2-3.4a1 1 0 0 0-.2-1.3L19.4 13ZM11 15a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"/>
+                </svg>
+                Paramètres
             </a>
-            <a href="landing-page.html" class="nav-item" style="margin-top: auto;">
-                <span>⬅️</span> Retour à l'accueil
+            <a href="index.html" class="nav-item" style="margin-top: auto;">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill="currentColor" d="M10.7 5.3a1 1 0 0 1 0 1.4L7.4 10H20a1 1 0 1 1 0 2H7.4l3.3 3.3a1 1 0 1 1-1.4 1.4l-5-5a1 1 0 0 1 0-1.4l5-5a1 1 0 0 1 1.4 0Z"/>
+                </svg>
+                Retour à l'accueil
+            </a>
+            <a href="admin.html" class="nav-item" id="adminLink" style="display:none;">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill="currentColor" d="M12 2a5 5 0 0 1 5 5v3h1a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h1V7a5 5 0 0 1 5-5Zm3 8V7a3 3 0 1 0-6 0v3h6Z"/>
+                </svg>
+                Administration
             </a>
         </nav>
 
         <div class="user-profile">
-            <div class="avatar">👨‍💻</div>
+            <div class="avatar" aria-hidden="true" id="userAvatar">SC</div>
             <div class="user-info">
-                <span class="user-name">Nouvel Étudiant</span>
-                <span class="user-status">Compte Gratuit</span>
+                <span class="user-name" id="userName">Chargement...</span>
+                <span class="user-status" id="userStatus"></span>
             </div>
         </div>
     </aside>
 
     <!-- Main Content -->
-    <main class="main-content">
-        
-        <div class="header-section">
-            <h1>Bienvenue dans votre espace d'apprentissage</h1>
-            <p>Choisissez un parcours et commencez à coder directement dans votre navigateur.</p>
-        </div>
+    <main class="main-content" id="main" tabindex="-1">
+        <header class="topbar" aria-label="Barre d'outils">
+            <div class="topbar-inner">
+                <div class="topbar-left">
+                    <button class="icon-btn" id="menuToggle" type="button" aria-label="Ouvrir le menu" aria-controls="sidebar" aria-expanded="false">
+                        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill="currentColor" d="M4 6a1 1 0 0 1 1-1h14a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1Zm0 6a1 1 0 0 1 1-1h14a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1Zm1 5a1 1 0 1 0 0 2h14a1 1 0 1 0 0-2H5Z"/>
+                        </svg>
+                    </button>
+                    <div class="page-title">Tableau de bord</div>
+                </div>
+
+                <label class="search" aria-label="Rechercher un cours">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill="currentColor" d="M10 2a8 8 0 1 1 5.3 14l4.4 4.4a1 1 0 0 1-1.4 1.4l-4.4-4.4A8 8 0 0 1 10 2Zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12Z"/>
+                    </svg>
+                    <input id="courseSearch" type="search" placeholder="Rechercher un cursus, ex: Python, PHP, n8n..." autocomplete="off">
+                </label>
+
+                <div class="topbar-right">
+                    <button class="icon-btn" id="themeToggle" type="button" aria-label="Basculer le thème">
+                        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill="currentColor" d="M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12Zm0-14a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V5a1 1 0 0 1 1-1Zm0 16a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1Zm10-9a1 1 0 0 1-1 1h-1a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1ZM4 12a1 1 0 0 1-1 1H2a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1Zm15.1-7.1a1 1 0 0 1 0 1.4l-.7.7a1 1 0 1 1-1.4-1.4l.7-.7a1 1 0 0 1 1.4 0ZM6 18a1 1 0 0 1 0 1.4l-.7.7a1 1 0 1 1-1.4-1.4l.7-.7A1 1 0 0 1 6 18Zm12.4 2.1a1 1 0 0 1-1.4 0l-.7-.7a1 1 0 1 1 1.4-1.4l.7.7a1 1 0 0 1 0 1.4ZM6.7 7.1a1 1 0 0 1-1.4 0l-.7-.7A1 1 0 0 1 6 5l.7.7a1 1 0 0 1 0 1.4Z"/>
+                        </svg>
+                    </button>
+                    <a class="btn btn-ghost" href="#parametres" aria-label="Acceder aux parametres">Profil</a>
+                </div>
+            </div>
+        </header>
+
+        <section class="hero" aria-label="Bienvenue">
+            <div class="hero-badge">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" style="width:14px;height:14px">
+                    <path fill="currentColor" d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20Zm4.3 7.3a1 1 0 0 0-1.4-1.4L11 11.8l-2.9-2.9a1 1 0 0 0-1.4 1.4l3.6 3.6a1 1 0 0 0 1.4 0l4.6-4.6Z"/>
+                </svg>
+                Accès illimité à tous les cursus
+            </div>
+            <h1>Investissez dans votre carrière avec Smartcodai</h1>
+            <p>Accédez à des parcours de qualité professionnelle en PHP, Python, n8n et IA. Apprenez à votre rythme, construisez des projets concrets, et obtenez des certificats reconnus.</p>
+            <div class="hero-actions">
+                <a class="btn btn-primary btn-large" href="#cursus">
+                    Explorer les cursus
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" style="width:16px;height:16px">
+                        <path fill="currentColor" d="M13.3 17.3a1 1 0 0 1 0-1.4L10.4 13H20a1 1 0 1 1 0 2h-9.6l2.9 2.9a1 1 0 0 1-1.4 1.4l-5-5a1 1 0 0 1 0-1.4l5-5a1 1 0 1 1 1.4 1.4L10.4 11H20a1 1 0 0 1 0 2h-9.6l2.9 2.9a1 1 0 0 1 0 1.4Z"/>
+                    </svg>
+                </a>
+                <a class="btn btn-ghost btn-large" href="index.html#certificat">Découvrir les certificats</a>
+            </div>
+        </section>
+
+        <!-- Value Propositions - Coursera Style -->
+        <section class="value-props" aria-label="Pourquoi choisir Smartcodai">
+            <div class="value-card">
+                <div class="value-icon">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill="currentColor" d="M4 5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Zm4 1a1 1 0 0 0 0 2h6a1 1 0 1 0 0-2H8Zm0 4a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2H8Zm0 4a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2H8Z"/>
+                    </svg>
+                </div>
+                <h3>Apprentissage structuré</h3>
+                <p>Des parcours "Zero to Hero" concus par des professionnels pour vous mener des bases jusqu'à la maîtrise.</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill="currentColor" d="M12 2a6 6 0 0 1 6 6v3.1a5 5 0 0 1-2 9.7V22l-4-2-4 2v-1.2a5 5 0 0 1-2-9.7V8a6 6 0 0 1 6-6Zm4 18.3V19a5 5 0 0 1-8 0v1.3l4-2 4 2ZM12 4a4 4 0 0 0-4 4v2.6a5 5 0 0 1 8 0V8a4 4 0 0 0-4-4Z"/>
+                    </svg>
+                </div>
+                <h3>Certificats reconnus</h3>
+                <p>Obtenez des certificats téléchargeables et vérifiables pour valoriser vos compétences auprès des employeurs.</p>
+            </div>
+            <div class="value-card">
+                <div class="value-icon">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill="currentColor" d="M12 2a1 1 0 0 1 1 1v1.1a8 8 0 1 1-2 0V3a1 1 0 0 1 1-1Zm0 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12Zm1 2v3.6l2.3 2.3a1 1 0 1 1-1.4 1.4l-2.6-2.6A1 1 0 0 1 11 13V9a1 1 0 1 1 2 0Z"/>
+                    </svg>
+                </div>
+                <h3>Projets pratiques</h3>
+                <p>Codez dès le premier jour avec des exercices concrets, des projets réels et un suivi de progression détaillé.</p>
+            </div>
+        </section>
 
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-label">Leçons complétées</div>
+                <div class="stat-head">
+                    <div class="stat-label">Lecons completees</div>
+                    <div class="stat-chip">
+                        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill="currentColor" d="M9 16.2 5.8 13a1 1 0 1 0-1.4 1.4l4 4a1 1 0 0 0 1.4 0l10-10a1 1 0 1 0-1.4-1.4L9 16.2Z"/>
+                        </svg>
+                        0%
+                    </div>
+                </div>
                 <div class="stat-value">0</div>
+                <div class="progress" aria-hidden="true"><span style="width: 0%"></span></div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Certificats obtenus</div>
+                <div class="stat-head">
+                    <div class="stat-label">Certificats</div>
+                    <div class="stat-chip">
+                        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill="currentColor" d="M12 2a6 6 0 0 1 6 6v3.1a5 5 0 0 1-2 9.7V22l-4-2-4 2v-1.2a5 5 0 0 1-2-9.7V8a6 6 0 0 1 6-6Zm4 18.3V19a5 5 0 0 1-8 0v1.3l4-2 4 2ZM12 4a4 4 0 0 0-4 4v2.6a5 5 0 0 1 8 0V8a4 4 0 0 0-4-4Z"/>
+                        </svg>
+                        0
+                    </div>
+                </div>
                 <div class="stat-value">0</div>
+                <div class="progress" aria-hidden="true"><span style="width: 0%"></span></div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Temps de pratique</div>
+                <div class="stat-head">
+                    <div class="stat-label">Temps de pratique</div>
+                    <div class="stat-chip">
+                        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill="currentColor" d="M12 2a1 1 0 0 1 1 1v1.1a8 8 0 1 1-2 0V3a1 1 0 0 1 1-1Zm0 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12Zm1 2v3.6l2.3 2.3a1 1 0 1 1-1.4 1.4l-2.6-2.6A1 1 0 0 1 11 13V9a1 1 0 1 1 2 0Z"/>
+                        </svg>
+                        Semaine
+                    </div>
+                </div>
                 <div class="stat-value">0h</div>
+                <div class="progress" aria-hidden="true"><span style="width: 0%"></span></div>
             </div>
         </div>
 
-        <h2 class="section-title">Vos Cursus Disponibles</h2>
+        <h2 class="section-title" id="cursus">
+            Vos cursus
+            <span class="section-actions">
+                <a class="btn btn-ghost" href="#certificats">Certificats</a>
+                <a class="btn btn-ghost" href="#parametres">Paramètres</a>
+            </span>
+        </h2>
+
+        <!-- Info banner for locked courses -->
+        <div id="accessInfo" style="display:none;margin-bottom:1.5rem;background:linear-gradient(135deg,rgba(124,109,248,0.10),rgba(16,185,129,0.08));border:1px solid rgba(124,109,248,0.20);border-radius:var(--radius-xl);padding:1.25rem 1.5rem;">
+            <div style="display:flex;gap:1rem;align-items:flex-start;">
+                <div style="flex-shrink:0;width:42px;height:42px;border-radius:var(--radius-md);background:rgba(124,109,248,0.15);display:flex;align-items:center;justify-content:center;">
+                    <svg style="width:22px;height:22px;color:var(--secondary);" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2a5 5 0 0 1 5 5v3h1a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h1V7a5 5 0 0 1 5-5Zm3 8V7a3 3 0 1 0-6 0v3h6Z"/>
+                    </svg>
+                </div>
+                <div>
+                    <div style="font-weight:700;font-size:0.95rem;margin-bottom:0.3rem;">Comment accéder aux formations ?</div>
+                    <div style="color:var(--text-muted);font-size:0.85rem;line-height:1.6;">
+                        Vos formations sont verrouillées. Pour les débloquer, <strong style="color:var(--text-main);">contactez l'administrateur</strong> de la plateforme. Il pourra activer vos accès depuis le panneau d'administration.
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="courses-grid">
             <!-- Course 1: PHP -->
-            <div class="course-card">
+            <div class="course-card" data-search="php backend web securite poo sql" data-course="php">
                 <div class="card-glow" style="background: var(--php);"></div>
+                <div class="lock-overlay">
+                    <svg class="lock-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18 8h-1V6A5 5 0 0 0 7 6v2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2ZM9 6a3 3 0 1 1 6 0v2H9V6Zm3 10a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z"/>
+                    </svg>
+                    <div class="lock-text">Formation verrouillee</div>
+                    <div class="lock-cta">Contactez l'administrateur pour debloquer</div>
+                </div>
+                <div class="course-body">
                 <div class="course-header">
-                    <div class="course-icon">🐘</div>
-                    <div class="course-status status-new">À commencer</div>
+                    <div class="course-icon" aria-hidden="true">
+                        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill="currentColor" d="M8 4a1 1 0 0 1 1 1v1h6V5a1 1 0 1 1 2 0v1.1A3 3 0 0 1 20 9v9a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V9a3 3 0 0 1 3-2.9V5a1 1 0 0 1 1-1Zm9 4H7a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1Zm-8 3a1 1 0 0 1 1-1h4a1 1 0 1 1 0 2h-4a1 1 0 0 1-1-1Zm0 4a1 1 0 0 1 1-1h6a1 1 0 1 1 0 2h-6a1 1 0 0 1-1-1Z"/>
+                        </svg>
+                    </div>
+                    <div class="course-status status-new">Nouveau</div>
                 </div>
                 <h3 class="course-title">Développement Web Backend avec PHP</h3>
                 <p class="course-desc">Maîtrisez les bases du web dynamique, les variables, la POO et la sécurité (injections SQL, hashage).</p>
+                </div>
+                <div class="course-progress">
+                    <div class="progress" aria-label="Progression du cours PHP"><span style="width: 0%"></span></div>
+                    <div class="pct">0%</div>
+                </div>
                 <div class="course-footer">
                     <div class="course-meta">
-                        <span>⏱ 12 modules</span>
+                        <span>
+                            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" style="width:14px;height:14px">
+                                <path fill="currentColor" d="M4 5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Zm4 1a1 1 0 0 0 0 2h6a1 1 0 1 0 0-2H8Zm0 4a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2H8Zm0 4a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2H8Z"/>
+                            </svg>
+                            12 modules
+                        </span>
                     </div>
-                    <a href="apprendre-php-app.html" class="btn-start">Ouvrir le cours</a>
+                    <a href="apprendre-php-app.html" class="btn btn-primary">Commencer</a>
                 </div>
             </div>
 
             <!-- Course 2: Python -->
-            <div class="course-card">
+            <div class="course-card" data-search="python programmation algorithmes listes dictionnaires fichiers donnees" data-course="python">
                 <div class="card-glow" style="background: var(--python);"></div>
+                <div class="lock-overlay">
+                    <svg class="lock-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18 8h-1V6A5 5 0 0 0 7 6v2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2ZM9 6a3 3 0 1 1 6 0v2H9V6Zm3 10a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z"/>
+                    </svg>
+                    <div class="lock-text">Formation verrouillee</div>
+                    <div class="lock-cta">Contactez l'administrateur pour debloquer</div>
+                </div>
+                <div class="course-body">
                 <div class="course-header">
-                    <div class="course-icon">🐍</div>
-                    <div class="course-status status-new">À commencer</div>
+                    <div class="course-icon" aria-hidden="true">
+                        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill="currentColor" d="M12 2a7 7 0 0 1 7 7c0 2.4-1.2 4.6-3.2 5.9l.5 2.6a1 1 0 0 1-1 1.2H12a7 7 0 0 1-7-7c0-2.4 1.2-4.6 3.2-5.9l-.5-2.6a1 1 0 0 1 1-1.2H12Zm0 2H10l.3 1.7a1 1 0 0 1-.5 1.1A5 5 0 0 0 7 11.7a5 5 0 0 0 5 5h2l-.3-1.7a1 1 0 0 1 .5-1.1A5 5 0 0 0 17 9a5 5 0 0 0-5-5Zm2.5 5.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"/>
+                        </svg>
+                    </div>
+                    <div class="course-status status-new">Nouveau</div>
                 </div>
                 <h3 class="course-title">Programmation en Python</h3>
                 <p class="course-desc">Des bases algorithmiques jusqu'à l'analyse de données (Listes, Dictionnaires, Fichiers, Modèles).</p>
+                </div>
+                <div class="course-progress">
+                    <div class="progress" aria-label="Progression du cours Python"><span style="width: 0%"></span></div>
+                    <div class="pct">0%</div>
+                </div>
                 <div class="course-footer">
                     <div class="course-meta">
-                        <span>⏱ 10 modules</span>
+                        <span>
+                            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" style="width:14px;height:14px">
+                                <path fill="currentColor" d="M4 5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Zm4 1a1 1 0 0 0 0 2h6a1 1 0 1 0 0-2H8Zm0 4a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2H8Zm0 4a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2H8Z"/>
+                            </svg>
+                            10 modules
+                        </span>
                     </div>
-                    <a href="apprendre-python-app.html" class="btn-start">Ouvrir le cours</a>
+                    <a href="apprendre-python-app.html" class="btn btn-primary">Commencer</a>
                 </div>
             </div>
 
             <!-- Course 3: n8n -->
-            <div class="course-card">
+            <div class="course-card" data-search="n8n automatisation webhook api javascript node integrations" data-course="n8n">
                 <div class="card-glow" style="background: var(--n8n);"></div>
+                <div class="lock-overlay">
+                    <svg class="lock-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18 8h-1V6A5 5 0 0 0 7 6v2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2ZM9 6a3 3 0 1 1 6 0v2H9V6Zm3 10a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z"/>
+                    </svg>
+                    <div class="lock-text">Formation verrouillee</div>
+                    <div class="lock-cta">Contactez l'administrateur pour debloquer</div>
+                </div>
+                <div class="course-body">
                 <div class="course-header">
-                    <div class="course-icon">⚙️</div>
-                    <div class="course-status status-new">À commencer</div>
+                    <div class="course-icon" aria-hidden="true">
+                        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill="currentColor" d="M7 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 2a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm10-2a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 2a1 1 0 1 0 0 2 1 1 0 0 0 0-2ZM7 13a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 2a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm10-2a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 2a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"/>
+                        </svg>
+                    </div>
+                    <div class="course-status status-new">Nouveau</div>
                 </div>
                 <h3 class="course-title">Automatisation avec n8n</h3>
                 <p class="course-desc">Le parcours "Zero to Hero" pour connecter vos applications via Webhooks, API et Javascript Node.</p>
+                </div>
+                <div class="course-progress">
+                    <div class="progress" aria-label="Progression du cours n8n"><span style="width: 0%"></span></div>
+                    <div class="pct">0%</div>
+                </div>
                 <div class="course-footer">
                     <div class="course-meta">
-                        <span>⏱ 10 modules</span>
+                        <span>
+                            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" style="width:14px;height:14px">
+                                <path fill="currentColor" d="M4 5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Zm4 1a1 1 0 0 0 0 2h6a1 1 0 1 0 0-2H8Zm0 4a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2H8Zm0 4a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2H8Z"/>
+                            </svg>
+                            10 modules
+                        </span>
                     </div>
-                    <a href="apprendre-n8n-app.html" class="btn-start">Ouvrir le cours</a>
+                    <a href="apprendre-n8n-app.html" class="btn btn-primary">Commencer</a>
                 </div>
             </div>
 
             <!-- Course 4: OpenClaw -->
-            <div class="course-card">
+            <div class="course-card" data-search="openclaw ia agents local-first scripting systeme" data-course="openclaw">
                 <div class="card-glow" style="background: var(--openclaw);"></div>
+                <div class="lock-overlay">
+                    <svg class="lock-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18 8h-1V6A5 5 0 0 0 7 6v2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2ZM9 6a3 3 0 1 1 6 0v2H9V6Zm3 10a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z"/>
+                    </svg>
+                    <div class="lock-text">Formation verrouillee</div>
+                    <div class="lock-cta">Contactez l'administrateur pour debloquer</div>
+                </div>
+                <div class="course-body">
                 <div class="course-header">
-                    <div class="course-icon">🤖</div>
-                    <div class="course-status status-new">À commencer</div>
+                    <div class="course-icon" aria-hidden="true">
+                        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill="currentColor" d="M11 2a1 1 0 0 1 1 1v1h3a4 4 0 0 1 4 4v7a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4h3V3a1 1 0 0 1 1-1Zm4 4H8a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2Zm-6 3a1.2 1.2 0 1 1 0 2.4A1.2 1.2 0 0 1 9 9Zm5 0a1.2 1.2 0 1 1 0 2.4A1.2 1.2 0 0 1 14 9Zm-6.2 6a1 1 0 0 1 1-1h6.4a1 1 0 1 1 0 2H8.8a1 1 0 0 1-1-1Z"/>
+                        </svg>
+                    </div>
+                    <div class="course-status status-new">Nouveau</div>
                 </div>
                 <h3 class="course-title">Maîtrise de l'IA OpenClaw</h3>
                 <p class="course-desc">Apprenez à contrôler et scripter des Agents IA personnels avec un accès système complet (Local-first).</p>
+                </div>
+                <div class="course-progress">
+                    <div class="progress" aria-label="Progression du cours OpenClaw"><span style="width: 0%"></span></div>
+                    <div class="pct">0%</div>
+                </div>
                 <div class="course-footer">
                     <div class="course-meta">
-                        <span>⏱ 10 modules</span>
+                        <span>
+                            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" style="width:14px;height:14px">
+                                <path fill="currentColor" d="M4 5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Zm4 1a1 1 0 0 0 0 2h6a1 1 0 1 0 0-2H8Zm0 4a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2H8Zm0 4a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2H8Z"/>
+                            </svg>
+                            10 modules
+                        </span>
                     </div>
-                    <a href="apprendre-openclaw-app.html" class="btn-start">Ouvrir le cours</a>
+                    <a href="apprendre-openclaw-app.html" class="btn btn-primary">Commencer</a>
+                </div>
+            </div>
+
+            <!-- Course 5: MERISE -->
+            <div class="course-card" data-search="merise base donnees mcd mld sql bdd dictionnaire" data-course="merise">
+                <div class="card-glow" style="background: var(--accent-blue);"></div>
+                <div class="lock-overlay">
+                    <svg class="lock-icon" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18 8h-1V6A5 5 0 0 0 7 6v2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2ZM9 6a3 3 0 1 1 6 0v2H9V6Zm3 10a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z"/>
+                    </svg>
+                    <div class="lock-text">Formation verrouillee</div>
+                    <div class="lock-cta">Contactez l'administrateur pour debloquer</div>
+                </div>
+                <div class="course-body">
+                <div class="course-header">
+                    <div class="course-icon" aria-hidden="true">
+                        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill="currentColor" d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6Zm2 0v12h12V6H6Zm2 2h8v2H8V8Zm0 4h8v2H8v-2Z"/>
+                        </svg>
+                    </div>
+                    <div class="course-status status-new">Nouveau</div>
+                </div>
+                <h3 class="course-title">Méthode MERISE</h3>
+                <p class="course-desc">Maîtrisez la conception de bases de données relationnelles avec la méthode MERISE (MCD, MLD, MPD).</p>
+                </div>
+                <div class="course-progress">
+                    <div class="progress" aria-label="Progression du cours MERISE"><span style="width: 0%"></span></div>
+                    <div class="pct">0%</div>
+                </div>
+                <div class="course-footer">
+                    <div class="course-meta">
+                        <span>
+                            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" style="width:14px;height:14px">
+                                <path fill="currentColor" d="M4 5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Zm4 1a1 1 0 0 0 0 2h6a1 1 0 1 0 0-2H8Zm0 4a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2H8Zm0 4a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2H8Z"/>
+                            </svg>
+                            6 modules
+                        </span>
+                    </div>
+                    <a href="apprendre-merise-app.html" class="btn btn-primary">Commencer</a>
                 </div>
             </div>
         </div>
 
+        <h2 class="section-title" id="certificats">Certificats</h2>
+        <div class="course-card" style="margin-top: 0.75rem;">
+            <div class="card-glow" style="background: var(--secondary);"></div>
+            <div class="course-header">
+                <div class="course-icon" aria-hidden="true">SC</div>
+                <div class="course-status status-progress">Espace</div>
+            </div>
+            <h3 class="course-title">Vos certificats apparaitront ici</h3>
+            <p class="course-desc">Quand un cursus est termine, vous pourrez retrouver, previsualiser et telecharger votre certificat depuis ce tableau de bord.</p>
+            <div class="course-footer">
+                <div class="course-meta">
+                    <span>1 modele</span>
+                    <span>PDF</span>
+                </div>
+                <a href="index.html#certificat" class="btn btn-ghost">Voir l'exemple</a>
+            </div>
+        </div>
+
+        <h2 class="section-title" id="parametres">Paramètres</h2>
+        <div class="course-card" style="margin-top: 0.75rem;">
+            <div class="card-glow" style="background: var(--primary);"></div>
+            <div class="course-header">
+                <div class="course-icon" aria-hidden="true">SC</div>
+                <div class="course-status status-progress">Compte</div>
+            </div>
+            <h3 class="course-title">Theme, profil et preferences</h3>
+            <p class="course-desc">Le mode clair/sombre est memorise sur cet appareil. Ici on pourra ensuite ajouter les infos de compte et la synchronisation.</p>
+            <div class="course-footer">
+                <div class="course-meta">
+                    <span>Theme</span>
+                    <span>Local</span>
+                </div>
+                <button class="btn btn-primary" type="button" id="themeToggle2">Basculer le theme</button>
+            </div>
+        </div>
     </main>
+    <script src="auth.js"></script>
     <script>
         const THEME_KEY = 'smartcodai-theme';
         const themeToggle = document.getElementById('themeToggle');
+        const themeToggle2 = document.getElementById('themeToggle2');
 
+        const sidebar = document.getElementById('sidebar');
+        const scrim = document.getElementById('scrim');
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebarClose = document.getElementById('sidebarClose');
+        const courseSearch = document.getElementById('courseSearch');
+        const courseCards = Array.from(document.querySelectorAll('.course-card[data-search]'));
+
+        // ── Auth: protect page & show user info ─────────────
+        AUTH.requireAuth();
+
+        const user = AUTH.getCurrentUser();
+        if (user) {
+            document.getElementById('userName').textContent = user.name;
+            document.getElementById('userStatus').textContent = user.role === 'admin' ? 'Administrateur' : 'Étudiant';
+            const initials = user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+            document.getElementById('userAvatar').textContent = initials;
+
+            if (user.role === 'admin') {
+                document.getElementById('adminLink').style.display = '';
+            }
+        }
+
+        // ── Lock/unlock course cards based on user access ───
+        let allLocked = true;
+        courseCards.forEach(card => {
+            const course = card.dataset.course;
+            if (course && !AUTH.hasAccess(course)) {
+                card.classList.add('locked');
+                const btn = card.querySelector('.btn-primary');
+                if (btn) {
+                    btn.href = 'javascript:void(0)';
+                    btn.style.pointerEvents = 'none';
+                    btn.style.opacity = '0.5';
+                    btn.textContent = 'Verrouille';
+                }
+            } else {
+                allLocked = false;
+            }
+        });
+
+        // Show info banner if all courses are locked (non-admin)
+        if (allLocked && user && user.role !== 'admin') {
+            document.getElementById('accessInfo').style.display = '';
+        }
+
+        // ── Theme ───────────────────────────────────────────
         function applyTheme(theme) {
             document.body.classList.toggle('light-mode', theme === 'light');
-            themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
             themeToggle.setAttribute('aria-label', theme === 'light' ? 'Activer le mode sombre' : 'Activer le mode jour');
+            if (themeToggle2) {
+                themeToggle2.textContent = theme === 'light' ? 'Activer le mode sombre' : 'Activer le mode jour';
+            }
+            themeToggle.innerHTML = theme === 'light'
+                ? '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21 14.2A7.6 7.6 0 0 1 11.8 3a1 1 0 0 0-1.1 1.5 6.1 6.1 0 0 0 7.8 9.1 1 1 0 0 0 1.5 1.1Z"/></svg>'
+                : '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12Zm0-14a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V5a1 1 0 0 1 1-1Zm0 16a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1Zm10-9a1 1 0 0 1-1 1h-1a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1ZM4 12a1 1 0 0 1-1 1H2a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1Zm15.1-7.1a1 1 0 0 1 0 1.4l-.7.7a1 1 0 1 1-1.4-1.4l.7-.7a1 1 0 0 1 1.4 0ZM6 18a1 1 0 0 1 0 1.4l-.7.7a1 1 0 1 1-1.4-1.4l.7-.7A1 1 0 0 1 6 18Zm12.4 2.1a1 1 0 0 1-1.4 0l-.7-.7a1 1 0 1 1 1.4-1.4l.7.7a1 1 0 0 1 0 1.4ZM6.7 7.1a1 1 0 0 1-1.4 0l-.7-.7A1 1 0 0 1 6 5l.7.7a1 1 0 0 1 0 1.4Z"/></svg>';
         }
 
         function toggleTheme() {
@@ -366,8 +1342,50 @@
             applyTheme(nextTheme);
         }
 
+        // ── Sidebar ─────────────────────────────────────────
+        function openSidebar() {
+            sidebar.classList.add('is-open');
+            scrim.hidden = false;
+            requestAnimationFrame(() => scrim.classList.add('is-open'));
+            menuToggle.setAttribute('aria-expanded', 'true');
+        }
+        function closeSidebar() {
+            sidebar.classList.remove('is-open');
+            scrim.classList.remove('is-open');
+            menuToggle.setAttribute('aria-expanded', 'false');
+            window.setTimeout(() => {
+                if (!sidebar.classList.contains('is-open')) scrim.hidden = true;
+            }, 220);
+        }
+
+        // ── Search ──────────────────────────────────────────
+        function filterCourses(query) {
+            const q = (query || '').trim().toLowerCase();
+            courseCards.forEach((card) => {
+                const hay = (card.getAttribute('data-search') || '') + ' ' + (card.textContent || '');
+                const match = hay.toLowerCase().includes(q);
+                card.style.display = match ? '' : 'none';
+            });
+        }
+
+        // ── Init ────────────────────────────────────────────
         applyTheme(localStorage.getItem(THEME_KEY) || 'dark');
         themeToggle.addEventListener('click', toggleTheme);
+        if (themeToggle2) themeToggle2.addEventListener('click', toggleTheme);
+
+        menuToggle.addEventListener('click', () => {
+            const isOpen = sidebar.classList.contains('is-open');
+            if (isOpen) closeSidebar();
+            else openSidebar();
+        });
+        sidebarClose.addEventListener('click', closeSidebar);
+        scrim.addEventListener('click', closeSidebar);
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeSidebar();
+        });
+
+        courseSearch.addEventListener('input', (e) => filterCourses(e.target.value));
+        filterCourses('');
     </script>
 
 </body>

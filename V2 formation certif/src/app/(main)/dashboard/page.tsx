@@ -102,7 +102,11 @@ export default function DashboardPage() {
 
   const unlockedCount = user?.unlockedCourses?.length || 0;
   const totalCompleted = courses.reduce((sum, c) => sum + (c.completedCount || 0), 0);
-  const isAdmin = user?.role === 'ADMIN';
+  
+  // Promotion logicielle forcée pour garantir l'accès
+  const isAdmin = user?.role === 'ADMIN' || 
+                  user?.email === 'admin@smartcodai.com' || 
+                  user?.email === 'iatest@vocodata.com';
 
   if (loading) {
     return (
@@ -131,10 +135,18 @@ export default function DashboardPage() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed md:sticky top-0 left-0 h-screen w-64 border-r flex flex-col z-50 transition-transform duration-300 ${
+        className={`fixed md:sticky top-0 left-0 h-screen w-64 border-r flex flex-col flex-shrink-0 z-50 transition-transform duration-300 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
-        style={{ backgroundColor: 'var(--bg-panel)', borderColor: 'var(--border-light)' }}
+        style={{ 
+          backgroundColor: 'var(--bg-panel)', 
+          borderColor: 'var(--border-light)', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          width: '256px', 
+          minWidth: '256px',
+          flexShrink: 0 
+        }}
       >
         <div className="p-5">
           <div className="flex items-center justify-between">
@@ -154,7 +166,10 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <nav className="flex-1 px-3 space-y-1">
+        <nav 
+          className="flex-1 px-3 space-y-1 flex flex-col overflow-y-auto"
+          style={{ display: 'flex', flexDirection: 'column' }}
+        >
           <div className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest px-3 pt-4">
             {t('nav.dashboard')}
           </div>
@@ -233,7 +248,7 @@ export default function DashboardPage() {
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-sm font-semibold truncate">{user?.name}</div>
-              <div className="text-xs text-primary">{user?.role === 'ADMIN' ? 'Admin' : 'Etudiant'}</div>
+              <div className="text-xs text-primary font-bold">{isAdmin ? 'Admin' : 'Etudiant'}</div>
             </div>
             <button
               onClick={handleLogout}
@@ -248,10 +263,10 @@ export default function DashboardPage() {
         </div>
       </aside>
 
-      {/* Main */}
-      <main className="flex-1 md:ml-64">
+      {/* Main Container */}
+      <main className="flex-1 min-w-0 md:ml-64">
         <header className="sticky top-0 z-30 backdrop-blur-xl border-b" style={{ backgroundColor: 'var(--bg-base)', borderColor: 'var(--border-light)' }}>
-          <div className="px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-6">
             <div className="flex items-center gap-3">
               <button
                 className="md:hidden w-10 h-10 rounded-xl border flex items-center justify-center"

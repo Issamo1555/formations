@@ -1,76 +1,64 @@
 # ============================================================
-# Smartcodai V2 — Dockerfile (Production)
-# Node.js 20 + PHP-CLI
+# Smartcodai V2 — Turbo Dockerfile (Optimisé Mac/BuildKit)
 # ============================================================
 
-FROM node:20-alpine AS base
+# ─── Base Stage ───
+FROM node:20.18.1-alpine AS base
+ENV NODE_ENV=production
 
-# ─── Installer PHP-CLI et outils ───
-RUN apk add --no-cache \
-    php83 \
-    php83-cli \
-    php83-json \
-    php83-mbstring \
-    php83-pdo \
-    php83-pdo_pgsql \
-    php83-pgsql \
-    php83-session \
-    php83-xml \
-    php83-tokenizer \
-    php83-phar \
-    php83-dom \
-    php83-simplexml \
-    wget
+# Dépendances système minimales
+RUN apk add --no-cache php83 php83-cli php83-json php83-mbstring \
+    php83-pdo php83-pdo_pgsql php83-pgsql php83-session php83-xml \
+    php83-tokenizer php83-phar php83-dom php83-simplexml wget \
+    && ln -sf /usr/bin/php83 /usr/bin/php
 
-# Créer le lien symbolique php pour que la commande `php` soit disponible
-RUN ln -sf /usr/bin/php83 /usr/bin/php
-
-# ─── Builder l'app ───
+# ─── Builder Stage ───
 FROM base AS builder
 WORKDIR /app
 
+# Copie des fichiers de dépendances
 COPY package.json package-lock.json ./
-RUN npm ci --ignore-scripts
 
+# Étape Turbo : npm ci avec cache mount (persiste entre les builds)
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --include=dev --ignore-scripts
+
+# Copie du reste du code
 COPY . .
 
-# Générer Prisma client + build
-RUN npx prisma generate --schema=prisma/schema.prod.prisma
-RUN npm run build
+# Génération Prisma et Build Next.js avec cache d'étape
+RUN --mount=type=cache,target=/app/.next/cache \
+    npx prisma generate --schema=prisma/schema.prod.prisma && \
+    npm run build
 
-# ─── Production ───
+# ─── Runner Stage ───
 FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV=production
-
-# Créer un utilisateur non-root
+# Sécurité : utilisateur non-root
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-# Copier le build
+# Récupération du build standalone optimisé
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public/
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/scripts ./scripts/
-COPY --from=builder /app/prisma/schema.prod.prisma ./prisma/schema.prod.prisma
 
-# Installer Prisma CLI (pour db push au démarrage)
-RUN npm install -g prisma@6.19.3
+# Installation de Prisma & tsx localement dans le runner pour le seed
+# (Optimisé via cache mount)
+RUN --mount=type=cache,target=/root/.npm \
+    npm install prisma@6.2.0 tsx
 
-# Logs directory pour le volume
-RUN mkdir -p /app/logs && chown -R nextjs:nodejs /app/logs
+# Gestion des permissions
+RUN mkdir -p /app/logs && chown -R nextjs:nodejs /app/logs /app/node_modules
 
 USER nextjs
-
 EXPOSE 3000
-
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Script de démarrage : push DB + seed si besoin, puis démarrer
 COPY --chown=nextjs:nodejs docker-entrypoint.sh ./docker-entrypoint.sh
 RUN chmod +x ./docker-entrypoint.sh
 

@@ -32,7 +32,7 @@
     --stat-to: rgba(16, 185, 129, 0.08);
   }
 
-  .light {
+  .light, html.light {
     --bg-base: #f5f7fa;
     --bg-panel: #ffffff;
     --bg-elevated: #f0f2f5;

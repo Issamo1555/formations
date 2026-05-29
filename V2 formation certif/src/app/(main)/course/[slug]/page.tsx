@@ -11,6 +11,8 @@ import {
   Terminal, HelpCircle, Trophy, Play, BookOpen, XCircle
 } from 'lucide-react';
 import { locales, localeNames } from '@/i18n';
+import CodeBlock from '@/components/CodeBlock';
+import CodeEditor from '@/components/CodeEditor';
 
 interface Lesson {
   id: string;
@@ -204,7 +206,23 @@ export default function CoursePage() {
     const isHtml = /<(p|h[1-6]|ul|ol|li|strong|em|br|div|span)[\s>]/i.test(content);
 
     if (isHtml) {
-      return <div key="html-content" dangerouslySetInnerHTML={{ __html: content }} />;
+      return (
+        <div key="html-content" className="prose-content">
+          <style dangerouslySetInnerHTML={{ __html: `
+            .prose-content p { margin-bottom: 1rem; line-height: 1.75; color: var(--text-muted); }
+            .prose-content h3 { font-size: 1.125rem; font-weight: 600; margin-top: 2rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-light); color: var(--text-main); }
+            .prose-content ul { list-style: none; padding-left: 0; margin: 0.5rem 0; }
+            .prose-content li { display: flex; align-items: flex-start; gap: 0.5rem; padding: 0.375rem 0; padding-left: 1rem; color: var(--text-muted); line-height: 1.75; }
+            .prose-content li::before { content: ""; display: block; width: 0.375rem; height: 0.375rem; border-radius: 9999px; background: var(--primary); opacity: 0.4; margin-top: 0.625rem; flex-shrink: 0; }
+            .prose-content code { font-size: 0.875rem; padding: 0.125rem 0.375rem; border-radius: 0.375rem; background: rgba(255,255,255,0.08); color: #e06c75; border: 1px solid rgba(255,255,255,0.06); }
+            .prose-content pre { background: #1e1e1e; border: 1px solid var(--border-light); border-radius: 0.75rem; padding: 1rem; overflow-x: auto; margin: 1rem 0; }
+            .prose-content pre code { background: none; border: none; padding: 0; color: #d4d4d4; font-size: 0.875rem; }
+            .prose-content strong { color: var(--text-main); font-weight: 600; }
+            .prose-content em { font-style: italic; color: var(--text-muted); }
+          `}} />
+          <div dangerouslySetInnerHTML={{ __html: content }} />
+        </div>
+      );
     }
 
     const lines = content.split('\n');
@@ -213,25 +231,55 @@ export default function CoursePage() {
     let codeLines: string[] = [];
     let codeLang = '';
 
+    // Helper to render inline formatting (bold, italic, inline code)
+    const renderInline = (text: string, keyPrefix: string, keyIndex: number) => {
+      // Inline code
+      const parts = text.split(/(`[^`]+`)/g);
+      if (parts.length > 1) {
+        return parts.map((part, i) => {
+          if (part.startsWith('`') && part.endsWith('`')) {
+            return (
+              <code key={`${keyPrefix}-${keyIndex}-${i}`} className="px-1.5 py-0.5 rounded-md text-sm font-mono" style={{ 
+                backgroundColor: 'rgba(255,255,255,0.08)',
+                color: '#e06c75',
+                border: '1px solid rgba(255,255,255,0.06)'
+              }}>
+                {part.slice(1, -1)}
+              </code>
+            );
+          }
+          // Bold
+          const boldParts = part.split(/(\*\*[^*]+\*\*)/g);
+          if (boldParts.length > 1) {
+            return boldParts.map((bp, j) => {
+              if (bp.startsWith('**') && bp.endsWith('**')) {
+                return <strong key={`${keyPrefix}-${keyIndex}-${i}-${j}`}>{bp.slice(2, -2)}</strong>;
+              }
+              return bp;
+            });
+          }
+          return part;
+        });
+      }
+      // Bold without code
+      const boldParts = text.split(/(\*\*[^*]+\*\*)/g);
+      if (boldParts.length > 1) {
+        return boldParts.map((bp, i) => {
+          if (bp.startsWith('**') && bp.endsWith('**')) {
+            return <strong key={`${keyPrefix}-${keyIndex}-${i}`}>{bp.slice(2, -2)}</strong>;
+          }
+          return bp;
+        });
+      }
+      return text;
+    };
+
     lines.forEach((line, i) => {
       if (line.startsWith('```')) {
         if (inCodeBlock) {
           // End of code block
           elements.push(
-            <div key={`code-${i}`} className="relative mt-4 mb-4">
-              <div className="flex items-center justify-between px-4 py-2 rounded-t-lg border-b" style={{ backgroundColor: 'var(--bg-elevated)', borderColor: 'var(--border-light)' }}>
-                <span className="text-xs font-semibold text-primary">{codeLang || 'code'}</span>
-                <button
-                  onClick={() => navigator.clipboard.writeText(codeLines.join('\n'))}
-                  className="text-xs text-[var(--text-muted)] hover:text-primary transition-colors"
-                >
-                  {locale === 'ar' ? 'نسخ' : locale === 'en' ? 'Copy' : 'Copier'}
-                </button>
-              </div>
-              <pre className="p-4 rounded-b-lg overflow-x-auto font-mono text-sm" style={{ backgroundColor: 'var(--bg-base)', color: 'var(--text-main)' }}>
-                <code>{codeLines.join('\n')}</code>
-              </pre>
-            </div>
+            <CodeBlock key={`code-${i}`} code={codeLines.join('\n')} language={codeLang || 'code'} />
           );
           codeLines = [];
           inCodeBlock = false;
@@ -249,24 +297,55 @@ export default function CoursePage() {
       }
 
       if (line.startsWith('### ')) {
-        elements.push(<h3 key={i} className="text-lg font-semibold mt-6 mb-2">{line.slice(4)}</h3>);
+        elements.push(
+          <h3 key={i} className="mt-8 mb-3 pb-2 border-b border-border/30">
+            <span className="text-lg font-semibold" style={{ color: 'var(--text-main)' }}>{renderInline(line.slice(4), 'h3', i)}</span>
+          </h3>
+        );
       } else if (line.startsWith('## ')) {
-        elements.push(<h2 key={i} className="text-xl font-display font-bold mt-6 mb-3">{line.slice(3)}</h2>);
+        elements.push(
+          <h2 key={i} className="mt-8 mb-3 pb-2 border-b border-border/50">
+            <span className="text-xl font-display font-bold" style={{ color: 'var(--text-main)' }}>{renderInline(line.slice(3), 'h2', i)}</span>
+          </h2>
+        );
       } else if (line.startsWith('# ')) {
-        elements.push(<h1 key={i} className="text-2xl font-display font-bold mt-6 mb-3">{line.slice(2)}</h1>);
+        elements.push(
+          <h1 key={i} className="mt-6 mb-4 pb-2 border-b border-border">
+            <span className="text-2xl font-display font-bold" style={{ color: 'var(--text-main)' }}>{renderInline(line.slice(2), 'h1', i)}</span>
+          </h1>
+        );
       } else if (line.startsWith('- **')) {
-        const match = line.match(/- \*\*(.+?)\*\* — (.+)/);
+        const match = line.match(/- \*\*(.+?)\*\*[ —] (.+)/);
         if (match) {
-          elements.push(<li key={i} className="text-[var(--text-muted)] ml-4"><strong>{match[1]}</strong> — {match[2]}</li>);
+          elements.push(
+            <li key={i} className="flex items-start gap-2 py-1.5 ml-4">
+              <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary/60 flex-shrink-0" />
+              <span className="text-[var(--text-muted)] leading-relaxed">
+                <strong style={{ color: 'var(--text-main)' }}>{renderInline(match[1], 'li-bold', i)}</strong>
+                {' — '}
+                {renderInline(match[2], 'li-text', i)}
+              </span>
+            </li>
+          );
         } else {
-          elements.push(<li key={i} className="text-[var(--text-muted)] ml-4">{line.slice(2)}</li>);
+          elements.push(
+            <li key={i} className="flex items-start gap-2 py-1.5 ml-4">
+              <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary/60 flex-shrink-0" />
+              <span className="text-[var(--text-muted)] leading-relaxed">{renderInline(line.slice(2), 'li', i)}</span>
+            </li>
+          );
         }
       } else if (line.startsWith('- ')) {
-        elements.push(<li key={i} className="text-[var(--text-muted)] ml-4">{line.slice(2)}</li>);
+        elements.push(
+          <li key={i} className="flex items-start gap-2 py-1.5 ml-4">
+            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary/60 flex-shrink-0" />
+            <span className="text-[var(--text-muted)] leading-relaxed">{renderInline(line.slice(2), 'li', i)}</span>
+          </li>
+        );
       } else if (line.trim() === '') {
-        elements.push(<br key={i} />);
+        elements.push(<div key={i} className="h-2" />);
       } else {
-        elements.push(<p key={i} className="text-[var(--text-muted)] leading-relaxed">{line}</p>);
+        elements.push(<p key={i} className="text-[var(--text-muted)] leading-relaxed py-1">{renderInline(line, 'p', i)}</p>);
       }
     });
 
@@ -640,14 +719,19 @@ sys.stdout = StringIO()
 
               {/* Tab Content */}
               {activeTab === 'theory' && (
-                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  {renderContent(getContent(currentLesson))}
-                  <div className="pt-8 flex justify-end">
-                    <button 
+                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className="bg-[var(--bg-elevated)] border border-border rounded-2xl p-6 sm:p-8">
+                    {renderContent(getContent(currentLesson))}
+                  </div>
+                  <div className="flex items-center justify-between pt-4">
+                    <div className="text-xs text-[var(--text-muted)]">
+                      {locale === 'ar' ? 'الدرس' : locale === 'en' ? 'Lesson' : 'Leçon'} {currentLessonIndex + 1} {locale === 'ar' ? 'على' : locale === 'en' ? 'of' : 'sur'} {course.lessons.length}
+                    </div>
+                    <button
                       onClick={() => setActiveTab(currentLesson.exampleFr ? 'example' : 'exercise')}
                       className="btn btn-primary flex items-center gap-2"
                     >
-                      {currentLesson.exampleFr 
+                      {currentLesson.exampleFr
                         ? (locale === 'ar' ? 'انتقل إلى المثال' : locale === 'en' ? 'Go to Example' : 'Passer à l\'exemple')
                         : (locale === 'ar' ? 'الذهاب إلى التمرين' : locale === 'en' ? 'Go to Exercise' : 'Passer à l\'exercice')
                       }
@@ -664,7 +748,10 @@ sys.stdout = StringIO()
                       <BookOpen className="w-5 h-5" />
                       <h3 className="font-display font-bold">{locale === 'ar' ? 'مثال توضيحي' : locale === 'en' ? 'Illustrative Example' : 'Exemple d\'illustration'}</h3>
                     </div>
-                    {renderContent(`\`\`\`php\n${currentLesson.exampleFr || ''}\n\`\`\``)}
+                    <CodeBlock
+                      code={(currentLesson.exampleFr || '').replace(/\\n/g, '\n').trim()}
+                      language="php"
+                    />
                   </div>
                   <div className="pt-8 flex justify-between">
                     <button onClick={() => setActiveTab('theory')} className="btn btn-ghost flex items-center gap-2">
@@ -688,8 +775,8 @@ sys.stdout = StringIO()
                         <Trophy className="w-5 h-5" />
                         <h3 className="font-display font-bold">🎯 {locale === 'ar' ? 'هدف التمرين' : locale === 'en' ? 'Exercise Objective' : 'Objectif de l\'exercice'}</h3>
                       </div>
-                      <div className="text-sm text-[var(--text-muted)] leading-relaxed">
-                        {currentLesson.exerciseFr?.split('\n').filter((l: string) => l.startsWith('//')).map((l: string) => l.replace(/^\/\/\s*/, '')).join('\n') || 
+                      <div className="text-sm text-[var(--text-muted)] leading-relaxed whitespace-pre-line">
+                        {currentLesson.exerciseFr?.replace(/\\n/g, '\n').split('\n').filter((l: string) => l.startsWith('//')).map((l: string) => l.replace(/^\/\/\s*/, '')).join('\n') ||
                          'Consultez les commentaires dans le code ci-dessous pour les instructions.'}
                       </div>
                     </div>
@@ -714,6 +801,7 @@ sys.stdout = StringIO()
                       <button
                         onClick={() => {
                           setSandboxCode(getDefaultSandbox(currentLesson));
+                          setSandboxOutput('');
                           setIsRunning(false);
                         }}
                         className="btn btn-ghost btn-sm text-xs"
@@ -721,37 +809,33 @@ sys.stdout = StringIO()
                         {locale === 'ar' ? 'إعادة تعيين' : locale === 'en' ? 'Reset' : 'Réinitialiser'}
                       </button>
                     </div>
-                    <div className="p-4 bg-[#0d1117]">
-                      <textarea
-                        value={sandboxCode}
-                        onChange={(e) => setSandboxCode(e.target.value)}
-                        className="w-full h-64 bg-transparent border-none p-4 font-mono text-sm text-gray-300 resize-none focus:outline-none"
-                        spellCheck={false}
-                        placeholder="// Écrivez votre code PHP ici..."
-                      />
-                      <div className="mt-3 flex items-center justify-between border-t border-white/5 pt-4">
-                        <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
-                          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                          {locale === 'ar' ? 'جاهز للتنفيذ' : locale === 'en' ? 'Ready to execute' : 'Prêt pour l\'exécution'}
-                        </div>
-                        <button
-                          onClick={runSandbox}
-                          disabled={isRunning}
-                          className="btn btn-primary px-6 flex items-center gap-2 group shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {isRunning ? (
-                            <>
-                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                              {locale === 'ar' ? 'جاري التنفيذ...' : locale === 'en' ? 'Running...' : 'Exécution...'}
-                            </>
-                          ) : (
-                            <>
-                              <Play className="w-4 h-4 fill-current group-hover:scale-110 transition-transform" />
-                              {locale === 'ar' ? 'تشغيل' : locale === 'en' ? 'Run' : 'Exécuter'}
-                            </>
-                          )}
-                        </button>
+                    <CodeEditor
+                      code={sandboxCode}
+                      onChange={(newCode) => setSandboxCode(newCode)}
+                      language="php"
+                    />
+                    <div className="px-4 pb-4 flex items-center justify-between border-t border-border pt-4">
+                      <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                        {locale === 'ar' ? 'جاهز للتنفيذ' : locale === 'en' ? 'Ready to execute' : 'Prêt pour l\'exécution'}
                       </div>
+                      <button
+                        onClick={runSandbox}
+                        disabled={isRunning}
+                        className="btn btn-primary px-6 flex items-center gap-2 group shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isRunning ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            {locale === 'ar' ? 'جاري التنفيذ...' : locale === 'en' ? 'Running...' : 'Exécution...'}
+                          </>
+                        ) : (
+                          <>
+                            <Play className="w-4 h-4 fill-current group-hover:scale-110 transition-transform" />
+                            {locale === 'ar' ? 'تشغيل' : locale === 'en' ? 'Run' : 'Exécuter'}
+                          </>
+                        )}
+                      </button>
                     </div>
                     {sandboxOutput && (
                       <div className="border-t border-border bg-black/40 p-0">

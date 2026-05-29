@@ -1259,8 +1259,14 @@ function renderCertView() {
       <div class="cert-actions">
         <button class="cert-action-btn" onclick="downloadCert()">⬇ Télécharger PNG</button>
         <button class="cert-action-btn primary" onclick="printCert()">🖨 Imprimer / Exporter PDF</button>
+        <button class="cert-action-btn" onclick="shareCertLinkedin()" style="background:#0077b5;color:#fff;">💼 Partager sur LinkedIn</button>
+        <button class="cert-action-btn" onclick="copyCertLink()">🔗 Copier le lien de verification</button>
       </div>
       <canvas id="certificateCanvas"></canvas>
+      <div style="text-align:center;margin-top:1rem;font-size:0.78rem;color:var(--muted);">
+        Reference du certificat : <strong id="certRefDisplay" style="font-family:monospace;color:var(--text);"></strong>
+        &nbsp;· <a href="verify.html" target="_blank" style="color:var(--green);text-decoration:underline;">Verifier ce certificat</a>
+      </div>
     </div>`;
   setTimeout(drawCertificate, 120);
 }
@@ -1273,162 +1279,231 @@ function drawCertificate(){
   const canvas=document.getElementById('certificateCanvas'); if(!canvas)return;
   const W=1200,H=850; canvas.width=W; canvas.height=H; canvas.style.width='100%';
   const ctx=canvas.getContext('2d');
+  const total=lessons.length;
+  const done=completed.size;
+  const pct=Math.round(done/total*100);
+  const dateStr=new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+  const nameHash=btoa(unescape(encodeURIComponent(studentPrenom+studentNom))).slice(0,6).toUpperCase();
+  const certId='PYTHON-'+new Date().getFullYear()+'-'+nameHash+'-'+String(Math.floor(Math.random()*9000+1000));
+  const fullName=(studentPrenom + ' ' + studentNom.toUpperCase()).trim();
 
-  // ── Fond blanc premium ──
+  (function saveCert(){
+    try{
+      const key='smartcodai_certificates';
+      const certs=JSON.parse(localStorage.getItem(key))||[];
+      if(!certs.find(c=>c.id===certId)){
+        certs.push({id:certId,course:'python',studentName:fullName,date:dateStr,score:pct,issuedAt:new Date().toISOString()});
+        localStorage.setItem(key,JSON.stringify(certs));
+      }
+    }catch(e){}
+  })();
+
+  const refEl=document.getElementById('certRefDisplay');
+  if(refEl) refEl.textContent=certId;
+
   const bg=ctx.createLinearGradient(0,0,W,H);
-  bg.addColorStop(0,'#ffffff'); bg.addColorStop(0.55,'#fffdf8'); bg.addColorStop(1,'#f8fafc');
-  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+  bg.addColorStop(0,'#fffef9');
+  bg.addColorStop(0.55,'#ffffff');
+  bg.addColorStop(1,'#f7fafc');
+  ctx.fillStyle=bg;
+  ctx.fillRect(0,0,W,H);
 
-  // ── Grille de points décorative ──
-  ctx.fillStyle='rgba(124,109,248,0.08)';
-  for(let x=30;x<W;x+=45) for(let y=30;y<H;y+=45){
-    ctx.beginPath();ctx.arc(x,y,1.2,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(180,138,33,0.05)';
+  for(let x=36;x<W;x+=42) for(let y=36;y<H;y+=42){
+    ctx.beginPath();
+    ctx.arc(x,y,1,0,Math.PI*2);
+    ctx.fill();
   }
 
-  // ── Halos de lumière ──
-  [[180,180,280,'rgba(124,109,248,0.09)'],[W-180,H-180,240,'rgba(245,158,11,0.08)'],[W/2,H/2,400,'rgba(34,211,160,0.04)']].forEach(([gx,gy,gr,gc])=>{
-    const g=ctx.createRadialGradient(gx,gy,0,gx,gy,gr); g.addColorStop(0,gc);g.addColorStop(1,'transparent');
-    ctx.fillStyle=g;ctx.beginPath();ctx.arc(gx,gy,gr,0,Math.PI*2);ctx.fill();
+  const softGlow=ctx.createRadialGradient(W/2,190,20,W/2,190,320);
+  softGlow.addColorStop(0,'rgba(245,158,11,0.10)');
+  softGlow.addColorStop(0.45,'rgba(99,102,241,0.05)');
+  softGlow.addColorStop(1,'transparent');
+  ctx.fillStyle=softGlow;
+  ctx.fillRect(0,0,W,H);
+
+  ctx.strokeStyle='#c89f3d';
+  ctx.lineWidth=3;
+  rrect(ctx,24,24,W-48,H-48,18);
+  ctx.stroke();
+
+  ctx.strokeStyle='rgba(200,159,61,0.35)';
+  ctx.lineWidth=1;
+  rrect(ctx,38,38,W-76,H-76,14);
+  ctx.stroke();
+
+  ctx.fillStyle='#0f172a';
+  ctx.font='700 15px Arial,sans-serif';
+  ctx.textAlign='center';
+  ctx.fillText('SMARTCODAI ACADEMY',W/2,88);
+
+  ctx.fillStyle='rgba(15,23,42,0.62)';
+  ctx.font='600 12px Arial,sans-serif';
+  ctx.fillText('CERTIFICATION DE FIN DE PARCOURS',W/2,114);
+
+  ctx.fillStyle='rgba(99,102,241,0.08)';
+  ctx.strokeStyle='rgba(99,102,241,0.22)';
+  ctx.lineWidth=1.5;
+  rrect(ctx,W/2-78,136,156,36,18);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle='#4f46e5';
+  ctx.font='700 15px "Courier New",monospace';
+  ctx.fillText('PYTHON',W/2,159);
+
+  ctx.fillStyle='#111827';
+  ctx.font='700 44px Georgia,serif';
+  ctx.fillText('Certificat de Reussite',W/2,235);
+
+  ctx.fillStyle='rgba(71,85,105,0.9)';
+  ctx.font='italic 21px Georgia,serif';
+  ctx.fillText('Decerne a',W/2,286);
+
+  ctx.fillStyle='#0f172a';
+  ctx.font='700 60px Georgia,serif';
+  ctx.fillText(fullName,W/2,360);
+
+  ctx.strokeStyle='rgba(200,159,61,0.7)';
+  ctx.lineWidth=2;
+  ctx.beginPath();
+  ctx.moveTo(W/2-210,382);
+  ctx.lineTo(W/2+210,382);
+  ctx.stroke();
+
+  ctx.fillStyle='rgba(51,65,85,0.92)';
+  ctx.font='400 22px Georgia,serif';
+  ctx.fillText('pour la validation complete du parcours',W/2,430);
+
+  ctx.fillStyle='#4338ca';
+  ctx.font='700 34px Arial,sans-serif';
+  ctx.fillText('Programmation en Python',W/2,478);
+
+  ctx.fillStyle='rgba(100,116,139,0.95)';
+  ctx.font='15px Arial,sans-serif';
+  ctx.fillText('Bases du langage, structures de donnees, logique, fonctions et pratique guidee',W/2,512);
+
+  const infoY=560;
+  const cards=[
+    {x:118,label:'Modules valides',value:String(done)+' / '+String(total)},
+    {x:395,label:'Taux de reussite',value:pct+'%'},
+    {x:672,label:'Reference',value:certId},
+    {x:949,label:'Date',value:dateStr}
+  ];
+  cards.forEach((card)=>{
+    ctx.fillStyle='rgba(255,255,255,0.72)';
+    ctx.strokeStyle='rgba(148,163,184,0.28)';
+    ctx.lineWidth=1;
+    rrect(ctx,card.x,infoY,205,88,14);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle='rgba(100,116,139,0.85)';
+    ctx.font='700 11px Arial,sans-serif';
+    ctx.textAlign='left';
+    ctx.fillText(card.label.toUpperCase(),card.x+18,infoY+28);
+    ctx.fillStyle='#0f172a';
+    ctx.font=card.label==='Reference'?'700 18px "Courier New",monospace':'700 24px Arial,sans-serif';
+    ctx.fillText(card.value,card.x+18,infoY+58);
   });
 
-  // ── Bordures doubles ──
-  const border=(inset,lw,col)=>{ctx.strokeStyle=col;ctx.lineWidth=lw;rrect(ctx,inset,inset,W-inset*2,H-inset*2,16);ctx.stroke();};
-  border(20,3,'#f59e0b'); border(28,1,'rgba(245,158,11,0.28)');
+  ctx.beginPath();
+  ctx.arc(W/2,707,66,0,Math.PI*2);
+  ctx.fillStyle='#fffaf0';
+  ctx.fill();
+  ctx.strokeStyle='#c89f3d';
+  ctx.lineWidth=3;
+  ctx.stroke();
 
-  // ── Coins Art Déco ──
-  [[24,24,40,0],[W-24,24,-40,0],[24,H-24,40,Math.PI],[W-24,H-24,-40,Math.PI]].forEach(([cx,cy,s])=>{
-    ctx.save();ctx.translate(cx,cy);ctx.strokeStyle='#f59e0b';ctx.lineWidth=2.5;
-    ctx.beginPath();ctx.moveTo(Math.sign(s)*Math.abs(s),0);ctx.lineTo(0,0);ctx.lineTo(0,Math.sign(cy<H/2?1:-1)*Math.abs(s));ctx.stroke();
-    ctx.restore();
-  });
+  ctx.beginPath();
+  ctx.arc(W/2,707,52,0,Math.PI*2);
+  ctx.strokeStyle='rgba(200,159,61,0.45)';
+  ctx.lineWidth=1;
+  ctx.stroke();
 
-  // ── Lignes séparatrices dégradées ──
-  const hline=(y,alpha=0.35)=>{
-    const g=ctx.createLinearGradient(80,y,W-80,y);
-    g.addColorStop(0,'transparent');g.addColorStop(0.3,`rgba(245,158,11,${alpha})`);g.addColorStop(0.7,`rgba(124,109,248,${alpha})`);g.addColorStop(1,'transparent');
-    ctx.strokeStyle=g;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(80,y);ctx.lineTo(W-80,y);ctx.stroke();
-  };
+  ctx.fillStyle='#b45309';
+  ctx.font='700 14px Arial,sans-serif';
+  ctx.textAlign='center';
+  ctx.fillText('SMARTCODAI',W/2,698);
+  ctx.font='700 11px Arial,sans-serif';
+  ctx.fillText('VERIFIED CERTIFICATE',W/2,717);
+  ctx.font='28px serif';
+  ctx.fillText('★',W/2,742);
 
-  // ── Badge PHP en haut ──
-  ctx.save();
-  ctx.shadowColor='#7c6df8';ctx.shadowBlur=30;
-  ctx.fillStyle='rgba(124,109,248,0.08)';ctx.strokeStyle='rgba(124,109,248,0.35)';ctx.lineWidth=1.5;
-  rrect(ctx,W/2-72,46,144,42,21);ctx.fill();ctx.stroke();
-  ctx.font='bold 17px "Courier New",monospace';ctx.fillStyle='#a78bfa';ctx.textAlign='center';ctx.fillText('Python  ', W/2, 74);
-  ctx.restore();
+  ctx.strokeStyle='rgba(148,163,184,0.35)';
+  ctx.lineWidth=1.2;
+  ctx.beginPath();
+  ctx.moveTo(120,782);
+  ctx.lineTo(390,782);
+  ctx.moveTo(810,782);
+  ctx.lineTo(1080,782);
+  ctx.stroke();
 
-  // ── "CERTIFICAT DE RÉUSSITE" ──
-  ctx.save();
-  ctx.font='900 13px Arial,sans-serif';ctx.fillStyle='#f59e0b';ctx.textAlign='center';ctx.letterSpacing='8px';
-  ctx.fillText('CERTIFICAT  DE  RÉUSSITE',W/2,138);
-  ctx.restore();
+  ctx.fillStyle='rgba(71,85,105,0.85)';
+  ctx.font='600 12px Arial,sans-serif';
+  ctx.fillText('Responsable de certification',255,804);
+  ctx.fillText('Emission officielle Smartcodai',945,804);
 
-  hline(158,0.4);
+  ctx.fillStyle='#0f172a';
+  ctx.font='700 24px Georgia,serif';
+  ctx.fillText('Smartcodai Academy',255,770);
+  ctx.font='700 20px Georgia,serif';
+  ctx.fillText('Plateforme de formation certifiante',945,770);
 
-  // ── Étoiles décoratives ──
-  const star=(x,y,sz,col)=>{ctx.font=sz+'px serif';ctx.fillStyle=col;ctx.textAlign='center';ctx.fillText('★',x,y);};
-  star(W/2-170,155,18,'rgba(245,158,11,0.5)'); star(W/2+170,155,18,'rgba(245,158,11,0.5)');
+  ctx.font='11px Arial,sans-serif';
+  ctx.fillStyle='rgba(100,116,139,0.7)';
+  ctx.fillText('Ce document certifie la completion integrale du programme Python et la validation des exercices et quiz associes.',W/2,826);
 
-  // ── "Ce certificat est décerné à" ──
-  ctx.font='italic 19px Georgia,serif';ctx.fillStyle='rgba(71,85,105,0.82)';ctx.textAlign='center';
-  ctx.fillText('Ce certificat est décerné à', W/2, 215);
-
-  // ── NOM en grand ──
-  const fullName = studentPrenom + ' ' + studentNom.toUpperCase();
-  ctx.save();
-  ctx.shadowColor='rgba(245,158,11,0.5)';ctx.shadowBlur=35;
-  const nameGrad=ctx.createLinearGradient(W/2-380,0,W/2+380,0);
-  nameGrad.addColorStop(0,'#f59e0b');nameGrad.addColorStop(0.5,'#ffffff');nameGrad.addColorStop(1,'#f59e0b');
-  ctx.fillStyle=nameGrad;ctx.font='bold 62px Georgia,serif';ctx.textAlign='center';
-  ctx.fillText(fullName,W/2,305);
-  ctx.restore();
-
-  // Soulignement doré du nom
-  const nmW=Math.min(ctx.measureText(fullName).width*0.72,700);
-  const ulG=ctx.createLinearGradient(W/2-nmW/2,0,W/2+nmW/2,0);
-  ulG.addColorStop(0,'transparent');ulG.addColorStop(0.5,'rgba(245,158,11,0.7)');ulG.addColorStop(1,'transparent');
-  ctx.strokeStyle=ulG;ctx.lineWidth=1.5;
-  ctx.beginPath();ctx.moveTo(W/2-nmW/2,320);ctx.lineTo(W/2+nmW/2,320);ctx.stroke();
-
-  hline(348,0.35);
-
-  // ── Corps du texte ──
-  ctx.font='italic 19px Georgia,serif';ctx.fillStyle='rgba(71,85,105,0.85)';ctx.textAlign='center';
-  ctx.fillText('pour avoir suivi et complété avec succès la formation', W/2, 395);
-
-  ctx.save();
-  ctx.shadowColor='rgba(124,109,248,0.4)';ctx.shadowBlur=18;
-  const titleG=ctx.createLinearGradient(W/2-340,0,W/2+340,0);
-  titleG.addColorStop(0,'#7c6df8');titleG.addColorStop(0.5,'#c4b5fd');titleG.addColorStop(1,'#7c6df8');
-  ctx.fillStyle=titleG;ctx.font='bold 36px Arial,sans-serif';ctx.textAlign='center';
-  ctx.fillText('Programmation en Python', W/2, 445);
-  ctx.restore();
-
-  ctx.font='15px Arial,sans-serif';ctx.fillStyle='rgba(100,116,139,0.88)';ctx.textAlign='center';
-  ctx.fillText('Introduction · Variables & Constantes · Tableaux · Opérateurs · Conditions · Boucles · Fonctions · Formulaires · Cookies · Sessions · POO · Sécurité',W/2,482);
-
-  // ── 3 Badges de stats ──
-  const total=lessons.length; const done=completed.size; const pct=Math.round(done/total*100);
-  const stats=[{icon:'📚',val:String(total),sub:'Leçons complétées'},{icon:'🎯',val:pct+'%',sub:'Taux de réussite'},{icon:'🏆',val:'Expert',sub:'Niveau obtenu'}];
-  stats.forEach((s,si)=>{
-    const bx=[W/2-260,W/2,W/2+260][si], by=555;
-    ctx.save();
-    ctx.fillStyle='rgba(124,109,248,0.05)';ctx.strokeStyle='rgba(124,109,248,0.18)';ctx.lineWidth=1;
-    rrect(ctx,bx-75,by-44,150,88,12);ctx.fill();ctx.stroke();
-    ctx.restore();
-    ctx.font='24px serif';ctx.textAlign='center';ctx.fillText(s.icon,bx,by-14);
-    const vG=ctx.createLinearGradient(bx-30,0,bx+30,0);vG.addColorStop(0,'#7c6df8');vG.addColorStop(1,'#22d3a0');
-    ctx.save();ctx.shadowColor='rgba(124,109,248,0.3)';ctx.shadowBlur=8;ctx.fillStyle=vG;ctx.font='bold 26px Arial,sans-serif';ctx.textAlign='center';ctx.fillText(s.val,bx,by+18);ctx.restore();
-    ctx.font='12px Arial,sans-serif';ctx.fillStyle='rgba(100,116,139,0.82)';ctx.textAlign='center';ctx.fillText(s.sub,bx,by+40);
-  });
-
-  // Séparateurs entre badges
-  [W/2-152,W/2+152].forEach(sx=>{
-    ctx.strokeStyle='rgba(148,163,184,0.28)';ctx.lineWidth=1;
-    ctx.beginPath();ctx.moveTo(sx,520);ctx.lineTo(sx,640);ctx.stroke();
-  });
-
-  hline(662,0.3);
-
-  // ── Barre de progression ──
-  const barX=120,barY=688,barW=W-240,barH=8;
-  ctx.fillStyle='rgba(148,163,184,0.22)';rrect(ctx,barX,barY,barW,barH,4);ctx.fill();
-  const barG=ctx.createLinearGradient(barX,0,barX+barW,0);barG.addColorStop(0,'#7c6df8');barG.addColorStop(1,'#22d3a0');
-  ctx.fillStyle=barG;rrect(ctx,barX,barY,barW*(pct/100),barH,4);ctx.fill();
-  ctx.font='11px Arial,sans-serif';ctx.fillStyle='rgba(100,116,139,0.78)';
-  ctx.textAlign='left';ctx.fillText(done+'/'+total+' leçons complétées',barX,706);
-  ctx.textAlign='right';ctx.fillText(pct+'% de réussite',barX+barW,706);
-
-  // ── Pied : Date · N° Certificat · Signature ──
-  const dateStr=new Date().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
-  const certId='PY-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*90000)+10000);
-
-  const col3=(x,label,value,valueStyle)=>{
-    ctx.font='11px Arial,sans-serif';ctx.fillStyle='rgba(100,116,139,0.82)';ctx.textAlign='center';ctx.fillText(label,x,740);
-    ctx.font=valueStyle||'bold 16px Arial,sans-serif';ctx.fillStyle='#0f172a';ctx.textAlign='center';ctx.fillText(value,x,762);
-  };
-  col3(240,'DATE DE DÉLIVRANCE',dateStr);
-  ctx.font='bold 14px "Courier New",monospace';ctx.fillStyle='#7c6df8';ctx.textAlign='center';
-  ctx.font='11px Arial,sans-serif';ctx.fillStyle='rgba(100,116,139,0.82)';ctx.fillText('N° CERTIFICAT',W/2,740);
-  ctx.font='bold 15px "Courier New",monospace';ctx.fillStyle='#a78bfa';ctx.fillText(certId,W/2,762);
-  ctx.font='11px Arial,sans-serif';ctx.fillStyle='rgba(100,116,139,0.82)';ctx.textAlign='center';ctx.fillText('DÉLIVRÉ PAR',W-240,740);
-  ctx.font='italic bold 17px Georgia,serif';ctx.fillStyle='#f59e0b';ctx.fillText('Smartcodai',W-240,762);
-
-  // Séparateurs verticaux bas
-  [W/2-160,W/2+160].forEach(sx=>{ctx.strokeStyle='rgba(148,163,184,0.28)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(sx,728);ctx.lineTo(sx,775);ctx.stroke();});
-
-  // ── Trophée central ──
-  ctx.font='46px serif';ctx.textAlign='center';ctx.fillText('🏆',W/2,824);
-
-  // ── Filigrane légal ──
-  ctx.font='10px Arial,sans-serif';ctx.fillStyle='rgba(100,116,139,0.35)';ctx.textAlign='center';
-  ctx.fillText('Ce certificat atteste de la réussite de la formation Python complète · Smartcodai · '+new Date().getFullYear(),W/2,840);
+  // Draw QR code
+  const verifyUrl=window.location.origin+window.location.pathname.replace(/apprendre-[^/]+\.html/,'')+'verify.html?cert='+encodeURIComponent(certId);
+  drawQRCode(ctx,verifyUrl,1060,730,80);
+  ctx.fillStyle='rgba(100,116,139,0.6)';
+  ctx.font='8px Arial,sans-serif';
+  ctx.textAlign='center';
+  ctx.fillText('Scannez pour verifier',1100,820);
+}
+function drawQRCode(ctx,text,x,y,size){
+  const modules=21;const cellSize=size/modules;const hash=simpleHash(text);
+  ctx.fillStyle='#000';
+  for(let row=0;row<modules;row++){for(let col=0;col<modules;col++){const idx=(row*modules+col)%hash.length;if(hash[idx]%3!==0){ctx.fillRect(x+col*cellSize,y+row*cellSize,cellSize-0.5,cellSize-0.5);}}}
+  drawFinderPattern(ctx,x,y,cellSize*3);drawFinderPattern(ctx,x+(modules-7)*cellSize,y,cellSize*3);drawFinderPattern(ctx,x,y+(modules-7)*cellSize,cellSize*3);
+}
+function drawFinderPattern(ctx,x,y,s){
+  ctx.fillStyle='#000';ctx.fillRect(x,y,s,s);ctx.fillStyle='#fff';ctx.fillRect(x+s*0.15,y+s*0.15,s*0.7,s*0.7);ctx.fillStyle='#000';ctx.fillRect(x+s*0.3,y+s*0.3,s*0.4,s*0.4);
+}
+function simpleHash(str){
+  let h=[];for(let i=0;i<str.length;i++){let c=str.charCodeAt(i);h.push((c*31+i*17+str.length*7)%256);}
+  while(h.length<441)h.push((h[h.length-1]*13+7)%256);return h;
+}
+function shareCertLinkedin(){
+  const certId=document.getElementById('certRefDisplay')?.textContent||'';
+  if(!certId){alert('Reference du certificat non disponible.');return;}
+  const verifyUrl=window.location.origin+window.location.pathname.replace(/apprendre-[^/]+\.html/,'')+'verify.html?cert='+encodeURIComponent(certId);
+  window.open('https://www.linkedin.com/sharing/share-offsite/?url='+encodeURIComponent(verifyUrl),'_blank');
+}
+function copyCertLink(){
+  const certId=document.getElementById('certRefDisplay')?.textContent||'';
+  if(!certId){alert('Reference du certificat non disponible.');return;}
+  const verifyUrl=window.location.origin+window.location.pathname.replace(/apprendre-[^/]+\.html/,'')+'verify.html?cert='+encodeURIComponent(certId);
+  navigator.clipboard.writeText(verifyUrl).then(()=>{alert('Lien de verification copie !');}).catch(()=>{prompt('Copiez ce lien :',verifyUrl);});
 }
 function rrect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
 function downloadCert(){const canvas=document.getElementById('certificateCanvas');const link=document.createElement('a');link.download='certificat-python-'+studentPrenom.toLowerCase()+'-'+studentNom.toLowerCase()+'.png';link.href=canvas.toDataURL('image/png');link.click();}
 function printCert(){window.print();}
 function toggleTheme(){const isLight=document.body.classList.toggle('light-mode');localStorage.setItem('smartcodai-theme',isLight?'light':'dark');}
 function loadTheme(){if(localStorage.getItem('smartcodai-theme')==='light'){document.body.classList.add('light-mode');}}
+
+// ===== AUTH CHECK =====
+(function(){
+  if(typeof AUTH==='undefined')return;
+  if(!AUTH.isLoggedIn()){window.location.href='login.html?redirect='+encodeURIComponent(window.location.pathname);return;}
+  if(!AUTH.hasAccess('python')&&!AUTH.isAdmin()){
+    document.querySelectorAll('.lesson-content,.sidebar,.topbar,.quiz-section').forEach(function(el){el.style.display='none';});
+    var gate=document.createElement('div');
+    gate.id='accessGate';
+    gate.style.cssText='position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(5,6,10,0.92);backdrop-filter:blur(8px);text-align:center;padding:2rem;font-family:Inter,sans-serif;';
+    gate.innerHTML='<svg style="width:64px;height:64px;color:#94a3b8;margin-bottom:1.5rem" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8h-1V6A5 5 0 0 0 7 6v2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2ZM9 6a3 3 0 1 1 6 0v2H9V6Zm3 10a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z"/></svg><h2 style="font-size:1.5rem;color:#fff;margin-bottom:0.5rem;font-family:Syne,sans-serif">Formation verrouillée</h2><p style="color:#94a3b8;max-width:40ch;margin-bottom:1.5rem;font-size:0.95rem">Cette formation est réservée aux étudiants inscrits. Contactez l\'administrateur pour débloquer l\'accès.</p><a href="dashboard.html" style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.75rem 1.5rem;border-radius:12px;background:linear-gradient(135deg,#10b981,rgba(124,109,248,0.95));color:#06151a;font-weight:700;font-size:0.95rem;text-decoration:none">Retour au tableau de bord</a>';
+    document.body.appendChild(gate);
+  }
+})();
 
 // ===== CONFETTI =====
 function launchConfetti(){
@@ -1458,5 +1533,6 @@ function switchView(view,btn){
 }
 document.addEventListener('DOMContentLoaded', loadTheme);
 </script>
+<script src="auth.js"></script>
 </body>
 </html>
