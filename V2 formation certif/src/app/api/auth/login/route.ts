@@ -37,6 +37,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (!user.passwordHash) {
+      return NextResponse.json(
+        { error: 'Email ou mot de passe incorrect.' },
+        { status: 401 }
+      );
+    }
+
     const valid = await bcrypt.compare(password, user.passwordHash);
 
     if (!valid) {
