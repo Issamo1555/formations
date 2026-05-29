@@ -19,7 +19,7 @@ services:
   # ─── Base de données PostgreSQL ───
   postgres:
     image: postgres:17-alpine
-    container_name: smartcodai-postgres
+    container_name: ${DB_CONTAINER_NAME:-smartcodai-postgres}
     restart: unless-stopped
     environment:
       POSTGRES_DB: smartcodai_v2
@@ -41,7 +41,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: smartcodai-app
+    container_name: ${APP_CONTAINER_NAME:-smartcodai-app}
     restart: unless-stopped
     env_file:
       - .env.production
@@ -56,7 +56,7 @@ services:
     networks:
       - smartcodai-net
     ports:
-      - "3002:3000"   # ← Port 3002 sur le VPS, pas de conflit avec les autres apps
+      - "${APP_PORT:-3002}:3000"   # ← Port configurable, pas de conflit avec les autres apps
     healthcheck:
       test: [ "CMD", "wget", "--spider", "-q", "http://localhost:3000" ]
       interval: 30s
