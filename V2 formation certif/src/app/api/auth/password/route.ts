@@ -27,6 +27,10 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: 'Utilisateur introuvable.' }, { status: 404 });
   }
 
+  if (!user.passwordHash) {
+    return NextResponse.json({ error: "Vous n'avez pas de mot de passe configuré sur ce compte." }, { status: 400 });
+  }
+
   // Verify current password
   const valid = await bcrypt.compare(currentPassword, user.passwordHash);
   if (!valid) {
