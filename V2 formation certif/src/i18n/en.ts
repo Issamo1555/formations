@@ -141,6 +141,7 @@ export const en = {
       pythonUnlocked: 'Python unlocked',
       n8nUnlocked: 'n8n unlocked',
       openclawUnlocked: 'OpenClaw unlocked',
+      architectureUnlocked: 'Architecture unlocked',
     },
     table: {
       title: 'Registered users',
@@ -237,5 +238,6 @@ export const en = {
     python: 'Programming in Python',
     n8n: 'Automation with n8n',
     openclaw: 'Mastering OpenClaw AI',
+    architecture: 'Architecture and Operating Systems',
   },
 };

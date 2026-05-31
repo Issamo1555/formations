@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEMAINE 1 : Algorithmique & Bases PHP</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        header {
+            text-align: center;
+            border-bottom: 4px solid #667eea;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .objectif {
+            background: #f8f9fa;
+            border-left: 5px solid #667eea;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        h2 {
+            color: #764ba2;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        h3 {
+            color: #667eea;
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            position: relative;
+        }
+        
+        .code-block::before {
+            content: "PHP";
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #667eea;
+            color: white;
+            padding: 5px 10px;
+            font-size: 0.8em;
+            border-radius: 0 8px 0 8px;
+        }
+        
+        .comment {
+            color: #75715e;
+            font-style: italic;
+        }
+        
+        .keyword {
+            color: #f92672;
+        }
+        
+        .string {
+            color: #e6db74;
+        }
+        
+        .function {
+            color: #66d9ef;
+        }
+        
+        .variable {
+            color: #a6e22e;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+        
+        tr:hover {
+            background: #f5f5f5;
+        }
+        
+        .td-section {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .td-section h3 {
+            color: #856404;
+            margin-top: 0;
+        }
+        
+        .projet {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .projet h3 {
+            color: #155724;
+            margin-top: 0;
+        }
+        
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 15px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+            color: #666;
+        }
+        
+        @media print {
+            body {
+                background: white;
+            }
+            .container {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 SEMAINE 1 : Algorithmique & Bases PHP</h1>
+            <p style="font-size: 1.2em; color: #666;">PHASE 1 : PHP NATIF (Semaines 1 → 5)</p>
+        </header>
+
+        <div class="objectif">
+            <h2>🎯 Objectif de la semaine</h2>
+            <p><strong>Maîtriser les bases de PHP + la logique métier</strong></p>
+            <p>Vous allez apprendre à programmer en PHP "pur" (sans framework) pour bien comprendre les fondements du langage et développer votre raisonnement algorithmique.</p>
+        </div>
+
+        <!-- SECTION 1: LES VARIABLES -->
+        <section class="section">
+            <h2>1️⃣ Les Variables</h2>
+            <p><strong>Qu'est-ce qu'une variable ?</strong><br>
+            C'est une boîte qui stocke une information en mémoire. En PHP, une variable commence toujours par le symbole <span class="highlight">$</span>.</p>
+            
+            <h3>Syntaxe de base :</h3>
+            <div class="code-block">
+<span class="comment">&lt;?php
+// Déclaration de variables avec différents types
+// Le symbole $ indique une variable en PHP</span>
+
+<span class="variable">$nom</span> = <span class="string">"Dupont"</span>;        <span class="comment">// Chaîne de caractères (string)</span>
+<span class="variable">$age</span> = <span class="keyword">25</span>;              <span class="comment">// Nombre entier (int)</span>
+<span class="variable">$prix</span> = <span class="keyword">19.99</span>;          <span class="comment">// Nombre décimal (float)</span>
+<span class="variable">$estActif</span> = <span class="keyword">true</span>;       <span class="comment">// Booléen (bool) - vrai ou faux</span>
+<span class="variable">$taille</span> = <span class="keyword">null</span>;         <span class="comment">// Valeur nulle</span>
+
+<span class="comment">// Affichage des variables</span>
+<span class="function">echo</span> <span class="string">"Bonjour "</span> . <span class="variable">$nom</span>;  <span class="comment">// Le point . permet de concaténer</span>
+?&gt;</span>
+            </div>
+
+            <h3>Règles importantes :</h3>
+            <ul>
+                <li>Une variable commence toujours par <strong>$</strong></li>
+                <li>Le nom est sensible à la casse (<code>$Nom</code> ≠ <code>$nom</code>)</li>
+                <li>Le nom doit commencer par une lettre ou un underscore</li>
+                <li>Nommez clairement vos variables pour la lisibilité</li>
+                <li>Pas d'espaces dans les noms de variables</li>
+            </ul>
+        </section>
+
+        <!-- SECTION 2: LES TYPES DE DONNÉES -->
+        <section class="section">
+            <h2>2️⃣ Les Types de Données</h2>
+            <p>PHP est un langage faiblement typé : le type est déterminé automatiquement selon la valeur assignée.</p>
+            
+            <h3>Tableau des types principaux :</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Exemple</th>
+                        <th>Description</th>
+                        <th>Valeur par défaut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>int</strong></td>
+                        <td><code>$age = 30;</code></td>
+                        <td>Nombre entier</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td><strong>string</strong></td>
+                        <td><code>$nom = "Alice";</code></td>
+                        <td>Chaîne de caractères</td>
+                        <td>"" (chaîne vide)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>float</strong></td>
+                        <td><code>$prix = 9.99;</code></td>
+                        <td>Nombre décimal</td>
+                        <td>0.0</td>
+                    </tr>
+                    <tr>
+                        <td><strong>bool</strong></td>
+                        <td><code>$valid = true;</code></td>
+                        <td>Booléen (vrai/faux)</td>
+                        <td>false</td>
+                    </tr>
+                    <tr>
+                        <td><strong>array</strong></td>
+                        <td><code>$notes = [15, 14];</code></td>
+                        <td>Tableau</td>
+                        <td>array()</td>
+                    </tr>
+                    <tr>
+                        <td><strong>null</strong></td>
+                        <td><code>$var = null;</code></td>
+                        <td>Aucune valeur</td>
+                        <td>null</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Exemples de tableaux :</h3>
+            <div class="code-block">
+<span class="comment">&lt;?php
+// Tableau indexé (indices numériques)</span>
+<span class="variable">$etudiants</span> = [<span class="string">"Alice"</span>, <span class="string">"Bob"</span>, <span class="string">"Charlie"</span>];
+<span class="function">echo</span> <span class="variable">$etudiants</span>[<span class="keyword">0</span>];  <span class="comment">// Affiche "Alice"</span>
+
+<span class="comment">// Tableau associatif (clés personnalisées)</span>
+<span class="variable">$notes</span> = [
+    <span class="string">"Alice"</span> =&gt; <span class="keyword">15</span>,
+    <span class="string">"Bob"</span> =&gt; <span class="keyword">14</span>,
+    <span class="string">"Charlie"</span> =&gt; <span class="keyword">16</span>
+];
+<span class="function">echo</span> <span class="variable">$notes</span>[<span class="string">"Alice"</span>];  <span class="comment">// Affiche 15</span>
+
+<span class="comment">// Tableau multidimensionnel</span>
+<span class="variable">$classe</span> = [
+    [<span class="string">"nom"</span> =&gt; <span class="string">"Alice"</span>, <span class="string">"note"</span> =&gt; <span class="keyword">15</span>],
+    [<span class="string">"nom"</span> =&gt; <span class="string">"Bob"</span>, <span class="string">"note"</span> =&gt; <span class="keyword">14</span>]
+];
+?&gt;</span>
+            </div>
+        </section>
+
+        <!-- SECTION 3: LES CONDITIONS -->
+        <section class="section">
+            <h2>3️⃣ Les Conditions</h2>
+            <p>Les structures conditionnelles permettent d'exécuter du code différemment selon certaines conditions.</p>
+
+            <h3>if / elseif / else :</h3>
+            <div class="code-block">
+<span class="comment">&lt;?php
+// Structure de base if/else</span>
+<span class="variable">$age</span> = <span class="keyword">17</span>;
+
+<span class="keyword">if</span> (<span class="variable">$age</span> &lt; <span class="keyword">18</span>) {
+    <span class="function">echo</span> <span class="string">"Vous êtes mineur"</span>;
+} <span class="keyword">elseif</span> (<span class="variable">$age</span> == <span class="keyword">18</span>) {
+    <span class="function">echo</span> <span class="string">"Tout juste majeur !"</span>;
+} <span class="keyword">else</span> {
+    <span class="function">echo</span> <span class="string">"Vous êtes majeur"</span>;
+}
+
+<span class="comment">// Opérateurs de comparaison :</span>
+<span class="comment">// == égal à</span>
+<span class="comment">// === identique à (type et valeur)</span>
+<span class="comment">// != différent de</span>
+<span class="comment">// &lt; inférieur à</span>
+<span class="comment">// &gt; supérieur à</span>
+<span class="comment">// &lt;= inférieur ou égal</span>
+<span class="comment">// &gt;= supérieur ou égal</span>
+
+<span class="comment">// Opérateurs logiques :</span>
+<span class="comment">// &amp;&amp; ET logique</span>
+<span class="comment">// || OU logique</span>
+<span class="comment">// ! NON logique</span>
+
+<span class="variable">$note</span> = <span class="keyword">15</span>;
+<span class="variable">$present</span> = <span class="keyword">true</span>;
+
+<span class="keyword">if</span> (<span class="variable">$note</span> &gt;= <span class="keyword">10</span> &amp;&amp; <span class="variable">$present</span> == <span class="keyword">true</span>) {
+    <span class="function">echo</span> <span class="string">"Admis !"</span>;
+}
+?&gt;</span>
+            </div>
+
+            <h3>switch / case :</h3>
+            <div class="code-block">
+<span class="comment">&lt;?php
+// Alternative à if/elseif pour tester une variable
+// contre plusieurs valeurs possibles</span>
+<span class="variable">$note</span> = <span class="keyword">15</span>;
+
+<span class="keyword">switch</span> (<span class="variable">$note</span>) {
+    <span class="keyword">case</span> <span class="keyword">20</span>:
+        <span class="function">echo</span> <span class="string">"Parfait !"</span>;
+        <span class="keyword">break</span>;  <span class="comment">// Important pour sortir du switch</span>
+    <span class="keyword">case</span> <span class="keyword">15</span>:
+        <span class="function">echo</span> <span class="string">"Très bien"</span>;
+        <span class="keyword">break</span>;
+    <span class="keyword">case</span> <span class="keyword">10</span>:
+        <span class="function">echo</span> <span class="string">"Passable"</span>;
+        <span class="keyword">break</span>;
+    <span class="keyword">default</span>:  <span class="comment">// Cas par défaut si aucune valeur ne correspond</span>
+        <span class="function">echo</span> <span class="string">"À améliorer"</span>;
+}
+?&gt;</span>
+            </div>
+        </section>
+
+        <!-- SECTION 4: LES BOUCLES -->
+        <section class="section">
+            <h2>4️⃣ Les Boucles</h2>
+            <p>Les boucles permettent de répéter un bloc de code plusieurs fois.</p>
+
+            <h3>Boucle for (quand on connaît le nombre de tours) :</h3>
+            <div class="code-block">
+<span class="comment">&lt;?php
+// Structure : for (initialisation; condition; incrément)
+// La boucle s'exécute tant que la condition est vraie</span>
+
+<span class="comment">// Exemple 1 : Compteur simple</span>
+<span class="keyword">for</span> (<span class="variable">$i</span> = <span class="keyword">1</span>; <span class="variable">$i</span> &lt;= <span class="keyword">5</span>; <span class="variable">$i</span>++) {
+    <span class="function">echo</span> <span class="string">"Tour numéro $i&lt;br&gt;"</span>;
+}
+
+<span class="comment">// Exemple 2 : Table de multiplication de 7</span>
+<span class="variable">$nombre</span> = <span class="keyword">7</span>;
+<span class="keyword">for</span> (<span class="variable">$i</span> = <span class="keyword">1</span>; <span class="variable">$i</span> &lt;= <span class="keyword">10</span>; <span class="variable">$i</span>++) {
+    <span class="variable">$resultat</span> = <span class="variable">$nombre</span> * <span class="variable">$i</span>;
+    <span class="function">echo</span> <span class="string">"$nombre x $i = $resultat&lt;br&gt;"</span>;
+}
+
+<span class="comment">// Incréments/décréments :</span>
+<span class="comment">// $i++  : incrémente de 1 (post-incrément)</span>
+<span class="comment">// ++$i  : incrémente de 1 (pré-incrément)</span>
+<span class="comment">// $i += 2 : incrémente de 2</span>
+<span class="comment">// $i--  : décrémente de 1</span>
+?&gt;</span>
+            </div>
+
+            <h3>Boucle while (tant qu'une condition est vraie) :</h3>
+            <div class="code-block">
+<span class="comment">&lt;?php
+// La condition est testée AVANT chaque tour</span>
+<span class="variable">$compteur</span> = <span class="keyword">0</span>;
+
+<span class="keyword">while</span> (<span class="variable">$compteur</span> &lt; <span class="keyword">5</span>) {
+    <span class="function">echo</span> <span class="string">"Tour n°$compteur&lt;br&gt;"</span>;
+    <span class="variable">$compteur</span>++;  <span class="comment">// Important : modifier la variable pour éviter une boucle infinie !</span>
+}
+
+<span class="comment">// Exemple pratique : somme des nombres de 1 à 10</span>
+<span class="variable">$somme</span> = <span class="keyword">0</span>;
+<span class="variable">$i</span> = <span class="keyword">1</span>;
+
+<span class="keyword">while</span> (<span class="variable">$i</span> &lt;= <span class="keyword">10</span>) {
+    <span class="variable">$somme</span> += <span class="variable">$i</span>;  <span class="comment">// Équivalent à $somme = $somme + $i</span>
+    <span class="variable">$i</span>++;
+}
+<span class="function">echo</span> <span class="string">"Somme : $somme"</span>;  <span class="comment">// Affiche 55</span>
+?&gt;</span>
+            </div>
+
+            <h3>Boucle do...while (exécution garantie au moins une fois) :</h3>
+            <div class="code-block">
+<span class="comment">&lt;?php
+// Le code est exécuté AVANT le test de la condition</span>
+<span class="variable">$i</span> = <span class="keyword">1</span>;
+
+<span class="keyword">do</span> {
+    <span class="function">echo</span> <span class="string">"Valeur : $i&lt;br&gt;"</span>;
+    <span class="variable">$i</span>++;
+} <span class="keyword">while</span> (<span class="variable">$i</span> &lt;= <span class="keyword">5</span>);
+
+<span class="comment">// Même si $i = 10 au départ, le code s'exécute une fois</span>
+?&gt;</span>
+            </div>
+
+            <h3>Boucle foreach (spéciale pour les tableaux) :</h3>
+            <div class="code-block">
+<span class="comment">&lt;?php
+// Parcours simplifié des tableaux</span>
+<span class="variable">$notes</span> = [<span class="keyword">15</span>, <span class="keyword">14</span>, <span class="keyword">16</span>, <span class="keyword">12</span>];
+
+<span class="comment">// Version simple</span>
+<span class="keyword">foreach</span> (<span class="variable">$notes</span> <span class="keyword">as</span> <span class="variable">$note</span>) {
+    <span class="function">echo</span> <span class="string">"Note : $note&lt;br&gt;"</span>;
+}
+
+<span class="comment">// Version avec clé/index</span>
+<span class="keyword">foreach</span> (<span class="variable">$notes</span> <span class="keyword">as</span> <span class="variable">$index</span> =&gt; <span class="variable">$note</span>) {
+    <span class="function">echo</span> <span class="string">"Note n°$index : $note&lt;br&gt;"</span>;
+}
+
+<span class="comment">// Avec tableau associatif</span>
+<span class="variable">$etudiant</span> = [<span class="string">"nom"</span> =&gt; <span class="string">"Alice"</span>, <span class="string">"age"</span> =&gt; <span class="keyword">20</span>];
+
+<span class="keyword">foreach</span> (<span class="variable">$etudiant</span> <span class="keyword">as</span> <span class="variable">$cle</span> =&gt; <span class="variable">$valeur</span>) {
+    <span class="function">echo</span> <span class="string">"$cle : $valeur&lt;br&gt;"</span>;
+}
+?&gt;</span>
+            </div>
+        </section>
+
+        <!-- SECTION 5: CONNEXION À LA BASE DE DONNÉES (PDO) -->
+        <section class="section">
+            <h2>5️⃣ Connexion à MySQL avec PDO</h2>
+            <p>PHP supporte deux extensions principales pour travailler avec des bases de données MySQL : <strong>MySQLi</strong> (MySQL Improved) et <strong>PDO</strong> (PHP Data Objects).</p>
+            
+            <p><strong>Devrais-je utiliser MySQLi ou PDO ?</strong><br>
+            PDO fonctionnera sur 12 systèmes de bases de données différents, tandis que MySQLi ne fonctionnera qu'avec les bases de données MySQL. Donc, si vous devez changer votre projet pour utiliser une autre base de données, PDO rend le processus facile. Les deux prennent en charge les requêtes préparées (Prepared Statements) qui sont importantes pour la sécurité des applications web.</p>
+
+            <h3>Ouvrir une connexion à MySQL (Syntaxe PDO) :</h3>
+            <div class="code-block">
+<span class="comment">&lt;?php
+$servername = "localhost";
+$username = "username";
+$password = "password";
+
+try {
+  $conn = new PDO("mysql:host=$servername;dbname=myDB", $username, $password);
+  // configurer le mode d'erreur PDO pour générer des exceptions
+  $conn-&gt;setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+  echo "Connected successfully";
+} catch(PDOException $e) {
+  echo "Connection failed: " . $e-&gt;getMessage();
+}
+?&gt;</span>
+            </div>
+
+            <p><em>Astuce : Un grand avantage de PDO est qu'il possède une classe d'exception pour gérer tous les problèmes pouvant survenir dans notre base de données. Si une exception est levée à l'intérieur du bloc try{ }, le script arrête son exécution et va directement au premier bloc catch(){ }.</em></p>
+        </section>
+
+        <!-- TRAVAUX DIRIGÉS -->
+        <section class="section">
+            <h2>🛠️ TRAVAUX DIRIGÉS (TD)</h2>
+
+            <!-- TD 1 -->
+            <div class="td-section">
+                <h3>✅ TD 1 : Vérifier l'âge (mineur/majeur)</h3>
+                <p><strong>Objectif :</strong> Utiliser les structures conditionnelles</p>
+                <p><strong>Consigne :</strong> Créez un programme qui détermine si une personne est mineure ou majeure en fonction de son âge.</p>
+                
+                <h4>Solution de base :</h4>
+                <div class="code-block">
+<span class="comment">&lt;?php
+// TD 1 : Vérification de la majorité
+// Objectif : Utiliser if/else</span>
+
+<span class="variable">$age</span> = <span class="keyword">16</span>;  <span class="comment">// Vous pouvez modifier cette valeur pour tester</span>
+
+<span class="keyword">if</span> (<span class="variable">$age</span> &gt;= <span class="keyword">18</span>) {
+    <span class="function">echo</span> <span class="string">"Vous êtes majeur(e)"</span>;
+} <span class="keyword">else</span> {
+    <span class="function">echo</span> <span class="string">"Vous êtes mineur(e)"</span>;
+}
+?&gt;</span>
+                </div>
+
+                <h4>Solution avancée (avec plus de catégories) :</h4>
+                <div class="code-block">
+<span class="comment">&lt;?php
+// Version améliorée avec plusieurs catégories d'âge</span>
+<span class="variable">$age</span> = <span class="keyword">25</span>;
+
+<span class="keyword">if</span> (<span class="variable">$age</span> &lt; <span class="keyword">11</span>) {
+    <span class="function">echo</span> <span class="string">"Catégorie : Enfant"</span>;
+} <span class="keyword">elseif</span> (<span class="variable">$age</span> &lt; <span class="keyword">18</span>) {
+    <span class="function">echo</span> <span class="string">"Catégorie : Adolescent"</span>;
+} <span class="keyword">elseif</span> (<span class="variable">$age</span> &lt; <span class="keyword">60</span>) {
+    <span class="function">echo</span> <span class="string">"Catégorie : Adulte"</span>;
+} <span class="keyword">else</span> {
+    <span class="function">echo</span> <span class="string">"Catégorie : Senior"</span>;
+}
+
+<span class="comment">// Vérification supplémentaire</span>
+<span class="keyword">if</span> (<span class="variable">$age</span> &gt;= <span class="keyword">18</span>) {
+    <span class="function">echo</span> <span class="string">"&lt;br&gt;✓ Vous pouvez voter"</span>;
+    
+    <span class="keyword">if</span> (<span class="variable">$age</span> &gt;= <span class="keyword">21</span>) {
+        <span class="function">echo</span> <span class="string">"&lt;br&gt;✓ Vous pouvez conduire sans permis probatoire"</span>;
+    }
+}
+?&gt;</span>
+                </div>
+
+                <h4>Pour aller plus loin :</h4>
+                <ul>
+                    <li>Ajouter la vérification de l'âge légal pour conduire (18 ans)</li>
+                    <li>Ajouter la catégorie d'âge (enfant, ado, adulte, senior)</li>
+                    <li>Vérifier si la personne peut voter (18 ans)</li>
+                    <li>Afficher un message personnalisé selon l'âge exact</li>
+                </ul>
+            </div>
+
+            <!-- TD 2 -->
+            <div class="td-section">
+                <h3>✅ TD 2 : Table de multiplication</h3>
+                <p><strong>Objectif :</strong> Maîtriser les boucles for</p>
+                <p><strong>Consigne :</strong> Affichez la table de multiplication d'un nombre donné (de 1 à 10).</p>
+                
+                <h4>Solution de base :</h4>
+                <div class="code-block">
+<span class="comment">&lt;?php
+// TD 2 : Table de multiplication
+// Objectif : Utiliser une boucle for</span>
+
+<span class="variable">$nombre</span> = <span class="keyword">7</span>;  <span class="comment">// Nombre dont on veut la table</span>
+
+<span class="keyword">for</span> (<span class="variable">$i</span> = <span class="keyword">1</span>; <span class="variable">$i</span> &lt;= <span class="keyword">10</span>; <span class="variable">$i</span>++) {
+    <span class="variable">$resultat</span> = <span class="variable">$nombre</span> * <span class="variable">$i</span>;
+    <span class="function">echo</span> <span class="string">"$nombre x $i = $resultat&lt;br&gt;"</span>;
+}
+?&gt;</span>
+                </div>
+
+                <h4>Solution avancée (tableau complet) :</h4>
+                <div class="code-block">
+<span class="comment">&lt;?php
+// Table de multiplication complète (1 à 10)</span>
+<span class="function">echo</span> <span class="string">"&lt;table border='1' style='border-collapse: collapse;'&gt;"</span>;
+
+<span class="keyword">for</span> (<span class="variable">$i</span> = <span class="keyword">1</span>; <span class="variable">$i</span> &lt;= <span class="keyword">10</span>; <span class="variable">$i</span>++) {
+    <span class="function">echo</span> <span class="string">"&lt;tr&gt;"</span>;
+    
+    <span class="keyword">for</span> (<span class="variable">$j</span> = <span class="keyword">1</span>; <span class="variable">$j</span> &lt;= <span class="keyword">10</span>; <span class="variable">$j</span>++) {
+        <span class="variable">$produit</span> = <span class="variable">$i</span> * <span class="variable">$j</span>;
+        <span class="function">echo</span> <span class="string">"&lt;td style='padding: 5px; text-align: center;'&gt;$produit&lt;/td&gt;"</span>;
+    }
+    
+    <span class="function">echo</span> <span class="string">"&lt;/tr&gt;"</span>;
+}
+
+<span class="function">echo</span> <span class="string">"&lt;/table&gt;"</span>;
+?&gt;</span>
+                </div>
+
+                <h4>Challenge :</h4>
+                <ul>
+                    <li>Créer un tableau de multiplication complet (1 à 10)</li>
+                    <li>Afficher uniquement les tables de 1 à 5</li>
+                    <li>Demander à l'utilisateur quel nombre il veut (avec un formulaire)</li>
+                    <li>Afficher la table dans un tableau HTML stylisé</li>
+                </ul>
+            </div>
+
+            <!-- TD 3 -->
+            <div class="td-section">
+                <h3>✅ TD 3 : Calcul de moyenne</h3>
+                <p><strong>Objectif :</strong> Manipuler les tableaux et faire des calculs</p>
+                <p><strong>Consigne :</strong> Calculez la moyenne d'un ensemble de notes et affichez la mention correspondante.</p>
+                
+                <h4>Solution de base :</h4>
+                <div class="code-block">
+<span class="comment">&lt;?php
+// TD 3 : Calcul de moyenne
+// Objectif : Utiliser les tableaux et les boucles</span>
+
+<span class="variable">$notes</span> = [<span class="keyword">15</span>, <span class="keyword">14</span>, <span class="keyword">16</span>, <span class="keyword">12</span>, <span class="keyword">18</span>];
+<span class="variable">$somme</span> = <span class="keyword">0</span>;
+
+<span class="comment">// Méthode 1 : Avec une boucle foreach</span>
+<span class="keyword">foreach</span> (<span class="variable">$notes</span> <span class="keyword">as</span> <span class="variable">$note</span>) {
+    <span class="variable">$somme</span> += <span class="variable">$note</span>;  <span class="comment">// Additionne chaque note</span>
+}
+
+<span class="comment">// Calcul de la moyenne</span>
+<span class="variable">$nombreNotes</span> = <span class="function">count</span>(<span class="variable">$notes</span>);  <span class="comment">// Compte le nombre de notes</span>
+<span class="variable">$moyenne</span> = <span class="variable">$somme</span> / <span class="variable">$nombreNotes</span>;
+
+<span class="comment">// Affichage du résultat</span>
+<span class="function">echo</span> <span class="string">"Moyenne : "</span> . <span class="function">number_format</span>(<span class="variable">$moyenne</span>, <span class="keyword">2</span>) . <span class="string">"/20&lt;br&gt;"</span>;
+
+<span class="comment">// Attribution de la mention</span>
+<span class="keyword">if</span> (<span class="variable">$moyenne</span> &gt;= <span class="keyword">16</span>) {
+    <span class="variable">$mention</span> = <span class="string">"Très Bien"</span>;
+} <span class="keyword">elseif</span> (<span class="variable">$moyenne</span> &gt;= <span class="keyword">14</span>) {
+    <span class="variable">$mention</span> = <span class="string">"Bien"</span>;
+} <span class="keyword">elseif</span> (<span class="variable">$moyenne</span> &gt;= <span class="keyword">12</span>) {
+    <span class="variable">$mention</span> = <span class="string">"Assez Bien"</span>;
+} <span class="keyword">elseif</span> (<span class="variable">$moyenne</span> &gt;= <span class="keyword">10</span>) {
+    <span class="variable">$mention</span> = <span class="string">"Passable"</span>;
+} <span class="keyword">else</span> {
+    <span class="variable">$mention</span> = <span class="string">"Ajourné"</span>;
+}
+
+<span class="function">echo</span> <span class="string">"Mention : "</span> . <span class="variable">$mention</span>;
+?&gt;</span>
+                </div>
+
+                <h4>Solution avancée (avec détails) :</h4>
+                <div class="code-block">
+<span class="comment">&lt;?php
+// Version complète avec affichage détaillé</span>
+<span class="variable">$notes</span> = [
+    <span class="string">"Mathématiques"</span> =&gt; <span class="keyword">15</span>,
+    <span class="string">"PHP"</span> =&gt; <span class="keyword">14</span>,
+    <span class="string">"Anglais"</span> =&gt; <span class="keyword">12</span>,
+    <span class="string">"Base de données"</span> =&gt; <span class="keyword">16</span>
+];
+
+<span class="variable">$somme</span> = <span class="keyword">0</span>;
+<span class="variable">$totalCoeff</span> = <span class="keyword">0</span>;
+
+<span class="function">echo</span> <span class="string">"&lt;h2&gt;Relevé de notes&lt;/h2&gt;"</span>;
+<span class="function">echo</span> <span class="string">"&lt;table border='1' style='border-collapse: collapse; width: 100%;'&gt;"</span>;
+<span class="function">echo</span> <span class="string">"&lt;tr&gt;&lt;th&gt;Matière&lt;/th&gt;&lt;th&gt;Note&lt;/th&gt;&lt;/tr&gt;"</span>;
+
+<span class="keyword">foreach</span> (<span class="variable">$notes</span> <span class="keyword">as</span> <span class="variable">$matiere</span> =&gt; <span class="variable">$note</span>) {
+    <span class="variable">$somme</span> += <span class="variable">$note</span>;
+    <span class="variable">$totalCoeff</span>++;
+    <span class="function">echo</span> <span class="string">"&lt;tr&gt;&lt;td&gt;"</span> . <span class="variable">$matiere</span> . <span class="string">"&lt;/td&gt;&lt;td&gt;"</span> . <span class="variable">$note</span> . <span class="string">"/20&lt;/td&gt;&lt;/tr&gt;"</span>;
+}
+
+<span class="variable">$moyenne</span> = <span class="variable">$somme</span> / <span class="variable">$totalCoeff</span>;
+
+<span class="function">echo</span> <span class="string">"&lt;tr style='font-weight: bold; background: #f0f0f0;'&gt;"</span>;
+<span class="function">echo</span> <span class="string">"&lt;td&gt;MOYENNE GÉNÉRALE&lt;/td&gt;&lt;td&gt;"</span> . <span class="function">number_format</span>(<span class="variable">$moyenne</span>, <span class="keyword">2</span>) . <span class="string">"/20&lt;/td&gt;"</span>;
+<span class="function">echo</span> <span class="string">"&lt;/tr&gt;&lt;/table&gt;"</span>;
+
+<span class="comment">// Validation du semestre</span>
+<span class="keyword">if</span> (<span class="variable">$moyenne</span> &gt;= <span class="keyword">10</span>) {
+    <span class="function">echo</span> <span class="string">"&lt;p style='color: green;'&gt;✅ Semestre VALIDÉ&lt;/p&gt;"</span>;
+} <span class="keyword">else</span> {
+    <span class="function">echo</span> <span class="string">"&lt;p style='color: red;'&gt;❌ Semestre NON VALIDÉ&lt;/p&gt;"</span>;
+}
+?&gt;</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- MINI PROJET -->
+        <section class="section">
+            <h2>🚀 MINI PROJET : Calculateur de notes</h2>
+            
+            <div class="projet">
+                <h3>📋 Cahier des charges</h3>
+                <p>Créez un programme PHP complet qui :</p>
+                <ol>
+                    <li><strong>Demande les notes</strong> d'un étudiant (au moins 3 matières différentes)</li>
+                    <li><strong>Calcule la moyenne générale</strong> (éventuellement avec coefficients)</li>
+                    <li><strong>Affiche la mention</strong> obtenue selon le barème :</li>
+                    <ul>
+                        <li>16-20 : Très Bien</li>
+                        <li>14-15.99 : Bien</li>
+                        <li>12-13.99 : Assez Bien</li>
+                        <li>10-11.99 : Passable</li>
+                        <li>0-9.99 : Ajourné</li>
+                    </ul>
+                    <li><strong>Indique si l'étudiant valide</strong> son semestre (moyenne ≥ 10)</li>
+                    <li><strong>Affiche un bulletin complet</strong> et bien présenté</li>
+                </ol>
+            </div>
+
+            <h3>💡 Exemple de structure complète :</h3>
+            <div class="code-block">
+<span class="comment">&lt;?php
+/**
+ * MINI PROJET - Calculateur de notes
+ * Semaine 1 - Algorithmique & Bases PHP
+ * 
+ * Objectifs :
+ * - Manipuler les variables et tableaux
+ * - Utiliser les structures conditionnelles
+ * - Maîtriser les boucles
+ * - Effectuer des calculs mathématiques
+ */</span>
+
+<span class="comment">// 1. DÉCLARATION DES DONNÉES</span>
+<span class="variable">$nomEtudiant</span> = <span class="string">"Alice Martin"</span>;
+<span class="variable">$classe</span> = <span class="string">"Développement Web - Niveau 1"</span>;
+
+<span class="comment">// Tableau des notes (matière =&gt; note)</span>
+<span class="variable">$notes</span> = [
+    <span class="string">"Mathématiques"</span> =&gt; <span class="keyword">15</span>,
+    <span class="string">"PHP Natif"</span> =&gt; <span class="keyword">14</span>,
+    <span class="string">"Anglais Technique"</span> =&gt; <span class="keyword">12</span>,
+    <span class="string">"Base de données"</span> =&gt; <span class="keyword">16</span>,
+    <span class="string">"Algorithmique"</span> =&gt; <span class="keyword">13</span>
+];
+
+<span class="comment">// 2. CALCUL DE LA MOYENNE</span>
+<span class="variable">$sommeNotes</span> = <span class="keyword">0</span>;
+<span class="variable">$nombreMatières</span> = <span class="function">count</span>(<span class="variable">$notes</span>);
+
+<span class="comment">// Parcours du tableau pour additionner toutes les notes</span>
+<span class="keyword">foreach</span> (<span class="variable">$notes</span> <span class="keyword">as</span> <span class="variable">$matiere</span> =&gt; <span class="variable">$note</span>) {
+    <span class="variable">$sommeNotes</span> += <span class="variable">$note</span>;
+}
+
+<span class="comment">// Calcul de la moyenne</span>
+<span class="variable">$moyenneGenerale</span> = <span class="variable">$sommeNotes</span> / <span class="variable">$nombreMatières</span>;
+
+<span class="comment">// Arrondir à 2 décimales</span>
+<span class="variable">$moyenneGenerale</span> = <span class="function">round</span>(<span class="variable">$moyenneGenerale</span>, <span class="keyword">2</span>);
+
+<span class="comment">// 3. DÉTERMINATION DE LA MENTION</span>
+<span class="keyword">if</span> (<span class="variable">$moyenneGenerale</span> &gt;= <span class="keyword">16</span>) {
+    <span class="variable">$mention</span> = <span class="string">"Très Bien"</span>;
+    <span class="variable">$couleurMention</span> = <span class="string">"#28a745"</span>;  <span class="comment">// Vert</span>
+} <span class="keyword">elseif</span> (<span class="variable">$moyenneGenerale</span> &gt;= <span class="keyword">14</span>) {
+    <span class="variable">$mention</span> = <span class="string">"Bien"</span>;
+    <span class="variable">$couleurMention</span> = <span class="string">"#17a2b8"</span>;  <span class="comment">// Bleu</span>
+} <span class="keyword">elseif</span> (<span class="variable">$moyenneGenerale</span> &gt;= <span class="keyword">12</span>) {
+    <span class="variable">$mention</span> = <span class="string">"Assez Bien"</span>;
+    <span class="variable">$couleurMention</span> = <span class="string">"#ffc107"</span>;  <span class="comment">// Jaune</span>
+} <span class="keyword">elseif</span> (<span class="variable">$moyenneGenerale</span> &gt;= <span class="keyword">10</span>) {
+    <span class="variable">$mention</span> = <span class="string">"Passable"</span>;
+    <span class="variable">$couleurMention</span> = <span class="string">"#fd7e14"</span>;  <span class="comment">// Orange</span>
+} <span class="keyword">else</span> {
+    <span class="variable">$mention</span> = <span class="string">"Ajourné"</span>;
+    <span class="variable">$couleurMention</span> = <span class="string">"#dc3545"</span>;  <span class="comment">// Rouge</span>
+}
+
+<span class="comment">// 4. VÉRIFICATION DE LA VALIDATION</span>
+<span class="variable">$semestreValide</span> = (<span class="variable">$moyenneGenerale</span> &gt;= <span class="keyword">10</span>) ? <span class="keyword">true</span> : <span class="keyword">false</span>;
+
+<span class="comment">// 5. AFFICHAGE DU BULLETIN</span>
+<span class="function">echo</span> <span class="string">"&lt;!DOCTYPE html&gt;"</span>;
+<span class="function">echo</span> <span class="string">"&lt;html&gt;&lt;head&gt;"</span>;
+<span class="function">echo</span> <span class="string">"&lt;title&gt;Bulletin de Notes&lt;/title&gt;"</span>;
+<span class="function">echo</span> <span class="string">"&lt;style&gt;
+    body { font-family: Arial; margin: 40px; background: #f5f5f5; }
+    .bulletin { 
+        background: white; 
+        padding: 30px; 
+        max-width: 800px; 
+        margin: 0 auto;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 { color: #333; text-align: center; border-bottom: 3px solid #667eea; padding-bottom: 10px; }
+    .info { background: #f8f9fa; padding: 15px; margin: 20px 0; border-radius: 5px; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+    th { background: #667eea; color: white; }
+    tr:hover { background: #f5f5f5; }
+    .moyenne { 
+        font-size: 1.2em; 
+        font-weight: bold; 
+        background: #f0f0f0;
+    }
+    .mention { 
+        color: "</span> . <span class="variable">$couleurMention</span> . <span class="string">"; 
+        font-size: 1.3em; 
+        font-weight: bold;
+        text-align: center;
+        padding: 15px;
+        margin: 20px 0;
+        border: 2px solid "</span> . <span class="variable">$couleurMention</span> . <span class="string">";
+        border-radius: 5px;
+    }
+    .validation { 
+        text-align: center; 
+        font-size: 1.5em; 
+        padding: 20px;
+        margin-top: 20px;
+    }
+    .valide { color: #28a745; }
+    .non-valide { color: #dc3545; }
+&lt;/style&gt;"</span>;
+<span class="function">echo</span> <span class="string">"&lt;/head&gt;&lt;body&gt;"</span>;
+
+<span class="function">echo</span> <span class="string">"&lt;div class='bulletin'&gt;"</span>;
+<span class="function">echo</span> <span class="string">"&lt;h1&gt;📚 BULLETIN DE NOTES&lt;/h1&gt;"</span>;
+
+<span class="function">echo</span> <span class="string">"&lt;div class='info'&gt;"</span>;
+<span class="function">echo</span> <span class="string">"&lt;p&gt;&lt;strong&gt;Étudiant :&lt;/strong&gt; "</span> . <span class="variable">$nomEtudiant</span> . <span class="string">"&lt;/p&gt;"</span>;
+<span class="function">echo</span> <span class="string">"&lt;p&gt;&lt;strong&gt;Classe :&lt;/strong&gt; "</span> . <span class="variable">$classe</span> . <span class="string">"&lt;/p&gt;"</span>;
+<span class="function">echo</span> <span class="string">"&lt;/div&gt;"</span>;
+
+<span class="function">echo</span> <span class="string">"&lt;table&gt;"</span>;
+<span class="function">echo</span> <span class="string">"&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Matière&lt;/th&gt;&lt;th&gt;Note sur 20&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;"</span>;
+<span class="function">echo</span> <span class="string">"&lt;tbody&gt;"</span>;
+
+<span class="comment">// Affichage de chaque matière</span>
+<span class="keyword">foreach</span> (<span class="variable">$notes</span> <span class="keyword">as</span> <span class="variable">$matiere</span> =&gt; <span class="variable">$note</span>) {
+    <span class="function">echo</span> <span class="string">"&lt;tr&gt;"</span>;
+    <span class="function">echo</span> <span class="string">"&lt;td&gt;"</span> . <span class="variable">$matiere</span> . <span class="string">"&lt;/td&gt;"</span>;
+    <span class="function">echo</span> <span class="string">"&lt;td&gt;"</span> . <span class="variable">$note</span> . <span class="string">"/20&lt;/td&gt;"</span>;
+    <span class="function">echo</span> <span class="string">"&lt;/tr&gt;"</span>;
+}
+
+<span class="function">echo</span> <span class="string">"&lt;/tbody&gt;"</span>;
+<span class="function">echo</span> <span class="string">"&lt;tfoot&gt;"</span>;
+<span class="function">echo</span> <span class="string">"&lt;tr class='moyenne'&gt;"</span>;
+<span class="function">echo</span> <span class="string">"&lt;td&gt;MOYENNE GÉNÉRALE&lt;/td&gt;"</span>;
+<span class="function">echo</span> <span class="string">"&lt;td&gt;"</span> . <span class="variable">$moyenneGenerale</span> . <span class="string">"/20&lt;/td&gt;"</span>;
+<span class="function">echo</span> <span class="string">"&lt;/tr&gt;"</span>;
+<span class="function">echo</span> <span class="string">"&lt;/tfoot&gt;"</span>;
+<span class="function">echo</span> <span class="string">"&lt;/table&gt;"</span>;
+
+<span class="function">echo</span> <span class="string">"&lt;div class='mention'&gt;"</span>;
+<span class="function">echo</span> <span class="string">"🏆 Mention : "</span> . <span class="variable">$mention</span>;
+<span class="function">echo</span> <span class="string">"&lt;/div&gt;"</span>;
+
+<span class="function">echo</span> <span class="string">"&lt;div class='validation "</span>;
+<span class="keyword">if</span> (<span class="variable">$semestreValide</span>) {
+    <span class="function">echo</span> <span class="string">"valide'&gt;✅ Semestre VALIDÉ"</span>;
+} <span class="keyword">else</span> {
+    <span class="function">echo</span> <span class="string">"non-valide'&gt;❌ Semestre NON VALIDÉ"</span>;
+}
+<span class="function">echo</span> <span class="string">"&lt;/div&gt;"</span>;
+
+<span class="function">echo</span> <span class="string">"&lt;/div&gt;"</span>;  <span class="comment">// Fin .bulletin</span>
+<span class="function">echo</span> <span class="string">"&lt;/body&gt;&lt;/html&gt;"</span>;
+?&gt;</span>
+            </div>
+
+            <h3>🎯 Critères d'évaluation du mini projet :</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Critère</th>
+                        <th>Points</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Variables et types</strong></td>
+                        <td>2 pts</td>
+                        <td>Bonne utilisation des variables et types de données</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tableaux</strong></td>
+                        <td>3 pts</td>
+                        <td>Manipulation correcte des tableaux</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Conditions</strong></td>
+                        <td>3 pts</td>
+                        <td>Structures if/elseif/else bien utilisées</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Boucles</strong></td>
+                        <td>3 pts</td>
+                        <td>Utilisation appropriée des boucles</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Calculs</strong></td>
+                        <td>2 pts</td>
+                        <td>Calculs mathématiques corrects</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Affichage</strong></td>
+                        <td>2 pts</td>
+                        <td>Présentation claire et lisible</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Code propre</strong></td>
+                        <td>2 pts</td>
+                        <td>Commentaires, indentation, noms de variables</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Fonctionnalités bonus</strong></td>
+                        <td>3 pts</td>
+                        <td>Coefficients, affichage HTML stylisé, etc.</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr style="font-weight: bold; background: #667eea; color: white;">
+                        <td>TOTAL</td>
+                        <td>20 pts</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </section>
+
+        <!-- CONSEILS -->
+        <section class="section">
+            <h2>💡 Conseils pour réussir</h2>
+            <ol>
+                <li><strong>Testez souvent</strong> votre code après chaque modification</li>
+                <li><strong>Commentez</strong> votre code pour le comprendre plus tard</li>
+                <li><strong>Nommez bien</strong> vos variables (<code>$moyenne</code> pas <code>$m</code>)</li>
+                <li><strong>Vérifiez les erreurs</strong> PHP (activez <code>error_reporting(E_ALL)</code>)</li>
+                <li><strong>Pratiquez</strong> en dehors des TD pour progresser</li>
+                <li><strong>Relisez</strong> votre code avant de le rendre</li>
+                <li><strong>Expérimentez</strong> en modifiant les valeurs pour voir ce qui se passe</li>
+            </ol>
+
+            <h3>Outils recommandés :</h3>
+            <ul>
+                <li><strong>Éditeur de code :</strong> VS Code, PHPStorm, ou Sublime Text</li>
+                <li><strong>Environnement local :</strong> XAMPP, WAMP, ou MAMP</li>
+                <li><strong>Navigateur :</strong> Chrome ou Firefox avec les outils de développement</li>
+                <li><strong>Documentation :</strong> <a href="https://www.php.net/manual/fr/" target="_blank">php.net/manual/fr</a></li>
+            </ul>
+        </section>
+
+        <!-- RESSOURCES -->
+        <section class="section">
+            <h2>📖 Ressources complémentaires</h2>
+            <ul>
+                <li><strong>Documentation officielle PHP :</strong> <a href="https://www.php.net/manual/fr/" target="_blank">php.net/manual/fr</a></li>
+                <li><strong>Exercices interactifs :</strong> PHPExercices.com</li>
+                <li><strong>Tutoriels vidéo :</strong> OpenClassrooms - Apprenez à programmer en PHP</li>
+                <li><strong>Communauté :</strong> Stack Overflow (pour poser des questions)</li>
+                <li><strong>Validation de code :</strong> PHPLint pour vérifier la syntaxe</li>
+            </ul>
+        </section>
+
+        <footer>
+            <p><strong>SEMAINE 1 : Algorithmique & Bases PHP</strong></p>
+            <p>PHASE 1 : PHP NATIF (Semaines 1 → 5)</p>
+            <p style="margin-top: 20px; font-style: italic;">"La pratique régulière est la clé de la réussite en programmation !"</p>
+            <p style="margin-top: 10px; color: #667eea; font-weight: bold;">Bon courage pour cette première semaine ! 🚀</p>
+        </footer>
+    </div>
+</body>
+</html>

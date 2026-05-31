@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { Inter, Syne, Noto_Sans_Arabic } from 'next/font/google';
-import Script from 'next/script';
 import { LocaleProvider } from '@/context/LocaleContext';
 import { ThemeProvider } from '@/context/ThemeContext';
+import { AuthProvider } from '@/context/AuthContext';
 import './globals.css';
 
 const inter = Inter({
@@ -43,12 +43,9 @@ export default function RootLayout({
       >
         <LocaleProvider>
           <ThemeProvider>
-            {children}
-            {/* Pyodide for Python execution in browser */}
-            <Script
-              src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"
-              strategy="lazyOnload"
-            />
+            <AuthProvider>
+              {children}
+            </AuthProvider>
           </ThemeProvider>
         </LocaleProvider>
       </body>

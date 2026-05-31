@@ -13,10 +13,11 @@ const COURSE_NAMES: Record<string, Record<string, string>> = {
   python: { fr: 'Programmation en Python', en: 'Programming in Python', ar: 'البرمجة بـ Python' },
   n8n: { fr: 'Automatisation avec n8n', en: 'Automation with n8n', ar: 'الأتمتة بـ n8n' },
   openclaw: { fr: 'Maitrise de l\'IA OpenClaw', en: 'Mastering OpenClaw AI', ar: 'إتقان الذكاء الاصطناعي OpenClaw' },
+  architecture: { fr: "Architecture et Système d'Exploitation", en: 'Architecture and Operating Systems', ar: 'بنية الحاسوب ونظم التشغيل' },
 };
 
 const COURSE_SHORT: Record<string, string> = {
-  php: 'PHP', python: 'Python', n8n: 'n8n', openclaw: 'OpenClaw',
+  php: 'PHP', python: 'Python', n8n: 'n8n', openclaw: 'OpenClaw', architecture: 'ARCH',
 };
 
 function generateCertReference(slug: string): string {

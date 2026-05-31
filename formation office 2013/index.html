@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support de Cours - Introduction aux Outils Bureautiques</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2b579a;
+            --secondary-color: #7cb9e8;
+            --accent-color: #f25022;
+            --success-color: #7fba00;
+            --dark-color: #1e1e1e;
+            --light-color: #f3f3f3;
+            --white: #ffffff;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-hover: 0 8px 15px rgba(0,0,0,0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-color);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            padding: 1rem 0;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark-color);
+            font-weight: 600;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-color);
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 100px auto 0;
+            padding: 2rem;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-hover);
+            text-align: center;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        .badge-container {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+
+        .badge {
+            background: var(--primary-color);
+            color: var(--white);
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: var(--light-color);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        /* Sections */
+        .section {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            animation: fadeInUp 0.8s ease;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            padding: 1rem;
+            background: var(--light-color);
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .section-header:hover {
+            background: var(--primary-color);
+            color: var(--white);
+        }
+
+        .section-icon {
+            font-size: 2rem;
+            color: var(--primary-color);
+        }
+
+        .section-header:hover .section-icon {
+            color: var(--white);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .section-content {
+            display: none;
+            padding: 1rem;
+        }
+
+        .section-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        /* Cards */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .card {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--white);
+            padding: 1.5rem;
+            border-radius: 10px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .card h3 {
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--white);
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--light-color);
+        }
+
+        th {
+            background: var(--primary-color);
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: var(--light-color);
+        }
+
+        /* Accordion */
+        .accordion {
+            margin: 1rem 0;
+        }
+
+        .accordion-item {
+            border: 1px solid var(--light-color);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            padding: 1rem;
+            background: var(--light-color);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .accordion-header:hover {
+            background: var(--secondary-color);
+            color: var(--white);
+        }
+
+        .accordion-content {
+            padding: 0 1rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+
+        .accordion-content.active {
+            padding: 1rem;
+            max-height: 500px;
+        }
+
+        /* Quiz */
+        .quiz-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+            border-radius: 15px;
+            color: var(--white);
+            margin: 2rem 0;
+        }
+
+        .quiz-question {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .quiz-option {
+            padding: 1rem;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quiz-option:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateX(5px);
+        }
+
+        .quiz-option.correct {
+            background: var(--success-color);
+            border-color: var(--white);
+        }
+
+        .quiz-option.incorrect {
+            background: var(--accent-color);
+            border-color: var(--white);
+        }
+
+        .quiz-result {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(255,255,255,0.2);
+            border-radius: 8px;
+            display: none;
+        }
+
+        /* Shortcuts Grid */
+        .shortcuts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .shortcut-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem;
+            background: var(--light-color);
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+            transition: transform 0.2s;
+        }
+
+        .shortcut-item:hover {
+            transform: translateX(5px);
+            background: var(--primary-color);
+            color: var(--white);
+        }
+
+        .shortcut-key {
+            background: var(--dark-color);
+            color: var(--white);
+            padding: 0.3rem 0.8rem;
+            border-radius: 5px;
+            font-family: monospace;
+            font-weight: 700;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            background: var(--primary-color);
+            color: var(--white);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            margin: 0.5rem;
+        }
+
+        .btn:hover {
+            background: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .btn-secondary {
+            background: var(--success-color);
+        }
+
+        /* Checklist */
+        .checklist {
+            list-style: none;
+            margin: 1rem 0;
+        }
+
+        .checklist-item {
+            padding: 0.8rem;
+            margin: 0.5rem 0;
+            background: var(--light-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .checklist-item:hover {
+            background: var(--secondary-color);
+            color: var(--white);
+        }
+
+        .checklist-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .checklist-item.checked {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+            
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .section {
+                padding: 1rem;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .navbar, .btn, .quiz-container {
+                display: none;
+            }
+            
+            .section {
+                break-inside: avoid;
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+            
+            .section-content {
+                display: block !important;
+            }
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            border-bottom: 2px dotted var(--primary-color);
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--dark-color);
+            color: var(--white);
+            text-align: center;
+            border-radius: 6px;
+            padding: 0.5rem;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--light-color);
+        }
+
+        .tab {
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .tab.active {
+            color: var(--primary-color);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        /* Highlight */
+        .highlight {
+            background: linear-gradient(120deg, #ffeaa7 0%, #ffeaa7 100%);
+            background-repeat: no-repeat;
+            background-size: 100% 40%;
+            background-position: 0 88%;
+            padding: 0 0.2rem;
+            font-weight: 600;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+        }
+
+        .info-box {
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-graduation-cap"></i>
+                Formation Bureautique
+            </div>
+            <ul class="nav-links">
+                <li><a href="#intro">Introduction</a></li>
+                <li><a href="#office">Office 2013</a></li>
+                <li><a href="#word">Word</a></li>
+                <li><a href="#outlook">Outlook</a></li>
+                <li><a href="#quiz">Quiz</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Hero Section -->
+        <section class="hero">
+            <h1><i class="fas fa-laptop-code"></i> Introduction aux Outils Bureautiques</h1>
+            <p class="hero-subtitle">Séance 1 - 2H Théorie | Microsoft Office 2013</p>
+            <div class="badge-container">
+                <div class="badge"><i class="fas fa-clock"></i> 2 Heures</div>
+                <div class="badge"><i class="fas fa-users"></i> Niveau Débutant</div>
+                <div class="badge"><i class="fas fa-certificate"></i> Certification</div>
+            </div>
+        </section>
+
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-label">
+                <span>Progression du cours</span>
+                <span id="progress-text">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+
+        <!-- Section 1: Introduction -->
+        <section class="section" id="intro">
+            <div class="section-header" onclick="toggleSection(this)">
+                <i class="fas fa-info-circle section-icon"></i>
+                <h2 class="section-title">1. Introduction Générale</h2>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="section-content active">
+                <h3>Objectifs Pédagogiques</h3>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <span>Identifier les principaux outils bureautiques</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <span>Comprendre l'utilité de chaque logiciel</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <span>Naviguer dans l'interface Office 2013</span>
+                    </li>
+                </ul>
+
+                <div class="info-box">
+                    <strong>Définition :</strong> La bureautique regroupe l'ensemble des techniques et moyens informatiques visant à automatiser les activités de bureau : rédaction, communication, gestion documentaire, etc.
+                </div>
+
+                <h3>Les Grandes Familles d'Outils</h3>
+                <div class="card-grid">
+                    <div class="card" onclick="showDetails('word')">
+                        <h3><i class="fas fa-file-word"></i> Traitement de Texte</h3>
+                        <p>Word, Writer - Rédaction et mise en forme de documents</p>
+                    </div>
+                    <div class="card" onclick="showDetails('excel')">
+                        <h3><i class="fas fa-file-excel"></i> Tableur</h3>
+                        <p>Excel, Calc - Calculs, tableaux et graphiques</p>
+                    </div>
+                    <div class="card" onclick="showDetails('powerpoint')">
+                        <h3><i class="fas fa-file-powerpoint"></i> Présentation</h3>
+                        <p>PowerPoint, Impress - Diaporamas et supports visuels</p>
+                    </div>
+                    <div class="card" onclick="showDetails('outlook')">
+                        <h3><i class="fas fa-envelope"></i> Messagerie</h3>
+                        <p>Outlook, Thunderbird - Communication et agenda</p>
+                    </div>
+                    <div class="card" onclick="showDetails('access')">
+                        <h3><i class="fas fa-database"></i> Base de Données</h3>
+                        <p>Access, Base - Gestion structurée d'informations</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Office 2013 -->
+        <section class="section" id="office">
+            <div class="section-header" onclick="toggleSection(this)">
+                <i class="fab fa-microsoft section-icon"></i>
+                <h2 class="section-title">2. Microsoft Office 2013</h2>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="section-content">
+                <h3>Interface Commune - Le Ruban</h3>
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab(event, 'interface')">Interface</button>
+                    <button class="tab" onclick="switchTab(event, 'formats')">Formats</button>
+                    <button class="tab" onclick="switchTab(event, 'navigation')">Navigation</button>
+                </div>
+
+                <div id="interface" class="tab-content active">
+                    <div class="info-box">
+                        <strong>Structure du Ruban :</strong> Onglets → Groupes → Commandes
+                    </div>
+                    <ul>
+                        <li><strong>Onglets :</strong> Fichier, Accueil, Insertion, Mise en page...</li>
+                        <li><strong>Groupes :</strong> Presse-papiers, Police, Paragraphe...</li>
+                        <li><strong>Barre d'accès rapide :</strong> Personnalisez vos commandes favorites</li>
+                    </ul>
+                </div>
+
+                <div id="formats" class="tab-content">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Logiciel</th>
+                                    <th>Format Natif</th>
+                                    <th>Formats Compatibles</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><i class="fas fa-file-word"></i> Word</td>
+                                    <td>.docx</td>
+                                    <td>.doc, .pdf, .rtf, .txt</td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fas fa-file-excel"></i> Excel</td>
+                                    <td>.xlsx</td>
+                                    <td>.xls, .csv, .pdf</td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fas fa-file-powerpoint"></i> PowerPoint</td>
+                                    <td>.pptx</td>
+                                    <td>.ppt, .pdf, .odp</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="navigation" class="tab-content">
+                    <div class="shortcuts-grid">
+                        <div class="shortcut-item">
+                            <span>Nouveau document</span>
+                            <span class="shortcut-key">Ctrl+N</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <span>Ouvrir</span>
+                            <span class="shortcut-key">Ctrl+O</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <span>Enregistrer</span>
+                            <span class="shortcut-key">Ctrl+S</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <span>Imprimer</span>
+                            <span class="shortcut-key">Ctrl+P</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <span>Annuler</span>
+                            <span class="shortcut-key">Ctrl+Z</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <span>Refaire</span>
+                            <span class="shortcut-key">Ctrl+Y</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="warning-box">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Important :</strong> Le support pour Office 2013 a pris fin en avril 2023. Privilégiez les versions ultérieures pour la sécurité.
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Word -->
+        <section class="section" id="word">
+            <div class="section-header" onclick="toggleSection(this)">
+                <i class="fas fa-file-word section-icon" style="color: #2b579a;"></i>
+                <h2 class="section-title">3. Traitement de Texte - Word</h2>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="section-content">
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span><i class="fas fa-plus-circle"></i> Création & Enregistrement</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <ul>
+                                <li>Nouveau document : Modèle vierge ou prédéfini</li>
+                                <li>Enregistrer / Enregistrer sous (choix du format)</li>
+                                <li>Récupération automatique activée par défaut</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span><i class="fas fa-font"></i> Mise en Forme du Texte</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="card-grid">
+                                <div class="card" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                                    <h4>Police</h4>
+                                    <p>Type, taille, couleur, effets (gras/italique/souligné)</p>
+                                </div>
+                                <div class="card" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                                    <h4>Paragraphe</h4>
+                                    <p>Alignement, interligne, retraits, puces/numéros</p>
+                                </div>
+                                <div class="card" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                                    <h4>Styles</h4>
+                                    <p>Titre 1, Titre 2, Normal (pour table des matières)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header" onclick="toggleAccordion(this)">
+                            <span><i class="fas fa-image"></i> Insertion d'Objets</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <ul>
+                                <li>Images, formes, SmartArt</li>
+                                <li>Tableaux : Insertion rapide via la grille</li>
+                                <li>En-têtes, pieds de page, numérotation</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Raccourcis Indispensables Word</h3>
+                <div class="shortcuts-grid">
+                    <div class="shortcut-item">
+                        <span>Nouveau document</span>
+                        <span class="shortcut-key">Ctrl+N</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <span>Enregistrer</span>
+                        <span class="shortcut-key">Ctrl+S</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <span>Copier/Coller</span>
+                        <span class="shortcut-key">Ctrl+C / Ctrl+V</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <span>Mettre en gras</span>
+                        <span class="shortcut-key">Ctrl+B</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <span>Rechercher</span>
+                        <span class="shortcut-key">Ctrl+F</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <span>Remplacer</span>
+                        <span class="shortcut-key">Ctrl+H</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <span>Sélectionner tout</span>
+                        <span class="shortcut-key">Ctrl+A</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <span>Vérification ortho</span>
+                        <span class="shortcut-key">F7</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Outlook -->
+        <section class="section" id="outlook">
+            <div class="section-header" onclick="toggleSection(this)">
+                <i class="fas fa-envelope section-icon" style="color: #0078d4;"></i>
+                <h2 class="section-title">4. Communication - Outlook</h2>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="section-content">
+                <h3>Gestion de la Messagerie</h3>
+                
+                <div class="success-box">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>Bonnes pratiques email :</strong> Objet clair, signature professionnelle, nettiquette, réduire la taille des pièces jointes
+                </div>
+
+                <div class="card-grid">
+                    <div class="card" style="background: linear-gradient(135deg, #fa709a, #fee140);">
+                        <h3><i class="fas fa-paper-plane"></i> Envoi/Réception</h3>
+                        <p>Rédiger un message : Destinataire, Objet, Corps, Pièces jointes</p>
+                    </div>
+                    <div class="card" style="background: linear-gradient(135deg, #30cfd0, #330867);">
+                        <h3><i class="fas fa-folder"></i> Organisation</h3>
+                        <p>Création de dossiers, règles de tri automatique, archivage</p>
+                    </div>
+                    <div class="card" style="background: linear-gradient(135deg, #a8edea, #fed6e3); color: #333;">
+                        <h3><i class="fas fa-calendar-alt"></i> Agenda & Contacts</h3>
+                        <p>Rendez-vous, réunions, gestion des contacts</p>
+                    </div>
+                </div>
+
+                <h3>Fonctionnalités Avancées</h3>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <span>Accusés de lecture/réception</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <span>Drapeaux de suivi et catégories couleur</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <span>Recherche rapide dans tous les éléments</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <span>Règles de tri automatique</span>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 5: Quiz Interactif -->
+        <section class="section" id="quiz">
+            <div class="section-header">
+                <i class="fas fa-question-circle section-icon" style="color: #7fba00;"></i>
+                <h2 class="section-title">5. Quiz de Validation</h2>
+            </div>
+            <div class="section-content active">
+                <div class="quiz-container">
+                    <div id="quiz-question-container">
+                        <div class="quiz-question" id="question-text">Question 1/5</div>
+                        <div class="quiz-options" id="quiz-options">
+                            <!-- Options générées par JS -->
+                        </div>
+                    </div>
+                    <div class="quiz-result" id="quiz-result"></div>
+                    <button class="btn btn-secondary" onclick="nextQuestion()" id="next-btn" style="display:none;">Question Suivante</button>
+                </div>
+
+                <div id="final-score" style="display:none; text-align:center; padding:2rem;">
+                    <h2><i class="fas fa-trophy" style="color: gold;"></i> Quiz Terminé !</h2>
+                    <p style="font-size:1.5rem; margin:1rem 0;">Votre score : <span id="score-value" style="font-weight:bold; color:var(--primary-color);"></span>/5</p>
+                    <div id="score-message"></div>
+                    <button class="btn" onclick="restartQuiz()">Recommencer le Quiz</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: Ressources -->
+        <section class="section">
+            <div class="section-header">
+                <i class="fas fa-download section-icon" style="color: #f25022;"></i>
+                <h2 class="section-title">6. Ressources & Téléchargements</h2>
+            </div>
+            <div class="section-content active">
+                <h3>Checklist de Fin de Session</h3>
+                <ul class="checklist">
+                    <li class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <span>J'ai créé et enregistré un document Word</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <span>J'ai envoyé un email avec pièce jointe via Outlook</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <span>J'ai inséré une image et appliqué une mise en forme</span>
+                    </li>
+                    <li class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox">
+                        <span>Je connais 5 raccourcis clavier essentiels</span>
+                    </li>
+                </ul>
+
+                <h3>Liens Utiles</h3>
+                <div class="card-grid">
+                    <a href="https://support.microsoft.com/fr-fr/office" target="_blank" class="card" style="text-decoration:none; color:white;">
+                        <h3><i class="fas fa-external-link-alt"></i> Support Microsoft</h3>
+                        <p>Documentation officielle Office</p>
+                    </a>
+                    <a href="https://www.cours-gratuit.com/cours-bureautique" target="_blank" class="card" style="text-decoration:none; color:white;">
+                        <h3><i class="fas fa-external-link-alt"></i> Cours Gratuits</h3>
+                        <p>Tutoriels et supports PDF</p>
+                    </a>
+                </div>
+
+                <button class="btn" onclick="window.print()">
+                    <i class="fas fa-print"></i> Imprimer le Support
+                </button>
+                <button class="btn btn-secondary" onclick="downloadPDF()">
+                    <i class="fas fa-file-pdf"></i> Télécharger en PDF
+                </button>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // Quiz Data
+        const quizData = [
+            {
+                question: "Quel est le format natif de Word 2013 ?",
+                options: [".doc", ".docx", ".pdf", ".txt"],
+                correct: 1
+            },
+            {
+                question: "Quel raccourci clavier permet d'enregistrer un document ?",
+                options: ["Ctrl+S", "Ctrl+E", "Ctrl+P", "Ctrl+N"],
+                correct: 0
+            },
+            {
+                question: "Dans Outlook, où pouvez-vous planifier des réunions ?",
+                options: ["Courrier", "Contacts", "Calendrier", "Tâches"],
+                correct: 2
+            },
+            {
+                question: "Quel onglet contient les options d'impression dans Office 2013 ?",
+                options: ["Accueil", "Insertion", "Fichier", "Mise en page"],
+                correct: 2
+            },
+            {
+                question: "Que signifie le terme 'bureautique' ?",
+                options: [
+                    "Programmation informatique",
+                    "Automatisation des activités de bureau",
+                    "Réparation d'ordinateurs",
+                    "Création de sites web"
+                ],
+                correct: 1
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = false;
+
+        // Progress Bar
+        function updateProgress() {
+            const sections = document.querySelectorAll('.section');
+            const visibleSections = document.querySelectorAll('.section.visible');
+            const progress = (visibleSections.length / sections.length) * 100;
+            
+            document.getElementById('progress-fill').style.width = progress + '%';
+            document.getElementById('progress-text').textContent = Math.round(progress) + '%';
+        }
+
+        // Intersection Observer for sections
+        const observerOptions = {
+            threshold: 0.3,
+            rootMargin: "0px 0px -100px 0px"
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    updateProgress();
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.section').forEach(section => {
+            observer.observe(section);
+        });
+
+        // Toggle Section
+        function toggleSection(header) {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('.fa-chevron-down');
+            
+            content.classList.toggle('active');
+            icon.style.transform = content.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+
+        // Toggle Accordion
+        function toggleAccordion(header) {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('.fa-chevron-down');
+            
+            content.classList.toggle('active');
+            icon.style.transform = content.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+
+        // Toggle Checklist
+        function toggleCheck(item) {
+            item.classList.toggle('checked');
+            const checkbox = item.querySelector('input[type="checkbox"]');
+            checkbox.checked = !checkbox.checked;
+            updateProgress();
+        }
+
+        // Tabs
+        function switchTab(event, tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // Quiz Functions
+        function loadQuestion() {
+            answered = false;
+            const q = quizData[currentQuestion];
+            document.getElementById('question-text').textContent = `Question ${currentQuestion + 1}/${quizData.length} : ${q.question}`;
+            
+            const optionsDiv = document.getElementById('quiz-options');
+            optionsDiv.innerHTML = '';
+            
+            q.options.forEach((option, index) => {
+                const btn = document.createElement('div');
+                btn.className = 'quiz-option';
+                btn.textContent = option;
+                btn.onclick = () => checkAnswer(index, btn);
+                optionsDiv.appendChild(btn);
+            });
+            
+            document.getElementById('next-btn').style.display = 'none';
+            document.getElementById('quiz-result').style.display = 'none';
+        }
+
+        function checkAnswer(selectedIndex, element) {
+            if (answered) return;
+            answered = true;
+            
+            const correct = quizData[currentQuestion].correct;
+            const options = document.querySelectorAll('.quiz-option');
+            
+            options.forEach((opt, idx) => {
+                if (idx === correct) {
+                    opt.classList.add('correct');
+                } else if (idx === selectedIndex && idx !== correct) {
+                    opt.classList.add('incorrect');
+                }
+            });
+            
+            if (selectedIndex === correct) {
+                score++;
+                document.getElementById('quiz-result').innerHTML = '<i class="fas fa-check"></i> Bonne réponse !';
+                document.getElementById('quiz-result').style.background = 'rgba(127, 186, 0, 0.5)';
+            } else {
+                document.getElementById('quiz-result').innerHTML = '<i class="fas fa-times"></i> Mauvaise réponse !';
+                document.getElementById('quiz-result').style.background = 'rgba(242, 80, 36, 0.5)';
+            }
+            
+            document.getElementById('quiz-result').style.display = 'block';
+            
+            if (currentQuestion < quizData.length - 1) {
+                document.getElementById('next-btn').style.display = 'inline-block';
+            } else {
+                document.getElementById('next-btn').textContent = 'Voir les résultats';
+                document.getElementById('next-btn').style.display = 'inline-block';
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < quizData.length - 1) {
+                currentQuestion++;
+                loadQuestion();
+            } else {
+                showFinalScore();
+            }
+        }
+
+        function showFinalScore() {
+            document.getElementById('quiz-question-container').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'none';
+            document.getElementById('final-score').style.display = 'block';
+            document.getElementById('score-value').textContent = score;
+            
+            let message = '';
+            if (score === 5) {
+                message = '<p style="color:var(--success-color); font-size:1.3rem;"><i class="fas fa-star"></i> Excellent ! Vous maîtrisez le sujet !</p>';
+            } else if (score >= 3) {
+                message = '<p style="color:var(--primary-color); font-size:1.3rem;"><i class="fas fa-thumbs-up"></i> Bien joué ! Continuez à réviser.</p>';
+            } else {
+                message = '<p style="color:var(--accent-color); font-size:1.3rem;"><i class="fas fa-book"></i> Relisez le cours et réessayez !</p>';
+            }
+            document.getElementById('score-message').innerHTML = message;
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            document.getElementById('quiz-question-container').style.display = 'block';
+            document.getElementById('final-score').style.display = 'none';
+            document.getElementById('next-btn').textContent = 'Question Suivante';
+            loadQuestion();
+        }
+
+        // Show Details (from cards)
+        function showDetails(type) {
+            const messages = {
+                'word': 'Word : Traitement de texte pour créer des documents professionnels',
+                'excel': 'Excel : Tableur pour calculs et analyses de données',
+                'powerpoint': 'PowerPoint : Création de présentations dynamiques',
+                'outlook': 'Outlook : Gestion emails, calendrier et contacts',
+                'access': 'Access : Base de données relationnelle'
+            };
+            alert(messages[type]);
+        }
+
+        // Download PDF (simulation)
+        function downloadPDF() {
+            alert('Fonctionnalité de téléchargement PDF\n\nDans un environnement réel, cette fonction générerait un PDF du support de cours.\n\nUtilisez Ctrl+P pour imprimer ou sauvegarder en PDF.');
+        }
+
+        // Smooth Scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Initialize
+        window.onload = function() {
+            loadQuestion();
+            updateProgress();
+        };
+
+        // Keyboard Navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' && answered) {
+                nextQuestion();
+            }
+        });
+    </script>
+</body>
+</html>

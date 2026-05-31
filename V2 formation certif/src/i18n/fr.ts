@@ -141,6 +141,7 @@ export const fr = {
       pythonUnlocked: 'Python debloque',
       n8nUnlocked: 'n8n debloque',
       openclawUnlocked: 'OpenClaw debloque',
+      architectureUnlocked: 'Architecture debloque',
     },
     table: {
       title: 'Utilisateurs inscrits',
@@ -237,5 +238,6 @@ export const fr = {
     python: 'Programmation en Python',
     n8n: 'Automatisation avec n8n',
     openclaw: 'Maitrise de l\'IA OpenClaw',
+    architecture: "Architecture et Système d'Exploitation",
   },
 };

@@ -1,0 +1,5 @@
+Vps hostinger 
+
+ssh : root@62.72.19.56
+password : VPS@v@C@O@2030
+

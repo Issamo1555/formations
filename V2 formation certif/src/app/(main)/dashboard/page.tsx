@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useLocale } from '@/context/LocaleContext';
 import { useTheme } from '@/context/ThemeContext';
+import { useAuth } from '@/context/AuthContext';
+import { DashboardSkeleton } from '@/components/Skeleton';
 import {
   Sun, Moon, Globe, Menu, X, LogOut, LayoutDashboard,
   Award, Settings, Home, Shield, BookOpen, Clock,
@@ -12,81 +14,69 @@ import {
 } from 'lucide-react';
 import { locales, localeNames } from '@/i18n';
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  unlockedCourses: { courseId: string; course: { slug: string; titleFr: string; titleEn: string; titleAr: string; modulesCount: number } }[];
-}
-
 export default function DashboardPage() {
   const { t, locale, setLocale, dir } = useLocale();
   const { theme, toggleTheme } = useTheme();
+  const { user, loading: authLoading, logout } = useAuth();
   const router = useRouter();
 
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [courses, setCourses] = useState<any[]>([]);
   const [certificates, setCertificates] = useState<any[]>([]);
+  const [dataLoading, setDataLoading] = useState(true);
 
+  // Redirect if not authenticated
   useEffect(() => {
-    async function fetchUser() {
-      try {
-        const [userRes, certsRes] = await Promise.all([
-          fetch('/api/auth/me'),
-          fetch('/api/certificates'),
-        ]);
-        const userData = await userRes.json();
-        const certsData = await certsRes.json();
+    if (!authLoading && !user) {
+      router.push('/login?redirect=/dashboard');
+    }
+  }, [authLoading, user, router]);
 
-        if (!userData.user) {
-          router.push('/login?redirect=/dashboard');
-          return;
-        }
-        setUser(userData.user);
+  // Fetch courses + certificates + batch progress in parallel
+  useEffect(() => {
+    if (!user) return;
+
+    async function fetchData() {
+      try {
+        const courseList = [
+          { id: '1', slug: 'php', titleFr: 'Developpement Web Backend avec PHP', titleEn: 'Backend Web Development with PHP', titleAr: 'تطوير الويب الخلفي بـ PHP', modulesCount: 12 },
+          { id: '2', slug: 'python', titleFr: 'Programmation en Python', titleEn: 'Programming in Python', titleAr: 'البرمجة بـ Python', modulesCount: 10 },
+          { id: '3', slug: 'n8n', titleFr: 'Automatisation avec n8n', titleEn: 'Automation with n8n', titleAr: 'الأتمtة بـ n8n', modulesCount: 10 },
+          { id: '4', slug: 'openclaw', titleFr: 'Maitrise de l\'IA OpenClaw', titleEn: 'Mastering OpenClaw AI', titleAr: 'إتقان الذكاء الاصطناعي OpenClaw', modulesCount: 10 },
+          { id: '5', slug: 'architecture', titleFr: "Architecture et Système d'Exploitation", titleEn: 'Architecture and Operating Systems', titleAr: 'بنية الحاسوب ونظم التشغيل', modulesCount: 5 },
+        ];
+
+        // Fetch certificates and batch progress in parallel (single batch call instead of 5)
+        const [certsRes, progressRes] = await Promise.all([
+          fetch('/api/certificates'),
+          fetch('/api/progress/batch?courses=php,python,n8n,openclaw,architecture'),
+        ]);
+
+        const certsData = await certsRes.json();
+        const progressData = await progressRes.json();
+
         setCertificates(certsData.certificates || []);
-      } catch {
-        router.push('/login');
+
+        // Merge progress into course list
+        const coursesWithProgress = courseList.map((c) => {
+          const p = progressData.progress?.[c.slug];
+          return {
+            ...c,
+            progressPct: p?.progressPct || 0,
+            completedCount: p?.completedCount || 0,
+          };
+        });
+
+        setCourses(coursesWithProgress);
+      } catch (e) {
+        console.error('Failed to load dashboard data:', e);
       } finally {
-        setLoading(false);
+        setDataLoading(false);
       }
     }
-    fetchUser();
-  }, [router]);
 
-  useEffect(() => {
-    async function fetchCourses() {
-      const courseList = [
-        { id: '1', slug: 'php', titleFr: 'Developpement Web Backend avec PHP', titleEn: 'Backend Web Development with PHP', titleAr: 'تطوير الويب الخلفي بـ PHP', modulesCount: 12 },
-        { id: '2', slug: 'python', titleFr: 'Programmation en Python', titleEn: 'Programming in Python', titleAr: 'البرمجة بـ Python', modulesCount: 10 },
-        { id: '3', slug: 'n8n', titleFr: 'Automatisation avec n8n', titleEn: 'Automation with n8n', titleAr: 'الأتمتة بـ n8n', modulesCount: 10 },
-        { id: '4', slug: 'openclaw', titleFr: 'Maitrise de l\'IA OpenClaw', titleEn: 'Mastering OpenClaw AI', titleAr: 'إتقان الذكاء الاصطناعي OpenClaw', modulesCount: 10 },
-      ];
-
-      const coursesWithProgress = await Promise.all(
-        courseList.map(async (c) => {
-          try {
-            const res = await fetch(`/api/progress?course=${c.slug}`);
-            const data = await res.json();
-            return { ...c, progressPct: data.progressPct || 0, completedCount: data.completedCount || 0 };
-          } catch {
-            return { ...c, progressPct: 0, completedCount: 0 };
-          }
-        })
-      );
-
-      setCourses(coursesWithProgress);
-    }
-    fetchCourses();
-  }, []);
-
-  const handleLogout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    router.push('/');
-    router.refresh();
-  };
+    fetchData();
+  }, [user]);
 
   const isUnlocked = (courseSlug: string) => {
     if (!user) return false;
@@ -109,10 +99,42 @@ export default function DashboardPage() {
                   user?.email === 'issamo1555@gmail.com' || 
                   user?.email === 'iatest@vocodata.com';
 
-  if (loading) {
+  // Show skeleton while loading auth or data
+  if (authLoading || !user || dataLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-[var(--text-muted)]">{t('common.loading')}</div>
+      <div className="min-h-screen flex" dir={dir}>
+        {/* Background */}
+        <div className="fixed inset-0 -z-10">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,var(--bg-pattern)_1px,transparent_0)] [background-size:24px_24px]" />
+          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_18%_6%,var(--glow-1),transparent_34%)]" />
+          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_92%_18%,var(--glow-2),transparent_36%)]" />
+        </div>
+
+        {/* Sidebar placeholder */}
+        <aside
+          className="hidden md:flex sticky top-0 left-0 h-screen w-64 border-r flex-col flex-shrink-0"
+          style={{ backgroundColor: 'var(--bg-panel)', borderColor: 'var(--border-light)', width: '256px', minWidth: '256px' }}
+        >
+          <div className="p-5">
+            <div className="flex items-center gap-2 font-display font-extrabold text-lg">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center font-bold text-sm" style={{ color: 'var(--text-main)' }}>
+                SC
+              </div>
+              Smartcodai
+            </div>
+          </div>
+        </aside>
+
+        <main className="flex-1 min-w-0 md:ml-64">
+          <header className="sticky top-0 z-30 backdrop-blur-xl border-b" style={{ backgroundColor: 'var(--bg-base)', borderColor: 'var(--border-light)' }}>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+              <div className="skeleton h-6 w-48 rounded-lg" />
+            </div>
+          </header>
+          <div className="px-4 sm:px-6 lg:px-8 py-8">
+            <DashboardSkeleton />
+          </div>
+        </main>
       </div>
     );
   }
@@ -252,7 +274,7 @@ export default function DashboardPage() {
               <div className="text-xs text-primary font-bold">{isAdmin ? 'Admin' : 'Etudiant'}</div>
             </div>
             <button
-              onClick={handleLogout}
+              onClick={logout}
               className="w-8 h-8 rounded-lg border flex items-center justify-center text-[var(--text-muted)] transition-colors"
               style={{ borderColor: 'var(--border-light)' }}
               onMouseEnter={(e) => { e.currentTarget.style.color = '#f87171'; e.currentTarget.style.borderColor = 'rgba(248,113,113,0.3)'; }}
@@ -311,7 +333,7 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        <div className="px-4 sm:px-6 lg:px-8 py-8">
+        <div className="px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
           {/* Hero */}
           <div className="relative rounded-2xl overflow-hidden border p-6 sm:p-8 mb-8"
             style={{ borderColor: 'var(--border-light)', background: 'linear-gradient(135deg, var(--hero-from), var(--hero-via), var(--hero-to))' }}
@@ -416,7 +438,7 @@ export default function DashboardPage() {
                     <div className="w-14 h-14 rounded-xl border flex items-center justify-center text-2xl"
                       style={{ backgroundColor: 'var(--btn-ghost-bg)', borderColor: 'var(--border-light)' }}
                     >
-                      {({ php: '💻', python: '🐍', n8n: '⚡', openclaw: '🤖' } as Record<string, string>)[course.slug]}
+                      {({ php: '💻', python: '🐍', n8n: '⚡', openclaw: '🤖', architecture: '🖥️' } as Record<string, string>)[course.slug]}
                     </div>
 
                     <h3 className="text-lg font-display font-bold mb-2">

@@ -5,6 +5,8 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useLocale } from '@/context/LocaleContext';
 import { useTheme } from '@/context/ThemeContext';
+import { useAuth } from '@/context/AuthContext';
+import { CourseSkeleton } from '@/components/Skeleton';
 import {
   Sun, Moon, Globe, Menu, X, ArrowLeft, ArrowRight,
   CheckCircle, Circle, Lock, Award, LayoutDashboard,
@@ -57,11 +59,13 @@ const COURSE_ICONS: Record<string, string> = {
   python: '🐍',
   n8n: '⚡',
   openclaw: '🤖',
+  architecture: '🖥️',
 };
 
 export default function CoursePage() {
   const { t, locale, setLocale, dir } = useLocale();
   const { theme, toggleTheme } = useTheme();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const params = useParams();
   const slug = params?.slug as string;
@@ -78,29 +82,38 @@ export default function CoursePage() {
   const [isRunning, setIsRunning] = useState(false);
   const [activeTab, setActiveTab] = useState<'theory' | 'example' | 'exercise' | 'quiz'>('theory');
 
+  // Redirect if not authenticated
   useEffect(() => {
+    if (!authLoading && !user) {
+      router.push(`/login?redirect=/course/${slug}`);
+    }
+  }, [authLoading, user, router, slug]);
+
+  // Check access and load course data (using auth context instead of fetching /api/auth/me)
+  useEffect(() => {
+    if (authLoading || !user) return;
+
     async function init() {
       try {
-        // Check auth
-        const meRes = await fetch('/api/auth/me');
-        const meData = await meRes.json();
-        if (!meData.user) {
-          router.push(`/login?redirect=/course/${slug}`);
-          return;
-        }
-
-        // Check if course is unlocked
-        const isUnlocked = meData.user.role === 'ADMIN' ||
-          meData.user.unlockedCourses?.some((uc: any) => uc.course.slug === slug);
+        // Check if course is unlocked (using cached user from context)
+        const isUnlocked = user!.role === 'ADMIN' ||
+          user!.unlockedCourses?.some((uc: any) => uc.course.slug === slug);
 
         if (!isUnlocked) {
           router.push('/dashboard');
           return;
         }
 
-        // Fetch course from API
-        const courseRes = await fetch(`/api/courses/${slug}`);
-        const courseData = await courseRes.json();
+        // Fetch course and progress in parallel (instead of sequentially)
+        const [courseRes, progressRes] = await Promise.all([
+          fetch(`/api/courses/${slug}`),
+          fetch(`/api/progress?course=${slug}`),
+        ]);
+
+        const [courseData, progressData] = await Promise.all([
+          courseRes.json(),
+          progressRes.json(),
+        ]);
 
         if (!courseData.course) {
           router.push('/dashboard');
@@ -109,9 +122,6 @@ export default function CoursePage() {
 
         setCourse(courseData.course);
 
-        // Load progress from DB
-        const progressRes = await fetch(`/api/progress?course=${slug}`);
-        const progressData = await progressRes.json();
         if (progressData.completedLessonIds) {
           setCompletedLessons(new Set(progressData.completedLessonIds));
         }
@@ -122,7 +132,7 @@ export default function CoursePage() {
       }
     }
     init();
-  }, [slug, router]);
+  }, [authLoading, user, slug, router]);
 
   // Reset quiz and tab state when lesson changes
   useEffect(() => {
@@ -545,12 +555,8 @@ sys.stdout = StringIO()
     }
   }, [currentLessonIndex]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-[var(--text-muted)]">{t('common.loading')}</div>
-      </div>
-    );
+  if (loading || authLoading) {
+    return <CourseSkeleton />;
   }
 
   if (!course) {

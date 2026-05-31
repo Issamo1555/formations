@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useLocale } from '@/context/LocaleContext';
 import { useTheme } from '@/context/ThemeContext';
-import { Sun, Moon, Globe, ArrowLeft, Calendar, Tag, ExternalLink, Loader2 } from 'lucide-react';
+import { Sun, Moon, Globe, ArrowLeft, Calendar, Tag, ExternalLink } from 'lucide-react';
+import { Skeleton } from '@/components/Skeleton';
 import { locales, localeNames } from '@/i18n';
 
 const CATEGORIES = [
@@ -131,8 +132,23 @@ export default function BlogPage() {
 
         {/* Posts */}
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 text-primary animate-spin" />
+          <div className="animate-fade-in grid gap-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="card">
+                <div className="flex flex-col sm:flex-row gap-5">
+                  <div className="w-full sm:w-48 h-32 rounded-xl skeleton" />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="skeleton h-5 w-20 rounded-full" />
+                      <div className="skeleton h-4 w-24 rounded-md" />
+                    </div>
+                    <div className="skeleton h-6 w-3/4 rounded-lg mb-2" />
+                    <div className="skeleton h-4 w-full rounded-md mb-1" />
+                    <div className="skeleton h-4 w-2/3 rounded-md" />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : posts.length === 0 ? (
           <div className="card text-center py-12">
