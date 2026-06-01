@@ -48,6 +48,7 @@ export async function POST(req: NextRequest) {
       const { PDFParse } = await import('pdf-parse');
       // @ts-ignore
       const parser = new PDFParse();
+      // @ts-ignore
       const data = await parser.parse(fileBuffer);
       rawText = data.text;
     } else if (extension === '.html' || extension === '.htm') {
