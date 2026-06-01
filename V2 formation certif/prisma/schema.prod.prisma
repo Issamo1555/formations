@@ -1,4 +1,4 @@
-// Smartcodai V2 - Database Schema (PostgreSQL for production)
+// Smartcodai V2 - Database Schema (SQLite for local dev)
 generator client {
   provider = "prisma-client-js"
 }
@@ -21,6 +21,8 @@ model User {
   loginCount    Int       @default(0) @map("login_count")
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
+  institution   String?
+  subject       String?
 
   accounts        Account[]
   sessions        Session[]
@@ -235,4 +237,17 @@ enum Role {
   USER
   INSTRUCTOR
   ADMIN
+}
+
+model Document {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  fileName    String   @map("file_name")
+  fileUrl     String   @map("file_url")
+  size        Int      @default(0) // in bytes
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("documents")
 }
