@@ -68,6 +68,21 @@ export async function main() {
         modulesCount: 10,
       },
     }),
+    prisma.course.upsert({
+      where: { slug: 'architecture' },
+      update: {},
+      create: {
+        slug: 'architecture',
+        titleFr: "Architecture et Système d'Exploitation",
+        titleEn: 'Architecture and Operating Systems',
+        titleAr: 'بنية الحاسوب ونظم التشغيل',
+        descFr: 'Comprenez le fonctionnement interne des ordinateurs, la logique booléenne et les systèmes d\'exploitation.',
+        descEn: 'Understand the internal workings of computers, boolean logic, and operating systems.',
+        descAr: 'افهم الآلية الداخلية لأجهزة الكمبيوتر، والمنطق البولياني، ونظم التشغيل.',
+        icon: 'monitor',
+        modulesCount: 5,
+      },
+    }),
   ]);
 
   console.log(`Created ${courses.length} courses`);

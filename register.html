@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smartcodai | Creer un compte</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #05060A;
+            --bg-panel: #0D101C;
+            --bg-elevated: #11162A;
+            --primary: #10b981;
+            --primary-hover: #059669;
+            --secondary: #7c6df8;
+            --text-main: #FFFFFF;
+            --text-muted: rgba(226, 232, 240, 0.72);
+            --border-light: rgba(255, 255, 255, 0.10);
+            --ring: rgba(16, 185, 129, 0.30);
+            --shadow-card: 0 16px 38px rgba(0, 0, 0, 0.36);
+            --page-glow: radial-gradient(circle at 30% 20%, rgba(124, 109, 248, 0.14), transparent 40%),
+                         radial-gradient(circle at 70% 80%, rgba(16, 185, 129, 0.10), transparent 40%);
+        }
+
+        body.light-mode {
+            --bg-base: #f5f7fa;
+            --bg-panel: #ffffff;
+            --bg-elevated: #f8fafc;
+            --text-main: #0b1324;
+            --text-muted: rgba(15, 23, 42, 0.62);
+            --border-light: rgba(15, 23, 42, 0.10);
+            --shadow-card: 0 10px 28px rgba(2, 6, 23, 0.08);
+            --page-glow: radial-gradient(circle at 30% 20%, rgba(124, 109, 248, 0.06), transparent 40%),
+                         radial-gradient(circle at 70% 80%, rgba(16, 185, 129, 0.05), transparent 40%);
+            color-scheme: light;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-base);
+            background-image: var(--page-glow);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 440px;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .auth-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-family: 'Syne', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        .auth-logo img {
+            height: 36px;
+            width: 36px;
+            border-radius: 8px;
+        }
+
+        .auth-header h1 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-bottom: 0.4rem;
+        }
+
+        .auth-header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .auth-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            padding: 2rem 1.75rem;
+            box-shadow: var(--shadow-card);
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.45rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            background: var(--bg-elevated);
+            color: var(--text-main);
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--ring);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
+
+        .password-strength {
+            margin-top: 0.4rem;
+            height: 4px;
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.16);
+            overflow: hidden;
+        }
+
+        .password-strength > span {
+            display: block;
+            height: 100%;
+            width: 0%;
+            border-radius: 999px;
+            transition: width 0.3s ease, background 0.3s ease;
+        }
+
+        .strength-weak { width: 33% !important; background: #ef4444; }
+        .strength-medium { width: 66% !important; background: #f59e0b; }
+        .strength-strong { width: 100% !important; background: var(--primary); }
+
+        .password-hint {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 0.3rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+            padding: 0.85rem 1.2rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), rgba(124, 109, 248, 0.95));
+            color: #06151a;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-hover), rgba(124, 109, 248, 0.90));
+            color: #fff;
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.32);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            font-size: 0.88rem;
+            margin-bottom: 1.25rem;
+            display: none;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        body.light-mode .alert-error {
+            background: rgba(239, 68, 68, 0.08);
+            color: #dc2626;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #6ee7b7;
+        }
+
+        body.light-mode .alert-success {
+            background: rgba(16, 185, 129, 0.08);
+            color: #059669;
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .auth-footer a {
+            color: var(--primary);
+            font-weight: 600;
+            transition: opacity 0.2s ease;
+        }
+
+        .auth-footer a:hover {
+            opacity: 0.8;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 1.25rem;
+            right: 1.25rem;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            background: var(--bg-panel);
+            color: var(--text-main);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .icon {
+            width: 18px;
+            height: 18px;
+            display: inline-block;
+        }
+
+        .features {
+            margin-top: 1.5rem;
+            display: grid;
+            gap: 0.6rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .feature-item .icon {
+            color: var(--primary);
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 480px) {
+            .auth-card { padding: 1.5rem 1.25rem; }
+            .auth-header h1 { font-size: 1.35rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Basculer le theme">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="currentColor" d="M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12Zm0-14a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V5a1 1 0 0 1 1-1Zm0 16a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1Zm10-9a1 1 0 0 1-1 1h-1a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1ZM4 12a1 1 0 0 1-1 1H2a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1Zm15.1-7.1a1 1 0 0 1 0 1.4l-.7.7a1 1 0 1 1-1.4-1.4l.7-.7a1 1 0 0 1 1.4 0ZM6 18a1 1 0 0 1 0 1.4l-.7.7a1 1 0 1 1-1.4-1.4l.7-.7A1 1 0 0 1 6 18Zm12.4 2.1a1 1 0 0 1-1.4 0l-.7-.7a1 1 0 1 1 1.4-1.4l.7.7a1 1 0 0 1 0 1.4ZM6.7 7.1a1 1 0 0 1-1.4 0l-.7-.7A1 1 0 0 1 6 5l.7.7a1 1 0 0 1 0 1.4Z"/>
+        </svg>
+    </button>
+
+    <div class="auth-container">
+        <div class="auth-header">
+            <div class="auth-logo">
+                <img src="assets/logo.png" alt="Logo">
+                Smartcodai
+            </div>
+            <h1>Creer un compte</h1>
+            <p>Commencez votre parcours d'apprentissage gratuitement</p>
+        </div>
+
+        <div class="auth-card">
+            <div class="alert alert-error" id="errorAlert" role="alert"></div>
+            <div class="alert alert-success" id="successAlert" role="alert"></div>
+
+            <form id="registerForm" novalidate>
+                <div class="form-group">
+                    <label for="name">Nom complet</label>
+                    <input class="form-input" type="text" id="name" name="name" placeholder="Votre nom et prenom" required autocomplete="name">
+                </div>
+                <div class="form-group">
+                    <label for="email">Adresse email</label>
+                    <input class="form-input" type="email" id="email" name="email" placeholder="vous@exemple.com" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <input class="form-input" type="password" id="password" name="password" placeholder="Minimum 6 caracteres" required autocomplete="new-password" minlength="6">
+                    <div class="password-strength"><span id="strengthBar"></span></div>
+                    <div class="password-hint" id="strengthHint">Minimum 6 caracteres requis</div>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirmer le mot de passe</label>
+                    <input class="form-input" type="password" id="confirmPassword" name="confirmPassword" placeholder="Retapez votre mot de passe" required autocomplete="new-password">
+                </div>
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    Creer mon compte
+                </button>
+            </form>
+        </div>
+
+        <div class="features">
+            <div class="feature-item">
+                <svg class="icon" viewBox="0 0 24 24"><path fill="currentColor" d="M9 16.2 5.8 13a1 1 0 1 0-1.4 1.4l4 4a1 1 0 0 0 1.4 0l10-10a1 1 0 1 0-1.4-1.4L9 16.2Z"/></svg>
+                Accès gratuit a tous les cursus de base
+            </div>
+            <div class="feature-item">
+                <svg class="icon" viewBox="0 0 24 24"><path fill="currentColor" d="M9 16.2 5.8 13a1 1 0 1 0-1.4 1.4l4 4a1 1 0 0 0 1.4 0l10-10a1 1 0 1 0-1.4-1.4L9 16.2Z"/></svg>
+                Suivi de progression personnalise
+            </div>
+            <div class="feature-item">
+                <svg class="icon" viewBox="0 0 24 24"><path fill="currentColor" d="M9 16.2 5.8 13a1 1 0 1 0-1.4 1.4l4 4a1 1 0 0 0 1.4 0l10-10a1 1 0 1 0-1.4-1.4L9 16.2Z"/></svg>
+                Certificats téléchargeables a la fin
+            </div>
+        </div>
+
+        <div class="auth-footer">
+            Deja un compte ? <a href="login.html">Se connecter</a>
+        </div>
+        <div class="auth-footer" style="margin-top: 0.6rem;">
+            <a href="index.html">Retour a l'accueil</a>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        const THEME_KEY = 'smartcodai-theme';
+        const themeToggle = document.getElementById('themeToggle');
+        const registerForm = document.getElementById('registerForm');
+        const errorAlert = document.getElementById('errorAlert');
+        const successAlert = document.getElementById('successAlert');
+        const submitBtn = document.getElementById('submitBtn');
+        const passwordInput = document.getElementById('password');
+        const strengthBar = document.getElementById('strengthBar');
+        const strengthHint = document.getElementById('strengthHint');
+
+        // Theme
+        function applyTheme(theme) {
+            document.body.classList.toggle('light-mode', theme === 'light');
+            themeToggle.innerHTML = theme === 'light'
+                ? '<svg class="icon" viewBox="0 0 24 24"><path fill="currentColor" d="M21 14.2A7.6 7.6 0 0 1 11.8 3a1 1 0 0 0-1.1 1.5 6.1 6.1 0 0 0 7.8 9.1 1 1 0 0 0 1.5 1.1Z"/></svg>'
+                : '<svg class="icon" viewBox="0 0 24 24"><path fill="currentColor" d="M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12Zm0-14a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V5a1 1 0 0 1 1-1Zm0 16a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1Zm10-9a1 1 0 0 1-1 1h-1a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1ZM4 12a1 1 0 0 1-1 1H2a1 1 0 1 1 0-2h1a1 1 0 0 1 1 1Zm15.1-7.1a1 1 0 0 1 0 1.4l-.7.7a1 1 0 1 1-1.4-1.4l.7-.7a1 1 0 0 1 1.4 0ZM6 18a1 1 0 0 1 0 1.4l-.7.7a1 1 0 1 1-1.4-1.4l.7-.7A1 1 0 0 1 6 18Zm12.4 2.1a1 1 0 0 1-1.4 0l-.7-.7a1 1 0 1 1 1.4-1.4l.7.7a1 1 0 0 1 0 1.4ZM6.7 7.1a1 1 0 0 1-1.4 0l-.7-.7A1 1 0 0 1 6 5l.7.7a1 1 0 0 1 0 1.4Z"/></svg>';
+        }
+        applyTheme(localStorage.getItem(THEME_KEY) || 'dark');
+        themeToggle.addEventListener('click', () => {
+            const next = document.body.classList.contains('light-mode') ? 'dark' : 'light';
+            localStorage.setItem(THEME_KEY, next);
+            applyTheme(next);
+        });
+
+        // Redirect if already logged in
+        if (AUTH.isLoggedIn()) {
+            window.location.href = 'dashboard.html';
+        }
+
+        // Password strength indicator
+        passwordInput.addEventListener('input', () => {
+            const val = passwordInput.value;
+            strengthBar.className = '';
+            if (val.length === 0) {
+                strengthHint.textContent = 'Minimum 6 caracteres requis';
+                return;
+            }
+            let score = 0;
+            if (val.length >= 6) score++;
+            if (val.length >= 10) score++;
+            if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score++;
+            if (/\d/.test(val)) score++;
+            if (/[^A-Za-z0-9]/.test(val)) score++;
+
+            if (score <= 2) {
+                strengthBar.classList.add('strength-weak');
+                strengthHint.textContent = 'Faible - ajoutez des majuscules, chiffres ou symboles';
+            } else if (score <= 3) {
+                strengthBar.classList.add('strength-medium');
+                strengthHint.textContent = 'Moyen - pas mal, mais peut etre ameliore';
+            } else {
+                strengthBar.classList.add('strength-strong');
+                strengthHint.textContent = 'Fort - excellent mot de passe !';
+            }
+        });
+
+        // Registration form submission
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            errorAlert.style.display = 'none';
+            successAlert.style.display = 'none';
+
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                errorAlert.textContent = 'Les mots de passe ne correspondent pas.';
+                errorAlert.style.display = 'block';
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creation du compte...';
+
+            setTimeout(() => {
+                const result = AUTH.register(name, email, password);
+
+                if (result.success) {
+                    successAlert.textContent = 'Compte cree avec succes ! Redirection vers votre espace...';
+                    successAlert.style.display = 'block';
+
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
+                } else {
+                    errorAlert.textContent = result.error;
+                    errorAlert.style.display = 'block';
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Creer mon compte';
+                }
+            }, 500);
+        });
+    </script>
+</body>
+</html>

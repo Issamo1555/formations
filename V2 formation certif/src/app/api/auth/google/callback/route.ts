@@ -6,17 +6,19 @@ export async function GET(req: NextRequest) {
   const code = searchParams.get('code');
   const errorParam = searchParams.get('error');
 
+  const origin = process.env.NEXTAUTH_URL || req.nextUrl.origin;
+
   if (errorParam) {
     console.error('>>> [GOOGLE-AUTH] Google returned error:', errorParam);
     return NextResponse.redirect(
-      new URL(`/login?error=${encodeURIComponent(errorParam)}`, req.nextUrl)
+      new URL(`/login?error=${encodeURIComponent(errorParam)}`, origin)
     );
   }
 
   if (!code) {
     console.error('>>> [GOOGLE-AUTH] No code parameter received from Google.');
     return NextResponse.redirect(
-      new URL('/login?error=no_code_provided', req.nextUrl)
+      new URL('/login?error=no_code_provided', origin)
     );
   }
 
@@ -26,12 +28,10 @@ export async function GET(req: NextRequest) {
   if (!googleClientId || !googleClientSecret) {
     console.error('>>> [GOOGLE-AUTH] GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET is missing.');
     return NextResponse.redirect(
-      new URL('/login?error=config_missing', req.nextUrl)
+      new URL('/login?error=config_missing', origin)
     );
   }
 
-  // Utilise NEXTAUTH_URL si configuré (production/staging), sinon l'origine de la requête
-  const origin = process.env.NEXTAUTH_URL || req.nextUrl.origin;
   const redirectUri = `${origin}/api/auth/google/callback`;
 
   try {
@@ -54,7 +54,7 @@ export async function GET(req: NextRequest) {
       const errBody = await tokenResponse.text();
       console.error('>>> [GOOGLE-AUTH] Failed to exchange code for token:', errBody);
       return NextResponse.redirect(
-        new URL('/login?error=token_exchange_failed', req.nextUrl)
+        new URL('/login?error=token_exchange_failed', origin)
       );
     }
 
@@ -71,7 +71,7 @@ export async function GET(req: NextRequest) {
     if (!userResponse.ok) {
       console.error('>>> [GOOGLE-AUTH] Failed to fetch Google userinfo.');
       return NextResponse.redirect(
-        new URL('/login?error=userinfo_failed', req.nextUrl)
+        new URL('/login?error=userinfo_failed', origin)
       );
     }
 
@@ -83,7 +83,7 @@ export async function GET(req: NextRequest) {
     if (!email) {
       console.error('>>> [GOOGLE-AUTH] No email address returned by Google.');
       return NextResponse.redirect(
-        new URL('/login?error=email_missing', req.nextUrl)
+        new URL('/login?error=email_missing', origin)
       );
     }
 
@@ -94,11 +94,12 @@ export async function GET(req: NextRequest) {
 
     if (!user) {
       // Créer un nouvel étudiant
+      const isAdmin = email === 'admin@smartcodai.com' || email === 'issamo1555@gmail.com';
       user = await prisma.user.create({
         data: {
           email,
           name: name || email.split('@')[0],
-          role: 'USER',
+          role: isAdmin ? 'ADMIN' : 'USER',
           image: picture || null,
         },
       });
@@ -115,7 +116,7 @@ export async function GET(req: NextRequest) {
     }
 
     // 4. Connecter en définissant le cookie de session
-    const response = NextResponse.redirect(new URL('/dashboard', req.nextUrl));
+    const response = NextResponse.redirect(new URL('/dashboard', origin));
     response.cookies.set('smartcodai-user-id', user.id, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -128,7 +129,7 @@ export async function GET(req: NextRequest) {
   } catch (err: any) {
     console.error('>>> [GOOGLE-AUTH] Internal error during Google sign-in:', err);
     return NextResponse.redirect(
-      new URL(`/login?error=${encodeURIComponent(err.message || 'unknown_error')}`, req.nextUrl)
+      new URL(`/login?error=${encodeURIComponent(err.message || 'unknown_error')}`, origin)
     );
   }
 }

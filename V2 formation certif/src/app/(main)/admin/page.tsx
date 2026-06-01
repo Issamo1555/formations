@@ -8,7 +8,7 @@ import { useTheme } from '@/context/ThemeContext';
 import {
   Sun, Moon, Globe, Menu, X, Shield, Users,
   Lock, Unlock, Search, LayoutDashboard, LogOut,
-  Award, Settings, Home, FileText
+  Award, Settings, Home, FileText, Upload
 } from 'lucide-react';
 import { locales, localeNames } from '@/i18n';
 
@@ -26,6 +26,7 @@ const COURSES = [
   { slug: 'python', label: 'Python' },
   { slug: 'n8n', label: 'n8n' },
   { slug: 'openclaw', label: 'OpenClaw' },
+  { slug: 'architecture', label: 'Architecture' },
 ];
 
 export default function AdminPage() {
@@ -92,6 +93,7 @@ export default function AdminPage() {
     python: users.filter((u) => u.unlockedCourses.some((uc) => uc.course.slug === 'python')).length,
     n8n: users.filter((u) => u.unlockedCourses.some((uc) => uc.course.slug === 'n8n')).length,
     openclaw: users.filter((u) => u.unlockedCourses.some((uc) => uc.course.slug === 'openclaw')).length,
+    architecture: users.filter((u) => u.unlockedCourses.some((uc) => uc.course.slug === 'architecture')).length,
   };
 
   if (loading) {
@@ -150,6 +152,18 @@ export default function AdminPage() {
             <FileText className="w-4 h-4" />
             {locale === 'ar' ? 'إدارة المدونة' : locale === 'en' ? 'Blog Management' : 'Gestion du Blog'}
           </Link>
+          <Link href="/admin/import" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-white/5 transition-colors">
+            <Upload className="w-4 h-4" />
+            {locale === 'ar' ? 'استيراد الدروس' : locale === 'en' ? 'Import Lessons' : 'Importer des cours'}
+          </Link>
+          <Link href="/admin/documents" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-white/5 transition-colors">
+            <FileText className="w-4 h-4" />
+            {locale === 'ar' ? 'إدارة المستندات' : locale === 'en' ? 'Manage Documents' : 'Ressources & Documents'}
+          </Link>
+          <Link href="/admin/students" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-white/5 transition-colors">
+            <Users className="w-4 h-4" />
+            {locale === 'ar' ? 'تتبع الطلاب' : locale === 'en' ? 'Track Students' : 'Suivi des Étudiants'}
+          </Link>
           <Link href="/" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-white/5 transition-colors mt-4">
             <Home className="w-4 h-4" />
             {t('nav.home')}
@@ -202,12 +216,12 @@ export default function AdminPage() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 mb-8">
             <div className="card text-center py-4">
               <div className="text-2xl font-display font-extrabold text-gradient">{stats.users}</div>
               <div className="text-xs text-[var(--text-muted)] uppercase tracking-wider mt-1">{t('admin.stats.users')}</div>
             </div>
-            {['php', 'python', 'n8n', 'openclaw'].map((slug) => (
+            {['php', 'python', 'n8n', 'openclaw', 'architecture'].map((slug) => (
               <div key={slug} className="card text-center py-4">
                 <div className="text-2xl font-display font-extrabold text-gradient">{(stats as any)[slug]}</div>
                 <div className="text-xs text-[var(--text-muted)] uppercase tracking-wider mt-1">{(t(`admin.stats.${slug}Unlocked`) as string)}</div>

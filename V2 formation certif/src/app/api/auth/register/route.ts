@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, email, password } = await req.json();
+    const { name, email, password, institution, subject } = await req.json();
 
     if (!name || !email || !password) {
       return NextResponse.json(
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     const passwordHash = await bcrypt.hash(password, 12);
 
     // Determine role
-    const isAdmin = emailLower === 'admin@smartcodai.com';
+    const isAdmin = emailLower === 'admin@smartcodai.com' || emailLower === 'issamo1555@gmail.com';
 
     // Create user
     const user = await prisma.user.create({
@@ -47,6 +47,8 @@ export async function POST(req: NextRequest) {
         email: emailLower,
         passwordHash,
         role: isAdmin ? 'ADMIN' : 'USER',
+        institution: institution ? institution.trim() : null,
+        subject: subject ? subject.trim() : null,
       },
       select: {
         id: true,

@@ -2631,6 +2631,215 @@ GitHub Webhook → OpenClaw (analyze PR) → Tests → Slack Notification → De
   },
 ];
 
+// ── Architecture et Système d'Exploitation Course Lessons ──
+const architectureLessons = [
+  {
+    order: 1,
+    titleFr: "Environnement Informatique et Matériel",
+    titleEn: "Computer Environment and Hardware",
+    titleAr: "بيئة الحاسوب والعتاد",
+    contentFr: `Cette partie aborde les composants physiques d'un ordinateur et leur fonctionnement.
+
+### Les composants clés d'un ordinateur :
+- **Le Processeur (CPU)** : Le cerveau de l'ordinateur qui exécute les instructions.
+- **La Mémoire Vive (RAM)** : Stockage temporaire ultra-rapide utilisé par les programmes en cours d'exécution.
+- **Le Stockage (SSD/HDD)** : Stockage permanent pour vos fichiers et le système d'exploitation.
+- **La Carte Mère** : Le circuit principal qui relie tous les composants.
+- **Les Périphériques** : Éléments d'entrée (clavier, souris) et de sortie (écran, imprimante).
+
+### Comment ils collaborent :
+Lorsque vous lancez un logiciel, ses données sont lues depuis le stockage permanent, chargées dans la RAM, puis traitées par le CPU.`,
+    contentEn: `This section covers the physical components of a computer and how they function.
+
+### Key components of a computer:
+- **Processor (CPU)**: The brain of the computer that executes instructions.
+- **Random Access Memory (RAM)**: Ultra-fast temporary storage used by active programs.
+- **Storage (SSD/HDD)**: Permanent storage for your files and the operating system.
+- **Motherboard**: The main circuit board that connects all components.
+- **Peripherals**: Input (keyboard, mouse) and output (screen, printer) devices.
+
+### How they work together:
+When you launch software, its data is read from permanent storage, loaded into RAM, and then processed by the CPU.`,
+    contentAr: `يغطي هذا القسم المكونات المادية لجهاز الكمبيوتر وكيفية عملها.
+
+### المكونات الأساسية للكمبيوتر:
+- **المعالج (CPU)**: عقل الكمبيوتر الذي ينفذ التعليمات.
+- **ذاكرة الوصول العشوائي (RAM)**: تخزين مؤقت فائق السرعة تستخدمه البرامج النشطة.
+- **التخزين (SSD/HDD)**: تخزين دائم لملفاتك ونظام التشغيل.
+- **اللوحة الأم**: اللوحة الرئيسية التي تربط جميع المكونات.
+- **الأجهزة الطرفية**: أجهزة الإدخال (لوحة المفاتيح، الماوس) والإخراج (الشاشة، الطابعة).`,
+    category: "Matériel",
+    hasQuiz: false,
+  },
+  {
+    order: 2,
+    titleFr: "Fonctionnalités du Système d'Exploitation",
+    titleEn: "Operating System Features",
+    titleAr: "وظائف نظام التشغيل",
+    contentFr: `Le système d'exploitation (OS) sert d'interface entre le matériel et l'utilisateur.
+
+### Rôles principaux de l'OS :
+- **Gestion des processus** : Allouer le CPU aux différents programmes qui tournent en même temps.
+- **Gestion de la mémoire** : Distribuer l'espace dans la RAM et éviter les collisions entre logiciels.
+- **Système de fichiers** : Organiser la structure de stockage (fichiers, dossiers) sur le disque dur.
+- **Gestion des droits** : Assurer la sécurité et séparer les espaces utilisateur.
+- **Interface Utilisateur (UI)** : Fournir un bureau graphique (GUI) ou une console en ligne de commande (CLI).
+
+### Exemples d'OS populaires :
+Windows (Microsoft), macOS (Apple), Linux (Open Source), Android et iOS pour les mobiles.`,
+    contentEn: `The operating system (OS) serves as the interface between the hardware and the user.
+
+### Main roles of the OS:
+- **Process Management**: Allocates the CPU to different programs running simultaneously.
+- **Memory Management**: Distributes space in RAM and prevents software conflicts.
+- **File System**: Organizes storage structure (files, directories) on the drive.
+- **Access Control**: Ensures security and isolates user environments.
+- **User Interface (UI)**: Provides a graphical desktop (GUI) or a command-line interface (CLI).
+
+### Popular OS examples:
+Windows (Microsoft), macOS (Apple), Linux (Open Source), Android, and iOS for mobile.`,
+    contentAr: `يعمل نظام التشغيل (OS) كواجهة بين المكونات المادية والمستخدم.
+
+### الأدوار الرئيسية لنظام التشغيل:
+- **إدارة العمليات**: تخصيص المعالج للبرامج المختلفة التي تعمل في نفس الوقت.
+- **إدارة الذاكرة**: توزيع المساحة في الذاكرة العشوائية ومنع تعارض البرامج.
+- **نظام الملفات**: تنظيم هيكل التخزين (الملفات والمجلدات) على القرص الصلب.
+- **التحكم في الوصول**: يضمن الأمان ويفصل بين بيئات المستخدمين.
+- **واجهة المستخدم (UI)**: يوفر سطح مكتب رسومي (GUI) أو واجهة سطر الأوامر (CLI).`,
+    category: "Système",
+    hasQuiz: false,
+  },
+  {
+    order: 3,
+    titleFr: "Logique Booléenne et Algorithmique de Base",
+    titleEn: "Boolean Logic and Basic Algorithms",
+    titleAr: "المنطق البولياني والخوارزميات الأساسية",
+    contentFr: `La logique booléenne est le fondement du calcul informatique, qui fonctionne uniquement avec des 0 et des 1 (vrai ou faux).
+
+### Les portes logiques principales :
+- **ET (AND)** : Vrai uniquement si TOUTES les entrées sont vraies.
+- **OU (OR)** : Vrai si AU MOINS UNE entrée est vraie.
+- **NON (NOT)** : Inverse la valeur (vrai devient faux, faux devient vrai).
+
+### Algorithmes et structures de contrôle :
+Un algorithme est une suite logique d'instructions pour résoudre un problème. Il utilise :
+- **Les séquences** : Exécuter les étapes dans l'ordre.
+- **Les conditions (SI... ALORS)** : Choisir un chemin selon un test logique.
+- **Les boucles (TANT QUE / POUR)** : Répéter une action.`,
+    contentEn: `Boolean logic is the foundation of computer computation, operating solely on 0s and 1s (true or false).
+
+### Key logical gates:
+- **AND**: True only if ALL inputs are true.
+- **OR**: True if AT LEAST ONE input is true.
+- **NOT**: Inverts the value (true becomes false, false becomes true).
+
+### Algorithms and control structures:
+An algorithm is a logical sequence of instructions to solve a problem. It utilizes:
+- **Sequences**: Executing steps in order.
+- **Conditions (IF... THEN)**: Choosing a path based on a logical test.
+- **Loops (WHILE / FOR)**: Repeating an action.`,
+    contentAr: `المنطق البولياني هو أساس الحوسبة، حيث يعمل فقط باستخدام 0 و 1 (صحيح أو خطأ).
+
+### البوابات المنطقية الرئيسية:
+- **AND (و)**: صحيح فقط إذا كانت جميع المدخلات صحيحة.
+- **OR (أو)**: صحيح إذا كان مدخل واحد على الأقل صحيحاً.
+- **NOT (ليس)**: يعكس القيمة (الصحيح يصبح خطأ والخطأ يصبح صحيحاً).
+
+### الخوارزميات وهياكل التحكم:
+الخوارزمية هي تسلسل منطقي للتعليمات لحل مشكلة ما. وهي تستخدم:
+- **التسلسل**: تنفيذ الخطوات بالترتيب.
+- **الشروط (إذا... إذن)**: اختيار مسار بناءً على اختبار منطقي.
+- **الحلقات (طالما / لأجل)**: تكرار إجراء ما.`,
+    category: "Logique & Algorithmes",
+    hasQuiz: false,
+  },
+  {
+    order: 4,
+    titleFr: "Familles de Logiciels et Bureautique",
+    titleEn: "Software Families and Office Suites",
+    titleAr: "عائلات البرمجيات والمكتبية",
+    contentFr: `Les logiciels se divisent en plusieurs grandes familles selon leur fonction et leur licence.
+
+### Logiciels Système vs Application :
+- **Logiciel Système** : Nécessaire au fonctionnement de la machine (pilotes, OS, utilitaires de disque).
+- **Logiciel d'Application** : Outils pour l'utilisateur (navigateur web, jeux, bureautique).
+
+### Types de licences :
+- **Propriétaire** : Code source fermé, licence payante ou restreinte (ex: Microsoft Office, Photoshop).
+- **Open Source / Libre** : Code source ouvert, modifiable et partageable (ex: LibreOffice, Firefox, Linux).
+
+### Outils de bureautique principaux :
+Traitement de texte (rédaction), tableur (calculs, graphiques) et logiciel de présentation (diaporamas).`,
+    contentEn: `Software is divided into major families based on function and licensing.
+
+### System vs Application Software:
+- **System Software**: Necessary for the machine to operate (drivers, OS, disk utilities).
+- **Application Software**: Tools for the user (web browser, games, office suites).
+
+### Licensing types:
+- **Proprietary**: Closed source code, paid or restricted license (e.g., Microsoft Office, Photoshop).
+- **Open Source / Free Software**: Open source code, modifiable and shareable (e.g., LibreOffice, Firefox, Linux).
+
+### Key Office Tools:
+Word processor (document writing), spreadsheet (calculations, charts), and presentation software (slideshows).`,
+    contentAr: `تنقسم البرمجيات إلى عائلات رئيسية بناءً على وظيفتها وترخيصها.
+
+### برمجيات النظام مقابل البرمجيات التطبيقية:
+- **برمجيات النظام**: ضرورية لتشغيل الآلة (برامج التشغيل، نظام التشغيل، أدوات القرص).
+- **البرمجيات التطبيقية**: أدوات للمستخدم (متصفح الويب، الألعاب، التطبيقات المكتبية).
+
+### أنواع التراخيص:
+- **مغلق المصدر (Proprietary)**: ترخيص مدفوع أو مقيد (مثل Microsoft Office).
+- **مفتوح المصدر (Open Source)**: كود مفتوح وقابل للتعديل والمشاركة (مثل LibreOffice).`,
+    category: "Logiciels",
+    hasQuiz: false,
+  },
+  {
+    order: 5,
+    titleFr: "Évaluation et Dossier de Recherche",
+    titleEn: "Evaluation and Research Portfolio",
+    titleAr: "التقييم وملف البحث",
+    contentFr: `Pour valider ce cursus, vous devez réaliser un dossier de recherche individuel.
+
+### Consignes pour le dossier de recherche :
+1. **Sujet** : Choisissez un système d'exploitation moderne (ex: Linux Ubuntu, macOS, FreeBSD) ou une architecture matérielle spécifique (ex: processeurs ARM vs x86).
+2. **Contenu attendu** :
+   - Historique et genèse du sujet.
+   - Schéma de l'architecture logicielle ou matérielle.
+   - Analyse des points forts (performance, sécurité, coût) et limites.
+   - Cas d'usage principaux.
+3. **Format** : Un document rédigé de 3 à 5 pages avec sources citées.
+
+### Critères d'évaluation :
+Rigueur technique, clarté de l'explication, structure logique du document et pertinence des sources.`,
+    contentEn: `To validate this course, you must complete an individual research portfolio.
+
+### Research portfolio guidelines:
+1. **Topic**: Choose a modern operating system (e.g., Linux Ubuntu, macOS, FreeBSD) or a specific hardware architecture (e.g., ARM vs x86 processors).
+2. **Expected Content**:
+   - History and background of the topic.
+   - Diagram of the software or hardware architecture.
+   - Analysis of strengths (performance, security, cost) and limitations.
+   - Main use cases.
+3. **Format**: A written document of 3 to 5 pages with cited sources.
+
+### Evaluation Criteria:
+Technical rigor, clarity of explanation, logical document structure, and source relevance.`,
+    contentAr: `لاعتماد هذه الدورة، يجب عليك إكمال ملف بحث فردي.
+
+### إرشادات ملف البحث:
+1. **الموضوع**: اختر نظام تشغيل حديثاً (مثل Linux Ubuntu) أو بنية عتاد معينة (مثل معالجات ARM مقابل x86).
+2. **المحتوى المتوقع**:
+   - تاريخ وخلفية الموضوع.
+   - مخطط لبنية البرمجيات أو العتاد.
+   - تحليل نقاط القوة (الأداء، الأمان، التكلفة) والحدود.
+   - حالات الاستخدام الرئيسية.
+3. **التنسيق**: وثيقة مكتوبة من 3 إلى 5 صفحات مع ذكر المصادر.`,
+    category: "Projet & Évaluation",
+    hasQuiz: false,
+  },
+];
+
 // ── Main seed function ──
 async function seedLessons() {
   console.log('Seeding lessons...');
@@ -2640,6 +2849,7 @@ async function seedLessons() {
     python: pythonLessons,
     n8n: n8nLessons,
     openclaw: openclawLessons,
+    architecture: architectureLessons,
   };
 
   let totalLessons = 0;

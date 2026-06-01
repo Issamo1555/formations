@@ -17,6 +17,8 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [institution, setInstitution] = useState('');
+  const [subject, setSubject] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -51,7 +53,7 @@ export default function RegisterPage() {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, password, institution, subject }),
       });
 
       const data = await res.json();
@@ -154,6 +156,38 @@ export default function RegisterPage() {
                 required
                 autoComplete="email"
               />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2">
+                {locale === 'ar' ? 'المؤسسة التعليمية (اختياري)' : locale === 'en' ? 'Institution (Optional)' : 'Établissement (Optionnel)'}
+              </label>
+              <input
+                type="text"
+                value={institution}
+                onChange={(e) => setInstitution(e.target.value)}
+                className="input"
+                placeholder={locale === 'ar' ? 'اسم مدرستك أو جامعتك' : locale === 'en' ? 'Your school or university name' : 'Nom de votre école ou université'}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2">
+                {locale === 'ar' ? 'التخصص / المادة (اختياري)' : locale === 'en' ? 'Subject (Optional)' : 'Matière (Optionnelle)'}
+              </label>
+              <select
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                className="input"
+              >
+                <option value="">{locale === 'ar' ? 'اختر تخصصاً' : locale === 'en' ? 'Select a subject' : 'Sélectionnez une matière'}</option>
+                <option value="Informatique">Informatique</option>
+                <option value="Mathématiques">Mathématiques</option>
+                <option value="Management">Management</option>
+                <option value="Économie">Économie</option>
+                <option value="Marketing">Marketing</option>
+                <option value="Autre">Autre</option>
+              </select>
             </div>
 
             <div>

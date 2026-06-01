@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useLocale } from '@/context/LocaleContext';
 import { useTheme } from '@/context/ThemeContext';
+import { useAuth } from '@/context/AuthContext';
+import { ProfileSkeleton } from '@/components/Skeleton';
 import {
   Sun, Moon, Globe, User, Lock, Save, Loader2, CheckCircle,
   XCircle, ArrowLeft, Award, BookOpen, Clock, BarChart3
@@ -14,11 +16,11 @@ import { locales, localeNames } from '@/i18n';
 export default function ProfilePage() {
   const { locale, setLocale, dir, t } = useLocale();
   const { theme, toggleTheme } = useTheme();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<any>(null);
+  const [dataLoading, setDataLoading] = useState(true);
 
   // Password change
   const [currentPassword, setCurrentPassword] = useState('');
@@ -28,59 +30,62 @@ export default function ProfilePage() {
   const [passwordSuccess, setPasswordSuccess] = useState('');
   const [changingPassword, setChangingPassword] = useState(false);
 
+  // Redirect if not authenticated
   useEffect(() => {
-    async function init() {
+    if (!authLoading && !user) {
+      router.push('/login?redirect=/profile');
+    }
+  }, [authLoading, user, router]);
+
+  // Fetch stats using batch progress API (single call instead of 5)
+  useEffect(() => {
+    if (!user) return;
+
+    async function fetchStats() {
       try {
-        const [userRes, progressRes] = await Promise.all([
-          fetch('/api/auth/me'),
+        const [certsRes, batchRes] = await Promise.all([
           fetch('/api/certificates'),
+          fetch('/api/progress/batch?courses=php,python,n8n,openclaw,architecture'),
         ]);
-        const userData = await userRes.json();
-        const certsData = await progressRes.json();
 
-        if (!userData.user) {
-          router.push('/login?redirect=/profile');
-          return;
-        }
-        setUser(userData.user);
+        const [certsData, batchData] = await Promise.all([
+          certsRes.json(),
+          batchRes.json(),
+        ]);
 
-        // Calculate stats
-        const courses = ['php', 'python', 'n8n', 'openclaw'];
+        // Aggregate stats from batch response
         let totalLessons = 0;
         let completedLessons = 0;
         let totalQuizzes = 0;
         let correctQuizzes = 0;
 
-        await Promise.all(
-          courses.map(async (slug) => {
-            try {
-              const res = await fetch(`/api/progress?course=${slug}`);
-              const data = await res.json();
-              totalLessons += data.totalLessons || 0;
-              completedLessons += data.completedCount || 0;
-              totalQuizzes += data.quizStats?.total || 0;
-              correctQuizzes += data.quizStats?.correct || 0;
-            } catch {}
-          })
-        );
+        const progressMap = batchData.progress || {};
+        for (const slug of Object.keys(progressMap)) {
+          const p = progressMap[slug];
+          totalLessons += p.totalLessons || 0;
+          completedLessons += p.completedCount || 0;
+          totalQuizzes += p.quizStats?.total || 0;
+          correctQuizzes += p.quizStats?.correct || 0;
+        }
 
         setStats({
           totalLessons,
           completedLessons,
           certificates: certsData.certificates?.length || 0,
-          coursesUnlocked: userData.user.unlockedCourses?.length || 0,
+          coursesUnlocked: user?.unlockedCourses?.length || 0,
           quizTotal: totalQuizzes,
           quizCorrect: correctQuizzes,
           quizScorePct: totalQuizzes > 0 ? Math.round((correctQuizzes / totalQuizzes) * 100) : 0,
         });
       } catch {
-        router.push('/login');
+        // fallback
       } finally {
-        setLoading(false);
+        setDataLoading(false);
       }
     }
-    init();
-  }, [router]);
+
+    fetchStats();
+  }, [user]);
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,10 +126,21 @@ export default function ProfilePage() {
     }
   };
 
-  if (loading) {
+  // Show skeleton while loading
+  if (authLoading || !user || dataLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      <div className="min-h-screen" dir={dir}>
+        <div className="fixed inset-0 -z-10">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.04)_1px,transparent_0)] [background-size:24px_24px]" />
+        </div>
+        <header className="sticky top-0 z-30 backdrop-blur-xl bg-[var(--bg-base)]/80 border-b border-border">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="skeleton h-5 w-40 rounded-lg" />
+          </div>
+        </header>
+        <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <ProfileSkeleton />
+        </main>
       </div>
     );
   }
@@ -169,7 +185,7 @@ export default function ProfilePage() {
       </header>
 
       {/* Content */}
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
         {/* Profile header */}
         <div className="card mb-8 flex flex-col sm:flex-row items-center sm:items-start gap-5">
           <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-secondary to-primary flex items-center justify-center text-white font-display font-bold text-2xl flex-shrink-0">

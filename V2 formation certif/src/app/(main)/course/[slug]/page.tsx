@@ -5,6 +5,8 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useLocale } from '@/context/LocaleContext';
 import { useTheme } from '@/context/ThemeContext';
+import { useAuth } from '@/context/AuthContext';
+import { CourseSkeleton } from '@/components/Skeleton';
 import {
   Sun, Moon, Globe, Menu, X, ArrowLeft, ArrowRight,
   CheckCircle, Circle, Lock, Award, LayoutDashboard,
@@ -57,11 +59,16 @@ const COURSE_ICONS: Record<string, string> = {
   python: '🐍',
   n8n: '⚡',
   openclaw: '🤖',
+  architecture: '🖥️',
 };
+
+// Courses that are theory-only (no code editor for exercises)
+const THEORY_ONLY_COURSES = ['architecture'];
 
 export default function CoursePage() {
   const { t, locale, setLocale, dir } = useLocale();
   const { theme, toggleTheme } = useTheme();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const params = useParams();
   const slug = params?.slug as string;
@@ -78,29 +85,38 @@ export default function CoursePage() {
   const [isRunning, setIsRunning] = useState(false);
   const [activeTab, setActiveTab] = useState<'theory' | 'example' | 'exercise' | 'quiz'>('theory');
 
+  // Redirect if not authenticated
   useEffect(() => {
+    if (!authLoading && !user) {
+      router.push(`/login?redirect=/course/${slug}`);
+    }
+  }, [authLoading, user, router, slug]);
+
+  // Check access and load course data (using auth context instead of fetching /api/auth/me)
+  useEffect(() => {
+    if (authLoading || !user) return;
+
     async function init() {
       try {
-        // Check auth
-        const meRes = await fetch('/api/auth/me');
-        const meData = await meRes.json();
-        if (!meData.user) {
-          router.push(`/login?redirect=/course/${slug}`);
-          return;
-        }
-
-        // Check if course is unlocked
-        const isUnlocked = meData.user.role === 'ADMIN' ||
-          meData.user.unlockedCourses?.some((uc: any) => uc.course.slug === slug);
+        // Check if course is unlocked (using cached user from context)
+        const isUnlocked = user!.role === 'ADMIN' ||
+          user!.unlockedCourses?.some((uc: any) => uc.course.slug === slug);
 
         if (!isUnlocked) {
           router.push('/dashboard');
           return;
         }
 
-        // Fetch course from API
-        const courseRes = await fetch(`/api/courses/${slug}`);
-        const courseData = await courseRes.json();
+        // Fetch course and progress in parallel (instead of sequentially)
+        const [courseRes, progressRes] = await Promise.all([
+          fetch(`/api/courses/${slug}`),
+          fetch(`/api/progress?course=${slug}`),
+        ]);
+
+        const [courseData, progressData] = await Promise.all([
+          courseRes.json(),
+          progressRes.json(),
+        ]);
 
         if (!courseData.course) {
           router.push('/dashboard');
@@ -109,9 +125,6 @@ export default function CoursePage() {
 
         setCourse(courseData.course);
 
-        // Load progress from DB
-        const progressRes = await fetch(`/api/progress?course=${slug}`);
-        const progressData = await progressRes.json();
         if (progressData.completedLessonIds) {
           setCompletedLessons(new Set(progressData.completedLessonIds));
         }
@@ -122,7 +135,7 @@ export default function CoursePage() {
       }
     }
     init();
-  }, [slug, router]);
+  }, [authLoading, user, slug, router]);
 
   // Reset quiz and tab state when lesson changes
   useEffect(() => {
@@ -545,12 +558,8 @@ sys.stdout = StringIO()
     }
   }, [currentLessonIndex]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-[var(--text-muted)]">{t('common.loading')}</div>
-      </div>
-    );
+  if (loading || authLoading) {
+    return <CourseSkeleton />;
   }
 
   if (!course) {
@@ -699,13 +708,15 @@ sys.stdout = StringIO()
                     {locale === 'ar' ? 'مثال' : locale === 'en' ? 'Example' : 'Exemple'}
                   </button>
                 )}
+                {currentLesson.exerciseFr && (
                 <button
                   onClick={() => setActiveTab('exercise')}
                   className={`px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-2 whitespace-nowrap ${activeTab === 'exercise' ? 'bg-primary text-white shadow-lg' : 'text-[var(--text-muted)] hover:text-white'}`}
                 >
-                  <Terminal className="w-4 h-4" />
+                  {THEORY_ONLY_COURSES.includes(slug) ? <BookOpen className="w-4 h-4" /> : <Terminal className="w-4 h-4" />}
                   {locale === 'ar' ? 'تمرين' : locale === 'en' ? 'Exercise' : 'Exercice'}
                 </button>
+                )}
                 {currentLesson.hasQuiz && (
                   <button
                     onClick={() => setActiveTab('quiz')}
@@ -768,105 +779,137 @@ sys.stdout = StringIO()
 
               {activeTab === 'exercise' && (
                 <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  {/* Instructions Area */}
-                  {(currentLesson.exerciseFr || currentLesson.contentFr.includes('Exercice')) && (
-                    <div className="mb-6 bg-primary/5 border border-primary/20 rounded-2xl p-6">
-                      <div className="flex items-center gap-3 mb-3 text-primary">
-                        <Trophy className="w-5 h-5" />
-                        <h3 className="font-display font-bold">🎯 {locale === 'ar' ? 'هدف التمرين' : locale === 'en' ? 'Exercise Objective' : 'Objectif de l\'exercice'}</h3>
-                      </div>
-                      <div className="text-sm text-[var(--text-muted)] leading-relaxed whitespace-pre-line">
-                        {currentLesson.exerciseFr?.replace(/\\n/g, '\n').split('\n').filter((l: string) => l.startsWith('//')).map((l: string) => l.replace(/^\/\/\s*/, '')).join('\n') ||
-                         'Consultez les commentaires dans le code ci-dessous pour les instructions.'}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Sandbox / Exercise Section */}
-                  <div className="bg-[var(--bg-elevated)] border border-border rounded-2xl overflow-hidden shadow-xl">
-                    <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-white/[0.02]">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center text-primary">
-                          <Terminal className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <h3 className="font-display font-bold text-base">
-                            {locale === 'ar' ? 'تمرين عملي' : locale === 'en' ? 'Practical Exercise' : 'Exercice Pratique'}
+                  {THEORY_ONLY_COURSES.includes(slug) ? (
+                    /* ── Theory-only exercise (no code editor) ── */
+                    <>
+                      <div className="bg-[var(--bg-elevated)] border border-border rounded-2xl p-6 sm:p-8">
+                        <div className="flex items-center gap-3 mb-6 text-primary">
+                          <Trophy className="w-5 h-5" />
+                          <h3 className="font-display font-bold text-lg">
+                            🎯 {locale === 'ar' ? 'تمرين' : locale === 'en' ? 'Exercise' : 'Exercice'}
                           </h3>
-                          <p className="text-xs text-[var(--text-muted)]">
-                            {locale === 'ar' ? 'قم بتعديل وتشغيل الكود' : locale === 'en' ? 'Modify and execute the code' : 'Modifiez et exécutez le code'}
-                          </p>
+                        </div>
+                        <div className="text-[var(--text-muted)] leading-relaxed whitespace-pre-line font-mono text-sm bg-black/20 border border-border rounded-xl p-6">
+                          {(currentLesson.exerciseFr || '').replace(/\\n/g, '\n').replace(/^\/\/\s?/gm, '')}
                         </div>
                       </div>
-                      <button
-                        onClick={() => {
-                          setSandboxCode(getDefaultSandbox(currentLesson));
-                          setSandboxOutput('');
-                          setIsRunning(false);
-                        }}
-                        className="btn btn-ghost btn-sm text-xs"
-                      >
-                        {locale === 'ar' ? 'إعادة تعيين' : locale === 'en' ? 'Reset' : 'Réinitialiser'}
-                      </button>
-                    </div>
-                    <CodeEditor
-                      code={sandboxCode}
-                      onChange={(newCode) => setSandboxCode(newCode)}
-                      language="php"
-                    />
-                    <div className="px-4 pb-4 flex items-center justify-between border-t border-border pt-4">
-                      <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
-                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                        {locale === 'ar' ? 'جاهز للتنفيذ' : locale === 'en' ? 'Ready to execute' : 'Prêt pour l\'exécution'}
-                      </div>
-                      <button
-                        onClick={runSandbox}
-                        disabled={isRunning}
-                        className="btn btn-primary px-6 flex items-center gap-2 group shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {isRunning ? (
-                          <>
-                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            {locale === 'ar' ? 'جاري التنفيذ...' : locale === 'en' ? 'Running...' : 'Exécution...'}
-                          </>
-                        ) : (
-                          <>
-                            <Play className="w-4 h-4 fill-current group-hover:scale-110 transition-transform" />
-                            {locale === 'ar' ? 'تشغيل' : locale === 'en' ? 'Run' : 'Exécuter'}
-                          </>
+                      <div className="mt-8 flex justify-between">
+                        <button onClick={() => setActiveTab(currentLesson.exampleFr ? 'example' : 'theory')} className="btn btn-ghost flex items-center gap-2">
+                          <ArrowLeft className={`w-4 h-4 ${dir === 'rtl' ? 'rotate-180' : ''}`} />
+                          {locale === 'ar' ? 'العودة' : locale === 'en' ? 'Back' : 'Retour'}
+                        </button>
+                        {currentLesson.hasQuiz && (
+                          <button onClick={() => setActiveTab('quiz')} className="btn btn-primary flex items-center gap-2">
+                            {locale === 'ar' ? 'انتقل إلى الاختبار' : locale === 'en' ? 'Go to Quiz' : 'Passer au Quiz'}
+                            <ArrowRight className={`w-4 h-4 ${dir === 'rtl' ? 'rotate-180' : ''}`} />
+                          </button>
                         )}
-                      </button>
-                    </div>
-                    {sandboxOutput && (
-                      <div className="border-t border-border bg-black/40 p-0">
-                        <div className="px-4 py-2 bg-white/5 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider border-b border-border">
-                          {locale === 'ar' ? 'النتيجة' : locale === 'en' ? 'Output' : 'Résultat'}
-                        </div>
-                        <pre className="p-6 font-mono text-sm text-green-400 overflow-x-auto min-h-[100px] whitespace-pre-wrap">
-                          {sandboxOutput}
-                        </pre>
                       </div>
-                    )}
-                  </div>
+                    </>
+                  ) : (
+                    /* ── Programming exercise (with code editor) ── */
+                    <>
+                      {/* Instructions Area */}
+                      {(currentLesson.exerciseFr || currentLesson.contentFr.includes('Exercice')) && (
+                        <div className="mb-6 bg-primary/5 border border-primary/20 rounded-2xl p-6">
+                          <div className="flex items-center gap-3 mb-3 text-primary">
+                            <Trophy className="w-5 h-5" />
+                            <h3 className="font-display font-bold">🎯 {locale === 'ar' ? 'هدف التمرين' : locale === 'en' ? 'Exercise Objective' : 'Objectif de l\'exercice'}</h3>
+                          </div>
+                          <div className="text-sm text-[var(--text-muted)] leading-relaxed whitespace-pre-line">
+                            {currentLesson.exerciseFr?.replace(/\\n/g, '\n').split('\n').filter((l: string) => l.startsWith('//')).map((l: string) => l.replace(/^\/\/\s*/, '')).join('\n') ||
+                             'Consultez les commentaires dans le code ci-dessous pour les instructions.'}
+                          </div>
+                        </div>
+                      )}
 
-                  <div className="mt-8 flex justify-between">
-                    <button 
-                      onClick={() => setActiveTab('theory')}
-                      className="btn btn-ghost flex items-center gap-2"
-                    >
-                      <ArrowLeft className={`w-4 h-4 ${dir === 'rtl' ? 'rotate-180' : ''}`} />
-                      {locale === 'ar' ? 'العودة للدرس' : locale === 'en' ? 'Back to Theory' : 'Retour au cours'}
-                    </button>
-                    {currentLesson.hasQuiz && (
-                      <button 
-                        onClick={() => setActiveTab('quiz')}
-                        className="btn btn-primary flex items-center gap-2"
-                      >
-                        {locale === 'ar' ? 'انتقل إلى الاختبار' : locale === 'en' ? 'Go to Quiz' : 'Passer au Quiz'}
-                        <ArrowRight className={`w-4 h-4 ${dir === 'rtl' ? 'rotate-180' : ''}`} />
-                      </button>
-                    )}
-                  </div>
+                      {/* Sandbox / Exercise Section */}
+                      <div className="bg-[var(--bg-elevated)] border border-border rounded-2xl overflow-hidden shadow-xl">
+                        <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-white/[0.02]">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center text-primary">
+                              <Terminal className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <h3 className="font-display font-bold text-base">
+                                {locale === 'ar' ? 'تمرين عملي' : locale === 'en' ? 'Practical Exercise' : 'Exercice Pratique'}
+                              </h3>
+                              <p className="text-xs text-[var(--text-muted)]">
+                                {locale === 'ar' ? 'قم بتعديل وتشغيل الكود' : locale === 'en' ? 'Modify and execute the code' : 'Modifiez et exécutez le code'}
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => {
+                              setSandboxCode(getDefaultSandbox(currentLesson));
+                              setSandboxOutput('');
+                              setIsRunning(false);
+                            }}
+                            className="btn btn-ghost btn-sm text-xs"
+                          >
+                            {locale === 'ar' ? 'إعادة تعيين' : locale === 'en' ? 'Reset' : 'Réinitialiser'}
+                          </button>
+                        </div>
+                        <CodeEditor
+                          code={sandboxCode}
+                          onChange={(newCode) => setSandboxCode(newCode)}
+                          language="php"
+                        />
+                        <div className="px-4 pb-4 flex items-center justify-between border-t border-border pt-4">
+                          <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+                            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                            {locale === 'ar' ? 'جاهز للتنفيذ' : locale === 'en' ? 'Ready to execute' : 'Prêt pour l\'exécution'}
+                          </div>
+                          <button
+                            onClick={runSandbox}
+                            disabled={isRunning}
+                            className="btn btn-primary px-6 flex items-center gap-2 group shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {isRunning ? (
+                              <>
+                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                {locale === 'ar' ? 'جاري التنفيذ...' : locale === 'en' ? 'Running...' : 'Exécution...'}
+                              </>
+                            ) : (
+                              <>
+                                <Play className="w-4 h-4 fill-current group-hover:scale-110 transition-transform" />
+                                {locale === 'ar' ? 'تشغيل' : locale === 'en' ? 'Run' : 'Exécuter'}
+                              </>
+                            )}
+                          </button>
+                        </div>
+                        {sandboxOutput && (
+                          <div className="border-t border-border bg-black/40 p-0">
+                            <div className="px-4 py-2 bg-white/5 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider border-b border-border">
+                              {locale === 'ar' ? 'النتيجة' : locale === 'en' ? 'Output' : 'Résultat'}
+                            </div>
+                            <pre className="p-6 font-mono text-sm text-green-400 overflow-x-auto min-h-[100px] whitespace-pre-wrap">
+                              {sandboxOutput}
+                            </pre>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="mt-8 flex justify-between">
+                        <button 
+                          onClick={() => setActiveTab('theory')}
+                          className="btn btn-ghost flex items-center gap-2"
+                        >
+                          <ArrowLeft className={`w-4 h-4 ${dir === 'rtl' ? 'rotate-180' : ''}`} />
+                          {locale === 'ar' ? 'العودة للدرس' : locale === 'en' ? 'Back to Theory' : 'Retour au cours'}
+                        </button>
+                        {currentLesson.hasQuiz && (
+                          <button 
+                            onClick={() => setActiveTab('quiz')}
+                            className="btn btn-primary flex items-center gap-2"
+                          >
+                            {locale === 'ar' ? 'انتقل إلى الاختبار' : locale === 'en' ? 'Go to Quiz' : 'Passer au Quiz'}
+                            <ArrowRight className={`w-4 h-4 ${dir === 'rtl' ? 'rotate-180' : ''}`} />
+                          </button>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
 

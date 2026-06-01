@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(www.coursera.org)",
+      "Bash(mkdir *)",
+      "Bash(npm install)",
+      "Bash(ls *)",
+      "Bash(sed *)",
+      "Bash(npx *)",
+      "Bash(npm run *)",
+      "Bash(sleep *)",
+      "Bash(curl *)",
+      "Bash(open *)",
+      "Bash(python3 *)",
+      "Bash(kill *)",
+      "Bash(pkill *)",
+      "Bash(cp *)",
+      "Bash(git checkout *)"
+    ]
+  },
+  "$version": 3
+}

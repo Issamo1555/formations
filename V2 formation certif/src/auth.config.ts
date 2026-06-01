@@ -29,16 +29,16 @@ export const authConfig = {
     },
     async session({ session, token }) {
       if (token.sub && session.user) {
-        session.user.id = token.sub;
+        (session.user as any).id = token.sub;
       }
       if (token.role && session.user) {
-        session.user.role = token.role as 'USER' | 'INSTRUCTOR' | 'ADMIN';
+        (session.user as any).role = token.role as 'USER' | 'INSTRUCTOR' | 'ADMIN';
       }
       return session;
     },
     async jwt({ token, user }) {
       if (user) {
-        token.role = user.role;
+        token.role = (user as any).role;
       }
       return token;
     },
@@ -56,7 +56,7 @@ export const authConfig = {
       clientId: process.env.AZURE_AD_CLIENT_ID,
       clientSecret: process.env.AZURE_AD_CLIENT_SECRET,
       tenantId: process.env.AZURE_AD_TENANT_ID,
-    }),
+    } as any),
     Credentials({
       async authorize(credentials) {
         // Validation basique (la vraie validation a lieu dans auth.ts avec Prisma)

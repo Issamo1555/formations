@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useLocale } from '@/context/LocaleContext';
 import { useTheme } from '@/context/ThemeContext';
+import { useAuth } from '@/context/AuthContext';
 import { Sun, Moon, Globe } from 'lucide-react';
 import { locales, localeNames } from '@/i18n';
 import { useState, Suspense } from 'react';
@@ -11,6 +12,7 @@ import { useState, Suspense } from 'react';
 function LoginPageInner() {
   const { t, locale, setLocale } = useLocale();
   const { theme, toggleTheme } = useTheme();
+  const { refreshUser } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect') || '/dashboard';
@@ -46,11 +48,9 @@ function LoginPageInner() {
         return;
       }
 
-      router.refresh();
-      // Small delay to let cookie propagate
-      setTimeout(() => {
-        router.push(redirect);
-      }, 300);
+      // Refresh auth context so dashboard gets the user instantly
+      await refreshUser();
+      router.push(redirect);
     } catch {
       setError(t('common.error'));
     } finally {

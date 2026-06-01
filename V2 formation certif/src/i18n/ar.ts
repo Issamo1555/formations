@@ -141,6 +141,7 @@ export const ar = {
       pythonUnlocked: 'Python مفتوحة',
       n8nUnlocked: 'n8n مفتوحة',
       openclawUnlocked: 'OpenClaw مفتوحة',
+      architectureUnlocked: 'Architecture مفتوحة',
     },
     table: {
       title: 'المستخدمون المسجلون',
@@ -237,5 +238,6 @@ export const ar = {
     python: 'البرمجة بـ Python',
     n8n: 'الأتمتة بـ n8n',
     openclaw: 'إتقان الذكاء الاصطناعي OpenClaw',
+    architecture: 'بنية الحاسوب ونظم التشغيل',
   },
 };
