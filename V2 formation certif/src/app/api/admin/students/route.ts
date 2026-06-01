@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 
 export async function GET(req: NextRequest) {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const userId = cookieStore.get('smartcodai-user-id')?.value;
 
     if (!userId) {

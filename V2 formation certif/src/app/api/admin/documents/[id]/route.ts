@@ -7,7 +7,7 @@ import path from 'path';
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const userId = cookieStore.get('smartcodai-user-id')?.value;
 
     if (!userId) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });

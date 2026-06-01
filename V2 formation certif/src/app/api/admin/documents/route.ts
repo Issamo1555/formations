@@ -6,7 +6,7 @@ import path from 'path';
 
 export async function POST(req: NextRequest) {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const userId = cookieStore.get('smartcodai-user-id')?.value;
 
     if (!userId) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const userId = cookieStore.get('smartcodai-user-id')?.value;
 
     if (!userId) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
