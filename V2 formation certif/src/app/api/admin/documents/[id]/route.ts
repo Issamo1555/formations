@@ -4,8 +4,9 @@ import { cookies } from 'next/headers';
 import fs from 'fs';
 import path from 'path';
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const cookieStore = cookies();
     const userId = cookieStore.get('smartcodai-user-id')?.value;
 
@@ -17,7 +18,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     }
 
     const document = await prisma.document.findUnique({
-      where: { id: params.id }
+      where: { id }
     });
 
     if (!document) {
@@ -36,7 +37,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
     // Delete from DB
     await prisma.document.delete({
-      where: { id: params.id }
+      where: { id }
     });
 
     return NextResponse.json({ success: true });
