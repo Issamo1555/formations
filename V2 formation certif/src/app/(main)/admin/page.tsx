@@ -156,6 +156,14 @@ export default function AdminPage() {
             <Upload className="w-4 h-4" />
             {locale === 'ar' ? 'استيراد الدروس' : locale === 'en' ? 'Import Lessons' : 'Importer des cours'}
           </Link>
+          <Link href="/admin/documents" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-white/5 transition-colors">
+            <FileText className="w-4 h-4" />
+            {locale === 'ar' ? 'إدارة المستندات' : locale === 'en' ? 'Manage Documents' : 'Ressources & Documents'}
+          </Link>
+          <Link href="/admin/students" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-white/5 transition-colors">
+            <Users className="w-4 h-4" />
+            {locale === 'ar' ? 'تتبع الطلاب' : locale === 'en' ? 'Track Students' : 'Suivi des Étudiants'}
+          </Link>
           <Link href="/" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-white/5 transition-colors mt-4">
             <Home className="w-4 h-4" />
             {t('nav.home')}

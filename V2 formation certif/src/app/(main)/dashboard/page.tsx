@@ -232,6 +232,15 @@ export default function DashboardPage() {
             {locale === 'ar' ? 'المدونة' : locale === 'en' ? 'Blog' : 'Blog'}
           </Link>
           <Link
+            href="/documents"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--card-hover-bg)')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+          >
+            <FileText className="w-4 h-4" />
+            {locale === 'ar' ? 'مستنداتي' : locale === 'en' ? 'My Documents' : 'Mes Documents'}
+          </Link>
+          <Link
             href="#settings"
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--card-hover-bg)')}

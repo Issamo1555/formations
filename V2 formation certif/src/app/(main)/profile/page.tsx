@@ -72,7 +72,7 @@ export default function ProfilePage() {
           totalLessons,
           completedLessons,
           certificates: certsData.certificates?.length || 0,
-          coursesUnlocked: user.unlockedCourses?.length || 0,
+          coursesUnlocked: user?.unlockedCourses?.length || 0,
           quizTotal: totalQuizzes,
           quizCorrect: correctQuizzes,
           quizScorePct: totalQuizzes > 0 ? Math.round((correctQuizzes / totalQuizzes) * 100) : 0,
