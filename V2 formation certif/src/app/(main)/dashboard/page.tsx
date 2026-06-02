@@ -130,7 +130,7 @@ export default function DashboardPage() {
       });
       if (res.ok) {
         setShowProfileModal(false);
-        await refreshUser();
+        window.location.reload();
       } else {
         const data = await res.json();
         alert(data.error || 'Erreur lors de la mise à jour.');
