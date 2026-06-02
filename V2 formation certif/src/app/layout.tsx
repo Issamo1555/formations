@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter, Syne, Noto_Sans_Arabic } from 'next/font/google';
 import { LocaleProvider } from '@/context/LocaleContext';
 import { ThemeProvider } from '@/context/ThemeContext';
@@ -23,11 +23,22 @@ const notoArabic = Noto_Sans_Arabic({
   display: 'swap',
 });
 
+export const viewport: Viewport = {
+  themeColor: '#0f172a',
+};
+
 export const metadata: Metadata = {
   title: 'Smartcodai Academy | Apprenez en pratiquant',
   description: 'Plateforme de formation orientee pratique, progression et certification. PHP, Python, n8n et IA.',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Smartcodai V2',
+  },
   icons: {
     icon: '/favicon.ico',
+    apple: '/icons/icon-192x192.png',
   },
 };
 
