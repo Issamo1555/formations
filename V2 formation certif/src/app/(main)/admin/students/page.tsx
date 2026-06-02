@@ -160,9 +160,10 @@ export default function AdminStudentsPage() {
             <thead className="bg-white/5 text-[var(--text-muted)] uppercase text-xs">
               <tr>
                 <th className="px-6 py-4 font-semibold">Étudiant</th>
+                <th className="px-6 py-4 font-semibold">Inscription & Accès</th>
                 <th className="px-6 py-4 font-semibold">Établissement / Matière</th>
                 <th className="px-6 py-4 font-semibold">Avancement Cursus</th>
-                <th className="px-6 py-4 font-semibold">Activité</th>
+                <th className="px-6 py-4 font-semibold">Statistiques</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -177,6 +178,18 @@ export default function AdminStudentsPage() {
                         <div>
                           <p className="font-semibold">{student.name}</p>
                           <p className="text-xs text-[var(--text-muted)]">{student.email}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="space-y-1 text-xs">
+                        <div className="flex items-center gap-2 text-[var(--text-muted)]">
+                          <span className="font-semibold w-16">Inscrit le:</span>
+                          <span className="text-[var(--foreground)]">{new Date(student.createdAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-[var(--text-muted)]">
+                          <span className="font-semibold w-16">Dernier:</span>
+                          <span className="text-[var(--foreground)]">{new Date(student.lastActivity).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
                       </div>
                     </td>
@@ -225,11 +238,11 @@ export default function AdminStudentsPage() {
                     <td className="px-6 py-4">
                       <div className="space-y-2 text-xs text-[var(--text-muted)]">
                         <div className="flex items-center gap-2">
-                          <Clock className="w-3 h-3" />
+                          <Clock className="w-3 h-3 text-emerald-500" />
                           Temps: <span className="font-medium text-[var(--foreground)]">{formatTime(student.totalTimeSpent)}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Activity className="w-3 h-3" />
+                          <Activity className="w-3 h-3 text-blue-500" />
                           Connexions: <span className="font-medium text-[var(--foreground)]">{student.loginCount}</span>
                         </div>
                       </div>
