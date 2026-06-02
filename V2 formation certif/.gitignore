@@ -41,3 +41,10 @@ prisma/*.db-journal
 # TypeScript
 *.tsbuildinfo
 
+
+# PWA files
+public/sw.js
+public/workbox-*.js
+public/fallback-
+public/swe-worker-*.js
+
