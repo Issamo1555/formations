@@ -20,6 +20,8 @@ export interface AuthUser {
   name: string;
   email: string;
   role: string;
+  institution: string | null;
+  subject: string | null;
   createdAt: string;
   unlockedCourses: UnlockedCourse[];
 }

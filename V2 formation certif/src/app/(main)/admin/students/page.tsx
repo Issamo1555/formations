@@ -11,6 +11,7 @@ type Student = {
   email: string;
   institution: string | null;
   subject: string | null;
+  isActive: boolean;
   createdAt: string;
   totalTimeSpent: number;
   loginCount: number;
@@ -55,6 +56,34 @@ export default function AdminStudentsPage() {
   // Get unique institutions and subjects for filters
   const institutions = Array.from(new Set(students.map(s => s.institution).filter(Boolean))) as string[];
   const subjects = Array.from(new Set(students.map(s => s.subject).filter(Boolean))) as string[];
+
+  const toggleActiveStatus = async (studentId: string, currentStatus: boolean) => {
+    try {
+      // Optimistic update
+      setStudents(students.map(s => 
+        s.id === studentId ? { ...s, isActive: !currentStatus } : s
+      ));
+
+      const res = await fetch(`/api/admin/students/${studentId}/toggle-active`, {
+        method: 'PATCH',
+      });
+      const data = await res.json();
+      
+      if (!res.ok) {
+        // Revert on error
+        setStudents(students.map(s => 
+          s.id === studentId ? { ...s, isActive: currentStatus } : s
+        ));
+        console.error('Failed to toggle status:', data.error);
+      }
+    } catch (error) {
+      console.error('Error toggling status:', error);
+      // Revert on error
+      setStudents(students.map(s => 
+        s.id === studentId ? { ...s, isActive: currentStatus } : s
+      ));
+    }
+  };
 
   // Filter students
   const filteredStudents = students.filter(student => {
@@ -164,6 +193,7 @@ export default function AdminStudentsPage() {
                 <th className="px-6 py-4 font-semibold">Établissement / Matière</th>
                 <th className="px-6 py-4 font-semibold">Avancement Cursus</th>
                 <th className="px-6 py-4 font-semibold">Statistiques</th>
+                <th className="px-6 py-4 font-semibold text-center">Statut</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -245,6 +275,24 @@ export default function AdminStudentsPage() {
                           <Activity className="w-3 h-3 text-blue-500" />
                           Connexions: <span className="font-medium text-[var(--foreground)]">{student.loginCount}</span>
                         </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <button
+                        onClick={() => toggleActiveStatus(student.id, student.isActive)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[var(--bg-elevated)] ${
+                          student.isActive ? 'bg-emerald-500' : 'bg-red-500'
+                        }`}
+                        title={student.isActive ? 'Désactiver le compte' : 'Activer le compte'}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            student.isActive ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                      <div className={`text-xs mt-1 font-medium ${student.isActive ? 'text-emerald-500' : 'text-red-500'}`}>
+                        {student.isActive ? 'Actif' : 'Désactivé'}
                       </div>
                     </td>
                   </tr>
