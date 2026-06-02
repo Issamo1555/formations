@@ -214,6 +214,15 @@ export default function DashboardPage() {
             {t('nav.certificates')}
           </Link>
           <Link
+            href="/algorithmique"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--card-hover-bg)')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+          >
+            <span className="w-4 h-4 text-center">🧩</span>
+            {locale === 'ar' ? 'الخوارزميات (مبتدئ)' : locale === 'en' ? 'Algorithms (Beginner)' : 'Algorithmique (Débutant)'}
+          </Link>
+          <Link
             href="/profile"
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors"
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--card-hover-bg)')}

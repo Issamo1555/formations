@@ -18,6 +18,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [institution, setInstitution] = useState('');
+  const [otherInstitution, setOtherInstitution] = useState('');
   const [subject, setSubject] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -53,7 +54,13 @@ export default function RegisterPage() {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, institution, subject }),
+        body: JSON.stringify({ 
+          name, 
+          email, 
+          password, 
+          institution: institution === 'Autre' ? otherInstitution : institution, 
+          subject 
+        }),
       });
 
       const data = await res.json();
@@ -160,15 +167,30 @@ export default function RegisterPage() {
 
             <div>
               <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2">
-                {locale === 'ar' ? 'المؤسسة التعليمية (اختياري)' : locale === 'en' ? 'Institution (Optional)' : 'Établissement (Optionnel)'}
+                {locale === 'ar' ? 'المؤسسة التعليمية' : locale === 'en' ? 'Institution' : 'Établissement'}
               </label>
-              <input
-                type="text"
+              <select
                 value={institution}
                 onChange={(e) => setInstitution(e.target.value)}
                 className="input"
-                placeholder={locale === 'ar' ? 'اسم مدرستك أو جامعتك' : locale === 'en' ? 'Your school or university name' : 'Nom de votre école ou université'}
-              />
+                required
+              >
+                <option value="">{locale === 'ar' ? 'اختر مؤسسة' : locale === 'en' ? 'Select an institution' : 'Sélectionnez un établissement'}</option>
+                <option value="FLGA">FLGA</option>
+                <option value="FLGB">FLGB</option>
+                <option value="SGM">SGM</option>
+                <option value="Autre">Autre</option>
+              </select>
+              {institution === 'Autre' && (
+                <input
+                  type="text"
+                  value={otherInstitution}
+                  onChange={(e) => setOtherInstitution(e.target.value)}
+                  className="input mt-2"
+                  placeholder={locale === 'ar' ? 'اسم مؤسستك' : locale === 'en' ? 'Your institution name' : 'Nom de votre établissement'}
+                  required
+                />
+              )}
             </div>
 
             <div>
