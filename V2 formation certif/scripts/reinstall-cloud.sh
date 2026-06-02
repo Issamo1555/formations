@@ -7,7 +7,7 @@
 # ============================================================
 
 echo "🛑 Arrêt des conteneurs existants..."
-docker compose down -v
+docker compose down
 
 echo "🧹 Nettoyage des anciennes images..."
 docker image prune -f
