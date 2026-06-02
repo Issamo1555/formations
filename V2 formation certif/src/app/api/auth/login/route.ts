@@ -27,6 +27,7 @@ export async function POST(req: NextRequest) {
         email: true,
         passwordHash: true,
         role: true,
+        isActive: true,
         createdAt: true,
       },
     });
@@ -43,6 +44,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: 'Email ou mot de passe incorrect.' },
         { status: 401 }
+      );
+    }
+
+    if (!user.isActive) {
+      return NextResponse.json(
+        { error: 'Votre compte a été désactivé par un administrateur.' },
+        { status: 403 }
       );
     }
 

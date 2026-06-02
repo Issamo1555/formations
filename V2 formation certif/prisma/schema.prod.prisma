@@ -23,6 +23,7 @@ model User {
   updatedAt     DateTime  @updatedAt @map("updated_at")
   institution   String?
   subject       String?
+  isActive      Boolean   @default(true) @map("is_active")
 
   accounts        Account[]
   sessions        Session[]

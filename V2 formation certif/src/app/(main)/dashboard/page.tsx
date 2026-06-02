@@ -17,7 +17,7 @@ import { locales, localeNames } from '@/i18n';
 export default function DashboardPage() {
   const { t, locale, setLocale, dir } = useLocale();
   const { theme, toggleTheme } = useTheme();
-  const { user, loading: authLoading, logout } = useAuth();
+  const { user, loading: authLoading, logout, refreshUser } = useAuth();
   const router = useRouter();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -25,12 +25,30 @@ export default function DashboardPage() {
   const [certificates, setCertificates] = useState<any[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
 
+  // Profile completion state
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [institution, setInstitution] = useState('');
+  const [customInstitution, setCustomInstitution] = useState('');
+  const [subject, setSubject] = useState('');
+  const [profileSaving, setProfileSaving] = useState(false);
+
   // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login?redirect=/dashboard');
     }
   }, [authLoading, user, router]);
+
+  // Check if profile is complete
+  useEffect(() => {
+    if (user && !authLoading) {
+      if (!user.institution || !user.subject) {
+        setShowProfileModal(true);
+      } else {
+        setShowProfileModal(false);
+      }
+    }
+  }, [user, authLoading]);
 
   // Fetch courses + certificates + batch progress in parallel
   useEffect(() => {
@@ -98,6 +116,31 @@ export default function DashboardPage() {
                   user?.email === 'admin@smartcodai.com' || 
                   user?.email === 'issamo1555@gmail.com' || 
                   user?.email === 'iatest@vocodata.com';
+
+  const handleProfileSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setProfileSaving(true);
+    const finalInst = institution === 'Autre' ? customInstitution : institution;
+    
+    try {
+      const res = await fetch('/api/auth/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ institution: finalInst, subject })
+      });
+      if (res.ok) {
+        setShowProfileModal(false);
+        await refreshUser();
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Erreur lors de la mise à jour.');
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setProfileSaving(false);
+    }
+  };
 
   // Show skeleton while loading auth or data
   if (authLoading || !user || dataLoading) {
@@ -544,6 +587,75 @@ export default function DashboardPage() {
             )}
           </div>
         </div>
+        
+        {/* Profil Obligatoire Modal */}
+        {showProfileModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            <div className="bg-[var(--bg-elevated)] border border-border rounded-2xl w-full max-w-md p-6 shadow-2xl">
+              <div className="text-center mb-6">
+                <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary mx-auto mb-4">
+                  <User className="w-6 h-6" />
+                </div>
+                <h2 className="text-xl font-bold">Compléter votre profil</h2>
+                <p className="text-sm text-[var(--text-muted)] mt-1">
+                  Afin de personnaliser votre expérience, merci d'indiquer votre établissement.
+                </p>
+              </div>
+              
+              <form onSubmit={handleProfileSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Établissement <span className="text-red-500">*</span></label>
+                  <select 
+                    required
+                    value={institution}
+                    onChange={(e) => setInstitution(e.target.value)}
+                    className="input w-full"
+                  >
+                    <option value="">Sélectionner...</option>
+                    <option value="FLGA">FLGA</option>
+                    <option value="FLGB">FLGB</option>
+                    <option value="SGM">SGM</option>
+                    <option value="Autre">Autre</option>
+                  </select>
+                </div>
+
+                {institution === 'Autre' && (
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Précisez votre établissement <span className="text-red-500">*</span></label>
+                    <input
+                      type="text"
+                      required
+                      value={customInstitution}
+                      onChange={(e) => setCustomInstitution(e.target.value)}
+                      className="input w-full"
+                      placeholder="Nom de votre école/université"
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Matière / Filière <span className="text-red-500">*</span></label>
+                  <input
+                    type="text"
+                    required
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
+                    className="input w-full"
+                    placeholder="Ex: Informatique, Mathématiques..."
+                  />
+                </div>
+
+                <button 
+                  type="submit" 
+                  disabled={profileSaving}
+                  className="btn btn-primary w-full mt-4"
+                >
+                  {profileSaving ? 'Enregistrement...' : 'Enregistrer et Continuer'}
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

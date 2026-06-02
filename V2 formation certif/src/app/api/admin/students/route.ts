@@ -28,6 +28,7 @@ export async function GET(req: NextRequest) {
         email: true,
         institution: true,
         subject: true,
+        isActive: true,
         createdAt: true,
         totalTimeSpent: true,
         loginCount: true,
