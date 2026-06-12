@@ -759,10 +759,19 @@ sys.stdout = StringIO()
                       <BookOpen className="w-5 h-5" />
                       <h3 className="font-display font-bold">{locale === 'ar' ? 'مثال توضيحي' : locale === 'en' ? 'Illustrative Example' : 'Exemple d\'illustration'}</h3>
                     </div>
-                    <CodeBlock
-                      code={(currentLesson.exampleFr || '').replace(/\\n/g, '\n').trim()}
-                      language="php"
-                    />
+                    {THEORY_ONLY_COURSES.includes(slug) ? (
+                      <div className="text-[var(--text-muted)] leading-relaxed whitespace-pre-line text-sm bg-primary/5 border border-primary/20 rounded-xl p-6">
+                        {(currentLesson.exampleFr || '')
+                          .replace(/\\n/g, '\n')
+                          .replace(/^\/\/\s?/gm, '') // Remove PHP comment slashes
+                          .trim()}
+                      </div>
+                    ) : (
+                      <CodeBlock
+                        code={(currentLesson.exampleFr || '').replace(/\\n/g, '\n').trim()}
+                        language="php"
+                      />
+                    )}
                   </div>
                   <div className="pt-8 flex justify-between">
                     <button onClick={() => setActiveTab('theory')} className="btn btn-ghost flex items-center gap-2">
