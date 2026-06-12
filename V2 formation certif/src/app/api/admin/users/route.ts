@@ -27,6 +27,8 @@ export async function GET(req: NextRequest) {
       name: true,
       email: true,
       role: true,
+      institution: true,
+      subject: true,
       createdAt: true,
       unlockedCourses: {
         select: {

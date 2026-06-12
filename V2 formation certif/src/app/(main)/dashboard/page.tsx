@@ -168,7 +168,7 @@ export default function DashboardPage() {
           </div>
         </aside>
 
-        <main className="flex-1 min-w-0 md:ml-64">
+        <main className="flex-1 min-w-0">
           <header className="sticky top-0 z-30 backdrop-blur-xl border-b" style={{ backgroundColor: 'var(--bg-base)', borderColor: 'var(--border-light)' }}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
               <div className="skeleton h-6 w-48 rounded-lg" />
@@ -348,7 +348,7 @@ export default function DashboardPage() {
       </aside>
 
       {/* Main Container */}
-      <main className="flex-1 min-w-0 md:ml-64">
+      <main className="flex-1 min-w-0">
         <header className="sticky top-0 z-30 backdrop-blur-xl border-b" style={{ backgroundColor: 'var(--bg-base)', borderColor: 'var(--border-light)' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-6">
             <div className="flex items-center gap-3">

@@ -333,7 +333,7 @@ export default function AdminStudentsPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-[var(--text-muted)]">
+                  <td colSpan={6} className="px-6 py-12 text-center text-[var(--text-muted)]">
                     <div className="flex flex-col items-center justify-center">
                       <Users className="w-12 h-12 mb-3 opacity-20" />
                       <p>Aucun étudiant trouvé.</p>

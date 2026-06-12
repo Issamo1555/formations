@@ -8,7 +8,7 @@ import { useTheme } from '@/context/ThemeContext';
 import {
   Sun, Moon, Globe, Menu, X, Shield, Users,
   Lock, Unlock, Search, LayoutDashboard, LogOut,
-  Award, Settings, Home, FileText, Upload
+  Award, Settings, Home, FileText, Upload, Building, Book
 } from 'lucide-react';
 import { locales, localeNames } from '@/i18n';
 
@@ -17,6 +17,8 @@ interface User {
   name: string;
   email: string;
   role: string;
+  institution?: string;
+  subject?: string;
   createdAt: string;
   unlockedCourses: { courseId: string; course: { slug: string; titleFr: string; titleEn: string; titleAr: string } }[];
 }
@@ -179,7 +181,7 @@ export default function AdminPage() {
       </aside>
 
       {/* Main */}
-      <main className="flex-1 md:ml-64">
+      <main className="flex-1 min-w-0">
         <header className="sticky top-0 z-30 backdrop-blur-xl bg-[var(--bg-base)]/80 border-b border-border">
           <div className="px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -250,6 +252,7 @@ export default function AdminPage() {
                 <thead>
                   <tr className="border-b border-border">
                     <th className="text-left text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider px-5 py-3">{t('admin.table.user')}</th>
+                    <th className="text-left text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider px-5 py-3">{locale === 'ar' ? 'المؤسسة والمادة' : locale === 'en' ? 'Institution & Subject' : 'Établissement & Matière'}</th>
                     <th className="text-left text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider px-5 py-3">{t('admin.table.date')}</th>
                     <th className="text-left text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider px-5 py-3">{t('admin.table.courses')}</th>
                     <th className="text-left text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-wider px-5 py-3">{t('admin.table.actions')}</th>
@@ -258,7 +261,7 @@ export default function AdminPage() {
                 <tbody>
                   {filteredUsers.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="text-center py-12 text-[var(--text-muted)]">
+                      <td colSpan={5} className="text-center py-12 text-[var(--text-muted)]">
                         {users.length === 0 ? t('admin.table.empty') : t('admin.table.noResults')}
                       </td>
                     </tr>
@@ -270,6 +273,26 @@ export default function AdminPage() {
                           <td className="px-5 py-4">
                             <div className="font-semibold text-sm">{user.name}</div>
                             <div className="text-xs text-[var(--text-muted)]">{user.email}</div>
+                          </td>
+                          <td className="px-5 py-4">
+                            {user.institution || user.subject ? (
+                              <div className="flex flex-col gap-2">
+                                {user.institution && (
+                                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-purple-500/10 text-purple-500 border border-purple-500/20 w-fit">
+                                    <Building className="w-3.5 h-3.5" />
+                                    {user.institution}
+                                  </div>
+                                )}
+                                {user.subject && (
+                                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-blue-500/10 text-blue-500 border border-blue-500/20 w-fit">
+                                    <Book className="w-3.5 h-3.5" />
+                                    {user.subject}
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-xs text-[var(--text-muted)] italic">Non renseigné</span>
+                            )}
                           </td>
                           <td className="px-5 py-4 text-xs text-[var(--text-muted)]">
                             {new Date(user.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}

@@ -45,6 +45,7 @@ if [ "$LESSON_COUNT" = "0" ] || [ "$LESSON_COUNT" = "" ]; then
   npx tsx prisma/seed-lessons.ts 2>&1 || echo "⚠️ seed-lessons.ts échoué"
   npx tsx prisma/seed-quizzes.ts 2>&1 || echo "⚠️ seed-quizzes.ts échoué"
   npx tsx prisma/seed-exercises.ts 2>&1 || echo "⚠️ seed-exercises.ts échoué"
+  npx tsx prisma/seed-architecture.ts 2>&1 || echo "⚠️ seed-architecture.ts échoué"
   echo "✅ Seed terminé !"
 else
   echo "✅ Base déjà seedée ($LESSON_COUNT leçons trouvées)"
