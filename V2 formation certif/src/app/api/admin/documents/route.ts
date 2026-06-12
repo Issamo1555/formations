@@ -80,7 +80,17 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: 'desc' }
     });
 
-    return NextResponse.json({ success: true, documents });
+    const uniqueUsers = await prisma.user.findMany({
+      select: { institution: true },
+      distinct: ['institution']
+    });
+
+    const institutions = uniqueUsers
+      .map(u => u.institution)
+      .filter(i => i && i.trim() !== '')
+      .sort();
+
+    return NextResponse.json({ success: true, documents, institutions });
   } catch (error) {
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }

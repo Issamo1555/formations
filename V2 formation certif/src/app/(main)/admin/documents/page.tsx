@@ -19,6 +19,7 @@ type Document = {
 export default function AdminDocumentsPage() {
   const { t, locale, dir } = useLocale();
   const [documents, setDocuments] = useState<Document[]>([]);
+  const [institutions, setInstitutions] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -40,6 +41,9 @@ export default function AdminDocumentsPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erreur lors du chargement des documents');
       setDocuments(data.documents);
+      if (data.institutions) {
+        setInstitutions(data.institutions);
+      }
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -163,10 +167,11 @@ export default function AdminDocumentsPage() {
                   className="input cursor-pointer"
                 >
                   <option value="GLOBAL">🌐 Tous les établissements (Public)</option>
-                  <option value="OFPPT">🏢 OFPPT</option>
-                  <option value="Université Hassan II">🎓 Université Hassan II</option>
-                  <option value="EMINES">🏫 EMINES</option>
-                  <option value="UM6P">🏫 UM6P</option>
+                  {institutions.map((inst, idx) => (
+                    <option key={idx} value={inst}>
+                      🏢 {inst}
+                    </option>
+                  ))}
                 </select>
                 <p className="text-[10px] text-[var(--text-muted)] mt-1">Seuls les étudiants de cet établissement verront ce document.</p>
               </div>
