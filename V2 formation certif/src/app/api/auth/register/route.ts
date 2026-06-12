@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
         email: emailLower,
         passwordHash,
         role: isAdmin ? 'ADMIN' : 'USER',
-        institution: institution ? institution.trim() : null,
+        institution: institution && institution.trim() !== '' ? institution.trim().toUpperCase() : null,
         subject: subject ? subject.trim() : null,
       },
       select: {

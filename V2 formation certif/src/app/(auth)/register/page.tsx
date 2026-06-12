@@ -18,7 +18,6 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [institution, setInstitution] = useState('');
-  const [otherInstitution, setOtherInstitution] = useState('');
   const [subject, setSubject] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -58,7 +57,7 @@ export default function RegisterPage() {
           name, 
           email, 
           password, 
-          institution: institution === 'Autre' ? otherInstitution : institution, 
+          institution, 
           subject 
         }),
       });
@@ -169,28 +168,23 @@ export default function RegisterPage() {
               <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2">
                 {locale === 'ar' ? 'المؤسسة التعليمية' : locale === 'en' ? 'Institution' : 'Établissement'}
               </label>
-              <select
+              <input
+                type="text"
                 value={institution}
                 onChange={(e) => setInstitution(e.target.value)}
                 className="input"
+                placeholder={locale === 'ar' ? 'اسم مؤسستك (مثال: SGM)' : locale === 'en' ? 'Your institution (e.g. SGM)' : 'Nom de votre établissement (ex: SGM)'}
                 required
-              >
-                <option value="">{locale === 'ar' ? 'اختر مؤسسة' : locale === 'en' ? 'Select an institution' : 'Sélectionnez un établissement'}</option>
-                <option value="FLGA">FLGA</option>
-                <option value="FLGB">FLGB</option>
-                <option value="SGM">SGM</option>
-                <option value="Autre">Autre</option>
-              </select>
-              {institution === 'Autre' && (
-                <input
-                  type="text"
-                  value={otherInstitution}
-                  onChange={(e) => setOtherInstitution(e.target.value)}
-                  className="input mt-2"
-                  placeholder={locale === 'ar' ? 'اسم مؤسستك' : locale === 'en' ? 'Your institution name' : 'Nom de votre établissement'}
-                  required
-                />
-              )}
+                list="institutions-list"
+                autoComplete="organization"
+              />
+              <datalist id="institutions-list">
+                <option value="SGM" />
+                <option value="FLGA" />
+                <option value="FLGB" />
+                <option value="OFPPT" />
+                <option value="UM6P" />
+              </datalist>
             </div>
 
             <div>
