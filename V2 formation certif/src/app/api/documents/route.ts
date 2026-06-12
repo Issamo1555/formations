@@ -9,8 +9,20 @@ export async function GET(req: NextRequest) {
 
     if (!userId) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
 
-    // For now, return all documents. Later we can filter by course if needed.
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { institution: true }
+    });
+
+    if (!user) return NextResponse.json({ error: 'Utilisateur introuvable' }, { status: 404 });
+
+    const conditions: any[] = [{ institution: null }];
+    if (user.institution && user.institution.trim() !== '') {
+      conditions.push({ institution: user.institution });
+    }
+
     const documents = await prisma.document.findMany({
+      where: { OR: conditions },
       orderBy: { createdAt: 'desc' }
     });
 

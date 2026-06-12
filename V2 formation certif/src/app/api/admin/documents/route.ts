@@ -20,6 +20,12 @@ export async function POST(req: NextRequest) {
     const file = formData.get('file') as File | null;
     const title = formData.get('title') as string | null;
     const description = formData.get('description') as string | null;
+    const rawInstitution = formData.get('institution') as string | null;
+    
+    let institution = null;
+    if (rawInstitution && rawInstitution.trim() !== '' && rawInstitution !== 'GLOBAL') {
+      institution = rawInstitution.trim();
+    }
 
     if (!file || !title) {
       return NextResponse.json({ error: 'Le fichier et le titre sont requis.' }, { status: 400 });
@@ -47,6 +53,7 @@ export async function POST(req: NextRequest) {
         fileName: file.name,
         fileUrl,
         size: file.size,
+        institution,
       }
     });
 

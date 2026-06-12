@@ -12,6 +12,7 @@ type Document = {
   fileName: string;
   fileUrl: string;
   size: number;
+  institution: string | null;
   createdAt: string;
 };
 
@@ -25,6 +26,7 @@ export default function AdminDocumentsPage() {
   // Form states
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [institution, setInstitution] = useState('GLOBAL');
   const [file, setFile] = useState<File | null>(null);
 
   useEffect(() => {
@@ -57,6 +59,7 @@ export default function AdminDocumentsPage() {
       formData.append('file', file);
       formData.append('title', title);
       if (description) formData.append('description', description);
+      formData.append('institution', institution);
 
       const res = await fetch('/api/admin/documents', {
         method: 'POST',
@@ -69,6 +72,7 @@ export default function AdminDocumentsPage() {
       // Reset form
       setTitle('');
       setDescription('');
+      setInstitution('GLOBAL');
       setFile(null);
       // Refresh list
       fetchDocuments();
@@ -151,6 +155,24 @@ export default function AdminDocumentsPage() {
 
               <div>
                 <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2">
+                  Établissement cible (Visibilité)
+                </label>
+                <select
+                  value={institution}
+                  onChange={(e) => setInstitution(e.target.value)}
+                  className="input cursor-pointer"
+                >
+                  <option value="GLOBAL">🌐 Tous les établissements (Public)</option>
+                  <option value="OFPPT">🏢 OFPPT</option>
+                  <option value="Université Hassan II">🎓 Université Hassan II</option>
+                  <option value="EMINES">🏫 EMINES</option>
+                  <option value="UM6P">🏫 UM6P</option>
+                </select>
+                <p className="text-[10px] text-[var(--text-muted)] mt-1">Seuls les étudiants de cet établissement verront ce document.</p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2">
                   Description (Optionnel)
                 </label>
                 <textarea
@@ -210,7 +232,18 @@ export default function AdminDocumentsPage() {
                         <FileText className="w-5 h-5" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-lg">{doc.title}</h3>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-lg">{doc.title}</h3>
+                          {doc.institution ? (
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-500 border border-amber-500/30">
+                              {doc.institution}
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-green-500/20 text-green-500 border border-green-500/30">
+                              GLOBAL
+                            </span>
+                          )}
+                        </div>
                         {doc.description && (
                           <p className="text-sm text-[var(--text-muted)] mt-1">{doc.description}</p>
                         )}
