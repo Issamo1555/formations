@@ -52,7 +52,7 @@ RUN --mount=type=cache,target=/root/.npm \
     npm install prisma@6.2.0 @prisma/client@6.2.0 tsx
 
 # Gestion des permissions
-RUN mkdir -p /app/logs && chown -R nextjs:nodejs /app/logs /app/node_modules
+RUN mkdir -p /app/logs /app/public/uploads && chown -R nextjs:nodejs /app/logs /app/node_modules /app/public/uploads
 
 USER nextjs
 EXPOSE 3000
