@@ -4,7 +4,8 @@ import path from 'path';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   const resolvedParams = await params;
-  const filePath = path.join(process.cwd(), 'public', 'uploads', 'documents', ...resolvedParams.path);
+  const decodedPath = resolvedParams.path.map(p => decodeURIComponent(p));
+  const filePath = path.join(process.cwd(), 'public', 'uploads', 'documents', ...decodedPath);
 
   if (!fs.existsSync(filePath)) {
     return new NextResponse('File not found', { status: 404 });

@@ -42,6 +42,7 @@ interface Lesson {
   quizCorrect: number | null;
   category: string;
   hasQuiz: boolean;
+  quizData: any[] | null;
 }
 
 interface Course {
@@ -84,6 +85,7 @@ export default function CoursePage() {
   const [sandboxOutput, setSandboxOutput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
   const [activeTab, setActiveTab] = useState<'theory' | 'example' | 'exercise' | 'quiz'>('theory');
+  const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -142,6 +144,7 @@ export default function CoursePage() {
     setQuizAnswer(null);
     setQuizSubmitted(false);
     setActiveTab('theory');
+    setCurrentQuizIndex(0);
   }, [currentLessonIndex]);
 
   const currentLesson = course?.lessons[currentLessonIndex];
@@ -190,6 +193,12 @@ export default function CoursePage() {
 
   const getQuizQuestion = () => {
     if (!currentLesson) return '';
+    if (currentLesson.quizData && currentLesson.quizData.length > 0) {
+      const q = currentLesson.quizData[currentQuizIndex];
+      if (locale === 'ar') return q.qAr || q.qFr;
+      if (locale === 'en') return q.qEn || q.qFr;
+      return q.qFr;
+    }
     if (locale === 'ar') return currentLesson.quizQuestionAr || currentLesson.quizQuestionFr || '';
     if (locale === 'en') return currentLesson.quizQuestionEn || currentLesson.quizQuestionFr || '';
     return currentLesson.quizQuestionFr || '';
@@ -198,6 +207,10 @@ export default function CoursePage() {
   const getQuizOptions = (): string[] => {
     if (!currentLesson) return [];
     const suffix = locale === 'ar' ? 'Ar' : locale === 'en' ? 'En' : 'Fr';
+    if (currentLesson.quizData && currentLesson.quizData.length > 0) {
+      const q = currentLesson.quizData[currentQuizIndex];
+      return q[`opts${suffix}`] || q.optsFr || [];
+    }
     return [
       (currentLesson as any)[`quizOption1${suffix}`] || (currentLesson as any)[`quizOption1Fr`] || '',
       (currentLesson as any)[`quizOption2${suffix}`] || (currentLesson as any)[`quizOption2Fr`] || '',
@@ -208,9 +221,23 @@ export default function CoursePage() {
 
   const getQuizExplain = () => {
     if (!currentLesson) return '';
+    if (currentLesson.quizData && currentLesson.quizData.length > 0) {
+      const q = currentLesson.quizData[currentQuizIndex];
+      if (locale === 'ar') return q.explAr || q.explFr;
+      if (locale === 'en') return q.explEn || q.explFr;
+      return q.explFr;
+    }
     if (locale === 'ar') return currentLesson.quizExplainAr || currentLesson.quizExplainFr || '';
     if (locale === 'en') return currentLesson.quizExplainEn || currentLesson.quizExplainFr || '';
     return currentLesson.quizExplainFr || '';
+  };
+
+  const getQuizCorrect = () => {
+    if (!currentLesson) return 0;
+    if (currentLesson.quizData && currentLesson.quizData.length > 0) {
+      return currentLesson.quizData[currentQuizIndex].correct;
+    }
+    return currentLesson.quizCorrect || 0;
   };
 
   // Render content with code blocks and HTML support
@@ -925,11 +952,18 @@ sys.stdout = StringIO()
               {activeTab === 'quiz' && currentLesson.hasQuiz && (
                 <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                   <div className="bg-[var(--bg-elevated)] border border-border rounded-2xl p-6 shadow-xl">
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="w-10 h-10 rounded-xl bg-amber-500/15 flex items-center justify-center text-amber-500 font-bold">
-                        ?
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-amber-500/15 flex items-center justify-center text-amber-500 font-bold">
+                          ?
+                        </div>
+                        <h3 className="font-display font-bold text-lg">{t('course.quiz')}</h3>
                       </div>
-                      <h3 className="font-display font-bold text-lg">{t('course.quiz')}</h3>
+                      {currentLesson.quizData && currentLesson.quizData.length > 1 && (
+                        <div className="text-sm font-medium text-[var(--text-muted)] bg-white/5 px-3 py-1 rounded-lg border border-border">
+                          {currentQuizIndex + 1} / {currentLesson.quizData.length}
+                        </div>
+                      )}
                     </div>
 
                     <div className="bg-white/5 border border-border rounded-xl p-6 mb-6">
@@ -938,7 +972,7 @@ sys.stdout = StringIO()
 
                     <div className="space-y-3 mb-8">
                       {getQuizOptions().map((option, i) => {
-                        const isCorrect = i === currentLesson.quizCorrect;
+                        const isCorrect = i === getQuizCorrect();
                         const isSelected = quizAnswer === i;
                         let optionStyle = 'bg-white/5 border-border hover:bg-white/10 hover:border-primary/30 text-[var(--text-muted)]';
 
@@ -973,18 +1007,18 @@ sys.stdout = StringIO()
                     </div>
 
                     {quizSubmitted ? (
-                      <div className={`p-6 rounded-2xl border animate-in zoom-in-95 duration-300 ${
-                        quizAnswer === currentLesson.quizCorrect ? 'bg-primary/10 border-primary/30' : 'bg-red-500/10 border-red-500/30'
+                      <div className={`p-6 rounded-2xl border animate-in zoom-in-95 duration-300 mb-6 ${
+                        quizAnswer === getQuizCorrect() ? 'bg-primary/10 border-primary/30' : 'bg-red-500/10 border-red-500/30'
                       }`}>
                         <div className="flex items-start gap-4">
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                            quizAnswer === currentLesson.quizCorrect ? 'bg-primary/20 text-primary' : 'bg-red-500/20 text-red-400'
+                            quizAnswer === getQuizCorrect() ? 'bg-primary/20 text-primary' : 'bg-red-500/20 text-red-400'
                           }`}>
-                            {quizAnswer === currentLesson.quizCorrect ? '🏆' : '❌'}
+                            {quizAnswer === getQuizCorrect() ? '🏆' : '❌'}
                           </div>
                           <div className="flex-1">
                             <h4 className="font-bold mb-1">
-                              {quizAnswer === currentLesson.quizCorrect ? 'Bravo !' : 'Oups...'}
+                              {quizAnswer === getQuizCorrect() ? 'Bravo !' : 'Oups...'}
                             </h4>
                             <p className="text-sm text-[var(--text-muted)] leading-relaxed">
                               {getQuizExplain()}
@@ -999,7 +1033,7 @@ sys.stdout = StringIO()
                           if (quizAnswer !== null) {
                             setQuizSubmitted(true);
                             // Save progress
-                            if (quizAnswer === currentLesson.quizCorrect) {
+                            if (quizAnswer === getQuizCorrect()) {
                               markComplete();
                             }
                             // API call
@@ -1012,7 +1046,7 @@ sys.stdout = StringIO()
                                     lessonId: currentLesson.id,
                                     courseId: course.id,
                                     quizAnswer,
-                                    quizCorrect: currentLesson.quizCorrect,
+                                    quizCorrect: getQuizCorrect(),
                                   }),
                                 });
                               } catch (e) {
@@ -1021,10 +1055,40 @@ sys.stdout = StringIO()
                             }
                           }
                         }}
-                        className="btn btn-primary w-full py-4 rounded-xl shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] disabled:opacity-50 disabled:shadow-none transition-all"
+                        className="btn btn-primary w-full py-4 rounded-xl shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] disabled:opacity-50 disabled:shadow-none transition-all mb-6"
                       >
                         {locale === 'ar' ? 'تحقق من الإجابة' : locale === 'en' ? 'Verify Answer' : 'Vérifier la réponse'}
                       </button>
+                    )}
+                    
+                    {currentLesson.quizData && currentLesson.quizData.length > 1 && (
+                      <div className="flex items-center justify-between pt-4 border-t border-border">
+                        <button
+                          onClick={() => {
+                            setQuizSubmitted(false);
+                            setQuizAnswer(null);
+                            setCurrentQuizIndex(Math.max(0, currentQuizIndex - 1));
+                          }}
+                          disabled={currentQuizIndex === 0}
+                          className="btn btn-ghost flex items-center gap-2 disabled:opacity-30"
+                        >
+                          <ArrowLeft className={`w-4 h-4 ${dir === 'rtl' ? 'rotate-180' : ''}`} />
+                          {t('course.previous')}
+                        </button>
+                        
+                        <button
+                          onClick={() => {
+                            setQuizSubmitted(false);
+                            setQuizAnswer(null);
+                            setCurrentQuizIndex(Math.min(currentLesson.quizData!.length - 1, currentQuizIndex + 1));
+                          }}
+                          disabled={currentQuizIndex === currentLesson.quizData.length - 1}
+                          className="btn btn-ghost flex items-center gap-2 disabled:opacity-30"
+                        >
+                          {t('course.next')}
+                          <ArrowRight className={`w-4 h-4 ${dir === 'rtl' ? 'rotate-180' : ''}`} />
+                        </button>
+                      </div>
                     )}
                   </div>
                   

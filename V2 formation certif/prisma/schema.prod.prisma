@@ -107,6 +107,7 @@ model Lesson {
   quizExplainFr   String?  @map("quiz_explain_fr")
   quizExplainEn   String?  @map("quiz_explain_en")
   quizExplainAr   String?  @map("quiz_explain_ar")
+  quizData        Json?    @map("quiz_data")
 
   exampleFr       String?  @map("example_fr")
   exampleEn       String?  @map("example_en")
