@@ -23,7 +23,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ path
     '.zip': 'application/zip'
   };
 
-  return new NextResponse(fileBuffer, {
+  return new NextResponse(fileBuffer as any, {
     headers: {
       'Content-Type': mimeTypes[ext] || 'application/octet-stream',
       'Content-Length': stat.size.toString(),
