@@ -52,6 +52,19 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${syne.variable} ${notoArabic.variable} font-sans`}
       >
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                  for(let registration of registrations) {
+                    registration.unregister();
+                  }
+                });
+              }
+            `,
+          }}
+        />
         <LocaleProvider>
           <ThemeProvider>
             <AuthProvider>
